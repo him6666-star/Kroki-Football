@@ -3,5 +3,15 @@
   "appName": "Scribble Kick",
   "webDir": "www",
   "backgroundColor": "#101c19",
-  "android": { "backgroundColor": "#101c19" }
+  "android": {
+    "backgroundColor": "#101c19"
+  },
+  "plugins": {
+    "FirebaseAuthentication": {
+      "skipNativeAuth": true,
+      "providers": [
+        "google.com"
+      ]
+    }
+  }
 }

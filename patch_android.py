@@ -61,4 +61,20 @@ for d in glob.glob('icons/mipmap-*'):
         shutil.copy(f, dst)
 open(base + '/res/values/ic_launcher_background.xml', 'w', encoding='utf-8').write(
     '<?xml version="1.0" encoding="utf-8"?>\n<resources>\n    <color name="ic_launcher_background">#257A42</color>\n</resources>\n')
+# 4) Google girisi: Google Play hizmetleri, sabit imza (SHA-1 degismesin), google-services.json
+v = 'android/variables.gradle'
+t = open(v, encoding='utf-8').read()
+if 'rgcfaIncludeGoogle' not in t:
+    t = t.replace('ext {', 'ext {\n    rgcfaIncludeGoogle = true', 1)
+    open(v, 'w', encoding='utf-8').write(t)
+b = 'android/app/build.gradle'
+t = open(b, encoding='utf-8').read()
+if 'scribble-debug.keystore' not in t:
+    t = t.replace('android {', 'android {\n    signingConfigs {\n        debug {\n            storeFile file("../../scribble-debug.keystore")\n            storePassword "android"\n            keyAlias "androiddebugkey"\n            keyPassword "android"\n        }\n    }', 1)
+    open(b, 'w', encoding='utf-8').write(t)
+if os.path.exists('google-services.json'):
+    shutil.copy('google-services.json', 'android/app/google-services.json')
+    print('google-services.json kopyalandi')
+else:
+    print('UYARI: google-services.json yok, Google girisi calismaz')
 print('patch tamam')
