@@ -1,0 +1,61 @@
+// Kroki Futbol - cevrimici katman (Firebase: misafir girisi, profil, skor tablosu)
+(function(){
+ const cfg=window.KR_CFG;
+ if(!cfg||!cfg.apiKey||!window.firebase)return;
+ const T=(tr,en)=>(window.ST&&ST.lang=='en')?en:tr;
+ const esc=s=>String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+ firebase.initializeApp(cfg);
+ const auth=firebase.auth(),db=firebase.firestore(),FV=firebase.firestore.FieldValue;
+ const KR=window.KR={user:null,profile:null,ready:false};
+ const PTS={easy:[1,0],medium:[3,1],hard:[5,2]}; // [galibiyet, beraberlik]
+ const HI='background:#7cc4ee;color:#0b1a16';
+ const back='<div class="row"><button onclick="menu()">'+'←'+'</button></div>';
+ async function load(){
+  try{const d=await db.collection('users').doc(KR.user.uid).get();KR.profile=d.exists?d.data():null}catch(e){KR.profile=null}
+  KR.ready=true;if(typeof state!='undefined'&&state=='menu')menu();
+ }
+ auth.onAuthStateChanged(u=>{if(!u){auth.signInAnonymously().catch(()=>{KR.ready=true});return}KR.user=u;load()});
+ KR.menuRow=()=>'<div class="row"><button onclick="KR.profileUI()">👤 '+(KR.profile?esc(KR.profile.name):T('Profil','Profile'))+'</button><button onclick="KR.boardUI()">🏆 '+T('Skor tablosu','Leaderboard')+'</button></div>';
+ KR.profileUI=()=>{
+  if(!KR.user){ov.innerHTML='<div class="card"><h1>👤</h1><p>'+T('Baglanti kurulamadi. Interneti kontrol et.','Could not connect. Check your internet.')+'</p>'+back+'</div>';return}
+  const p=KR.profile;
+  let h='<div class="card"><h1>👤 '+T('Profil','Profile')+'</h1>';
+  if(p)h+='<p style="margin:4px 0 10px;opacity:.9">'+T('Puan','Points')+': <b>'+p.points+'</b> · '+T('Mac','Matches')+': '+p.matches+' · G/B/M: '+p.wins+'/'+p.draws+'/'+p.losses+' · '+T('Gol','Goals')+': '+p.goals+'</p>';
+  h+='<div class="row"><input id="krn" maxlength="16" placeholder="'+T('Oyuncu adi (3-16)','Player name (3-16)')+'" value="'+(p?esc(p.name):'')+'" style="padding:10px 14px;border-radius:999px;border:1px solid var(--bd);background:#1a2e28;color:#fff;font:600 15px system-ui;text-align:center;width:210px"></div>';
+  h+='<div id="krm" style="min-height:20px;font-size:13px;opacity:.85"></div><div class="row"><button style="'+HI+'" onclick="KR.saveName()">'+(p?T('Adi degistir','Rename'):T('Profil olustur','Create profile'))+'</button></div>'+back+'</div>';
+  ov.style.display='flex';ov.innerHTML=h;
+ };
+ KR.saveName=async()=>{
+  const el=document.getElementById('krn'),m=document.getElementById('krm'),n=(el.value||'').trim().replace(/\s+/g,' ');
+  if(n.length<3||n.length>16){m.textContent=T('Ad 3-16 karakter olmali.','Name must be 3-16 characters.');return}
+  m.textContent='...';
+  try{
+   const ref=db.collection('users').doc(KR.user.uid);
+   if(KR.profile){await ref.update({name:n});KR.profile.name=n}
+   else{const d={name:n,points:0,wins:0,draws:0,losses:0,goals:0,matches:0,last:FV.serverTimestamp()};await ref.set(d);KR.profile={...d,last:null}}
+   menu();
+  }catch(e){m.textContent=T('Kaydedilemedi. Tekrar dene.','Could not save. Try again.')}
+ };
+ KR.boardUI=async()=>{
+  ov.style.display='flex';ov.innerHTML='<div class="card"><h1>🏆</h1><p>...</p></div>';
+  try{
+   const q=await db.collection('users').orderBy('points','desc').limit(20).get();
+   let h='<div class="card" style="min-width:min(420px,86%)"><h1>🏆 '+T('Skor tablosu','Leaderboard')+'</h1><div style="text-align:left;max-height:240px;overflow:auto;margin:6px 0">';
+   let i=0;q.forEach(d=>{const x=d.data();i++;const me=KR.user&&d.id==KR.user.uid;h+='<div style="display:flex;gap:10px;padding:5px 8px;border-radius:8px;'+(me?'background:rgba(124,196,238,.18);':'')+'"><span style="width:24px;opacity:.7">'+i+'</span><span style="flex:1">'+esc(x.name)+'</span><b>'+x.points+'</b></div>'});
+   if(!i)h+='<p style="text-align:center;opacity:.8">'+T('Henuz kimse yok.','Nobody yet.')+'</p>';
+   ov.innerHTML=h+'</div>'+back+'</div>';
+  }catch(e){ov.innerHTML='<div class="card"><h1>🏆</h1><p>'+T('Tablo yuklenemedi.','Could not load the leaderboard.')+'</p>'+back+'</div>'}
+ };
+ // 1 oyunculu mac bitince cagrilir; ekrana eklenecek HTML dondurur
+ KR.matchEnd=(a,b,diff)=>{
+  const w=a>b,dr=a==b;
+  const gain=w?(PTS[diff]||PTS.medium)[0]:dr?(PTS[diff]||PTS.medium)[1]:0;
+  if(!KR.user)return '';
+  if(!KR.profile)return '<p style="margin:6px 0;font-size:14px;opacity:.9">'+T('Puan kaydetmek icin profil olustur.','Create a profile to save points.')+'</p><div class="row"><button onclick="KR.profileUI()">👤 '+T('Profil','Profile')+'</button></div>';
+  const p=KR.profile,g=Math.min(a,20);
+  const upd={points:FV.increment(gain),wins:FV.increment(w?1:0),draws:FV.increment(dr?1:0),losses:FV.increment(!w&&!dr?1:0),goals:FV.increment(g),matches:FV.increment(1),last:FV.serverTimestamp()};
+  db.collection('users').doc(KR.user.uid).update(upd).catch(()=>{});
+  p.points+=gain;p.wins+=w?1:0;p.draws+=dr?1:0;p.losses+=!w&&!dr?1:0;p.goals+=g;p.matches+=1;
+  return '<p style="margin:6px 0;font-size:16px;color:#7CFC8A">'+(gain?'+'+gain+' '+T('puan','points'):T('Puan yok','No points'))+' · '+T('Toplam','Total')+': <b>'+p.points+'</b></p>';
+ };
+})();

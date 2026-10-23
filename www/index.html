@@ -1,6 +1,6 @@
 <!DOCTYPE html><html lang="tr"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>Kroki Futbol</title>
+<title>Scribble Kick</title>
 <style>
 :root{--bg:#101c19;--fg:#e9f2e6;--card:#1b2e29;--bd:#2e4a42;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 html,body{margin:0;height:100%;overflow:hidden;overscroll-behavior:none}
@@ -15,9 +15,9 @@ button{font:600 15px system-ui;padding:10px 20px;border-radius:999px;border:1px 
 button:hover{background:#7cc4ee;color:#0b1a16}
 #tc{position:absolute;inset:0;z-index:5;contain:layout style;transform:translateZ(0);display:none;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;--u:48px}
 #tc .jz{position:absolute;left:0;bottom:0;width:46%;height:70%;pointer-events:auto;touch-action:none}
-#tc .jb{position:absolute;left:calc(var(--u)*.7);bottom:calc(var(--u)*.7);width:calc(var(--u)*2.7);height:calc(var(--u)*2.7);border-radius:50%;border:2px solid rgba(255,255,255,.5);background:radial-gradient(circle at 50% 40%,rgba(255,255,255,.22),rgba(255,255,255,.06) 70%);pointer-events:none}
+#tc .jb{position:absolute;left:calc(var(--u)*.7);bottom:calc(var(--u)*.7);width:calc(var(--u)*3.4);height:calc(var(--u)*3.4);border-radius:50%;border:2px solid rgba(255,255,255,.5);background:radial-gradient(circle at 50% 40%,rgba(255,255,255,.22),rgba(255,255,255,.06) 70%);pointer-events:none}
 #tc .jb svg{position:absolute;inset:0;width:100%;height:100%;fill:none;stroke:rgba(255,255,255,.65);stroke-width:3.5;stroke-linecap:round;stroke-linejoin:round}
-#tc .jk{position:absolute;width:calc(var(--u)*1.3);height:calc(var(--u)*1.3);border-radius:50%;background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.85),rgba(210,225,235,.45) 55%,rgba(255,255,255,.25));border:2px solid rgba(255,255,255,.85);will-change:transform;pointer-events:none}
+#tc .jk{position:absolute;width:calc(var(--u)*1.6);height:calc(var(--u)*1.6);border-radius:50%;background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.85),rgba(210,225,235,.45) 55%,rgba(255,255,255,.25));border:2px solid rgba(255,255,255,.85);will-change:transform;pointer-events:none}
 #tc .tb{position:absolute;border-radius:50%;border:2px solid rgba(255,255,255,.55);background:radial-gradient(circle at 32% 26%,rgba(255,255,255,.4),rgba(255,255,255,.1) 58%,rgba(255,255,255,.05));color:#fff;font:800 calc(var(--u)*.2)/1 system-ui;letter-spacing:.04em;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(var(--u)*.04);text-align:center;pointer-events:auto;touch-action:none;padding:0;box-sizing:border-box;}
 #tc .tb.big{border-width:3px;border-color:rgba(255,205,90,.95);box-shadow:0 0 0 calc(var(--u)*.09) rgba(255,205,90,.22)}
 #tc .tb.on{background:radial-gradient(circle at 50% 40%,rgba(255,255,255,.7),rgba(255,255,255,.3));transform:scale(.94)}
@@ -27,7 +27,7 @@ button:hover{background:#7cc4ee;color:#0b1a16}
 #fs{z-index:30;display:none;position:absolute;top:10px;right:62px;width:42px;height:42px;border-radius:50%;border:0;background:rgba(20,40,25,.75);color:#fff;font-size:18px;cursor:pointer;padding:0}
 small{display:block;line-height:1.6;opacity:.85;margin-top:8px}
 </style></head><body>
-<div class="wrap"><canvas id="cv" width="1160" height="740"></canvas><div id="ov"></div><div id="tc"></div><button id="fs" onclick="goFull()" title="Tam ekran">⛶</button><button id="pz" onclick="pause()" title="Durdur (P / Esc)" style="z-index:30;touch-action:manipulation;display:none;position:absolute;top:10px;right:10px;width:42px;height:42px;border-radius:50%;border:0;background:rgba(20,40,25,.75);color:#fff;font-size:18px;cursor:pointer">⏸</button></div>
+<div class="wrap"><canvas id="cv" width="1160" height="740"></canvas><div id="ov"></div><div id="tc"></div><button id="fs" onclick="goFull()" title="Tam ekran"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:auto"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button><button id="pz" onclick="pause()" title="Durdur (P / Esc)" style="z-index:30;touch-action:manipulation;display:none;position:absolute;top:10px;right:10px;width:42px;height:42px;border-radius:50%;border:0;background:rgba(20,40,25,.75);color:#fff;font-size:18px;cursor:pointer;padding:0"><svg width="20" height="20" viewBox="0 0 24 24" fill="#fff" style="display:block;margin:auto"><rect x="6" y="4.5" width="4.4" height="15" rx="1.3"/><rect x="13.6" y="4.5" width="4.4" height="15" rx="1.3"/></svg></button></div>
 <script>
 const cv=document.getElementById('cv');let c=cv.getContext('2d');const ov=document.getElementById('ov');
 const W=1160,H=740,PX=70,PY=100,PW=1020,PH=550,GY=PY+PH/2,R=12,BR=7,GH=65;
@@ -103,7 +103,7 @@ function give(t,bx,by,ix,iy){ball.x=bx;ball.y=by;ball.vx=ball.vy=0;ball.sq=0;bal
 const keys=new Set(),clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),par=t=>(mode==1&&t==1)?D:TM;
 const dn=l=>l.some(x=>keys.has(x));
 
-const tcEl=document.getElementById('tc'),fsb=document.getElementById('fs');let tcShown=false,tcBuilt=false,tcH=0,tcLang=null;
+const tcEl=document.getElementById('tc'),fsb=document.getElementById('fs');let tcShown=false,tcBuilt=false,tcH=0,tcLang=null,tcY=null,tcYs=true;
 const COARSE=!!(window.matchMedia&&matchMedia('(pointer:coarse)').matches);function tcOn(){return ST.touch=='on'||(ST.touch!='off'&&COARSE)}
 function vk(type,code){window.dispatchEvent(new KeyboardEvent(type,{code,key:code}))}
 function tcBuild(){if(tcBuilt)return;tcBuilt=true;tcEl.innerHTML='<div class="jz" id="jz"><div class="jb" id="jb"><svg viewBox="0 0 100 100"><path d="M41 17l9-9 9 9"/><path d="M41 83l9 9 9-9"/><path d="M17 41l-9 9 9 9"/><path d="M83 41l9 9-9 9"/></svg></div><div class="jk" id="jk"></div></div>';
@@ -114,7 +114,7 @@ function tcBuild(){if(tcBuilt)return;tcBuilt=true;tcEl.innerHTML='<div class="jz
  x:'<path class="f" d="M3.5 15.6V5.2h5.2v5.4l8.6 2.6c1.7.5 3.2 1.8 3.2 3.7v1.7H3.5z"/><path d="M7 21.2v-1.6M11 21.2v-1.6M15 21.2v-1.6M19 21.2v-1.6"/>',
  y:'<path class="f" d="M12 2.8l2.8 5.8 6.3.9-4.6 4.4 1.1 6.3L12 17.2l-5.6 3 1.1-6.3L2.9 9.5l6.3-.9z"/>'};
  const B=[['k',['ŞUT','SHOOT'],.7,.7,2.0],['p',['PAS','PASS'],3.1,.5,1.5],['s',['SIÇRA','DASH'],.5,3.2,1.2],['w',['DEĞİŞ','SWITCH'],2.7,2.5,1.15],['x',['MÜDAHALE','TACKLE'],4.7,1.9,1.15],['y',['ÖZEL','SPECIAL'],4.6,3.8,1.1]];
- B.forEach(([a,nm,r,b,z])=>{const e=document.createElement('div');e.className='tb'+(a=='k'?' big':'');e.style.cssText='right:calc(var(--u)*'+r+');bottom:calc(var(--u)*'+b+');width:calc(var(--u)*'+z+');height:calc(var(--u)*'+z+')';e.innerHTML='<svg viewBox="0 0 24 24">'+IC[a]+'</svg><span class="tl" data-t="'+nm[0]+'" data-e="'+nm[1]+'"></span>';
+ B.forEach(([a,nm,r,b,z])=>{const e=document.createElement('div');e.className='tb'+(a=='k'?' big':'');if(a=='y')tcY=e;e.style.cssText='right:calc(var(--u)*'+r+');bottom:calc(var(--u)*'+b+');width:calc(var(--u)*'+z+');height:calc(var(--u)*'+z+')';e.innerHTML='<svg viewBox="0 0 24 24">'+IC[a]+'</svg><span class="tl" data-t="'+nm[0]+'" data-e="'+nm[1]+'"></span>';
   let code=null;const dn=ev=>{ev.preventDefault();au();try{e.setPointerCapture(ev.pointerId)}catch(_){}if(code)return;code=K1[a][0];e.classList.add('on');vk('keydown',code)},up=ev=>{ev.preventDefault();if(!code)return;e.classList.remove('on');vk('keyup',code);code=null};
   e.addEventListener('pointerdown',dn);e.addEventListener('pointerup',up);e.addEventListener('pointercancel',up);e.addEventListener('lostpointercapture',up);tcEl.appendChild(e)});
  const jz=document.getElementById('jz'),jb=document.getElementById('jb'),jk=document.getElementById('jk');let pid=null,cur={u:0,d:0,l:0,r:0};
@@ -128,11 +128,11 @@ function tcBuild(){if(tcBuilt)return;tcBuilt=true;tcEl.innerHTML='<div class="jz
  let mpend=null,mraf=0;jz.addEventListener('pointermove',ev=>{if(ev.pointerId!==pid)return;mpend={clientX:ev.clientX,clientY:ev.clientY};if(!mraf)mraf=requestAnimationFrame(()=>{mraf=0;if(mpend&&pid!==null)move(mpend);mpend=null})});
  const end=ev=>{if(ev.pointerId!==pid)return;pid=null;mpend=null;rest();setK({u:0,d:0,l:0,r:0})};jz.addEventListener('pointerup',end);jz.addEventListener('pointercancel',end);jz.addEventListener('lostpointercapture',end);tcEl._rest=rest}
 function goFull(){const d=document,e=d.documentElement;try{if(!d.fullscreenElement&&!d.webkitFullscreenElement){(e.requestFullscreen||e.webkitRequestFullscreen).call(e);if(screen.orientation&&screen.orientation.lock)screen.orientation.lock('landscape').catch(()=>{})}else{(d.exitFullscreen||d.webkitExitFullscreen).call(d)}}catch(_){}}
-function tcUpdate(){const want=state=='play'&&tcOn();if(want){const h=tcEl.offsetHeight||innerHeight;if(h!==tcH){tcH=h;tcEl.style.setProperty('--u',Math.max(30,Math.min(64,h*.105))+'px')}}if(want&&!tcBuilt)tcBuild();if(want!==tcShown){tcShown=want;tcEl.style.display=want?'block':'none';if(!want)keys.clear();else if(tcEl._rest)setTimeout(tcEl._rest,50)}fsb.style.display=(want&&(document.documentElement.requestFullscreen||document.documentElement.webkitRequestFullscreen))?'block':'none';if(want&&tcBuilt&&tcLang!==ST.lang){tcLang=ST.lang;tcEl.querySelectorAll('.tl').forEach(e=>{e.textContent=ST.lang=='en'?e.dataset.e:e.dataset.t})}}
-function menu(){state='menu';pz.style.display='none';ov.style.display='flex';ov.innerHTML=`<div class="card"><h1>⚽ Kroki Futbol</h1>
+function tcUpdate(){const want=state=='play'&&tcOn();if(want){const h=tcEl.offsetHeight||innerHeight;if(h!==tcH){tcH=h;tcEl.style.setProperty('--u',Math.max(30,Math.min(64,h*.105))+'px')}}if(want&&!tcBuilt)tcBuild();if(want!==tcShown){tcShown=want;tcEl.style.display=want?'block':'none';if(!want)keys.clear();else if(tcEl._rest)setTimeout(tcEl._rest,50)}fsb.style.display=(want&&!window.Capacitor&&(document.documentElement.requestFullscreen||document.documentElement.webkitRequestFullscreen))?'block':'none';if(want&&tcY&&P.length){const pl=P[act[0]],sh=!!pl&&(pl.i==1||pl.i==2||pl.i>=4);if(sh!==tcYs){tcYs=sh;tcY.style.display=sh?'flex':'none'}}if(want&&tcBuilt&&tcLang!==ST.lang){tcLang=ST.lang;tcEl.querySelectorAll('.tl').forEach(e=>{e.textContent=ST.lang=='en'?e.dataset.e:e.dataset.t})}}
+function menu(){state='menu';pz.style.display='none';ov.style.display='flex';ov.innerHTML=`<div class="card"><h1>⚽ Scribble Kick</h1>
 <b>${L('1 Oyuncu (bilgisayara karşı)','1 Player (vs computer)')}</b><div class="row"><button onclick="go(1,'easy')">${L('Kolay','Easy')}</button><button onclick="go(1,'medium')">${L('Orta','Medium')}</button><button onclick="go(1,'hard')">${L('Zor','Hard')}</button></div>
 <b>${L('2 Oyuncu (aynı klavye)','2 Players (same keyboard)')}</b><div class="row"><button onclick="go(2)">${L('Başla','Start')}</button></div>
-${helpText()}</div>`}
+${window.KR?KR.menuRow():''}${helpText()}</div>`}
 let dk='medium';
 function helpText(){const n=a=>kname(a);const b1=ST.lang=='en'?`${n(K1.u)}${n(K1.l)}${n(K1.d)}${n(K1.r)} move · ${n(K1.k)} shoot (hold = power, steer while holding = curve) · ${n(K1.p)} pass (on rival wing = CROSS, double tap = THROUGH BALL) · ${n(K1.w)} switch player · ${n(K1.s)} dash · ${n(K1.x)} tackle · ${n(K1.y)} special (defender: WALL in front of the ball, once per half)`:`${n(K1.u)}${n(K1.l)}${n(K1.d)}${n(K1.r)} hareket · ${n(K1.k)} şut (basılı tut = güç, basılıyken yana kay = falso) · ${n(K1.p)} pas (rakip kanadında = ORTA, iki kez bas = ARA PASI) · ${n(K1.w)} oyuncu değiştir · ${n(K1.s)} sıçrama · ${n(K1.x)} müdahale · ${n(K1.y)} özel (defans: topun önüne SET duvarı, yarıda 1 kez)`;
  const b2=ST.lang=='en'?`${n(K2.u)}${n(K2.l)}${n(K2.d)}${n(K2.r)} move · ${n(K2.k)} shoot · ${n(K2.p)} pass · ${n(K2.w)} switch player · ${n(K2.s)} dash · ${n(K2.x)} tackle · ${n(K2.y)} special`:`${n(K2.u)}${n(K2.l)}${n(K2.d)}${n(K2.r)} hareket · ${n(K2.k)} şut · ${n(K2.p)} pas · ${n(K2.w)} oyuncu değiştir · ${n(K2.s)} sıçrama · ${n(K2.x)} müdahale · ${n(K2.y)} özel`;
@@ -384,7 +384,7 @@ fxs.forEach(t=>{t.l-=dt;if(t.sp){if(t.fl){t.vy-=(t.fl==2?160:300)*dt;t.vx+=(Math
  time+=dt/GS;if(time>=(half?2*HL:HL))ext+=dt/GS;if(restart&&(restart.time+=dt/GS)>5)restart=null;
  if(!half&&time>=HL&&stopOK()){half=1;bused=[0,0];kult=[0,0];msg='İKİNCİ YARI';reset(1);froze=1.5;return}
  if(time>=2*HL&&stopOK()){state='end';pz.style.display='none';const a=score[0],b=score[1];
-  ov.style.display='flex';ov.innerHTML=`<div class="card"><h1>${a>b?'MAVİ KAZANDI!':b>a?'TURUNCU KAZANDI!':'BERABERE'}</h1><p style="font-size:22px">${a} — ${b}</p><div class="row"><button onclick="go(mode,Object.keys(DIF).find(k=>DIF[k]==D))">Yeniden Oyna</button><button onclick="menu()">Menü</button></div></div>`;return}
+  ov.style.display='flex';ov.innerHTML=`<div class="card"><h1>${a>b?'MAVİ KAZANDI!':b>a?'TURUNCU KAZANDI!':'BERABERE'}</h1><p style="font-size:22px">${a} — ${b}</p>${(window.KR&&mode==1)?KR.matchEnd(a,b,dk):''}<div class="row"><button onclick="go(mode,Object.keys(DIF).find(k=>DIF[k]==D))">Yeniden Oyna</button><button onclick="menu()">Menü</button></div></div>`;return}
  for(let t=0;t<2;t++){const l=P.filter(p=>p.t==t&&p.i>0&&!(ctl[t]&&P[NP*t+act[t]]==p)).sort((a,b)=>Math.hypot(a.x-ball.x,a.y-ball.y)-Math.hypot(b.x-ball.x,b.y-ball.y));
   l.forEach((p,i)=>p.press=i<par(t).p&&!(ctl[t]&&ball.car&&ball.car.t==t))}
  if(psw){psw.time+=dt;const m=P[NP*psw.t+psw.idx];if(ball.car===m||Math.hypot(ball.x-m.x,ball.y-m.y)<110){if(ctl[psw.t])act[psw.t]=psw.idx;psw=null}else if(psw.time>3||(ball.last>=0&&ball.last!=psw.t))psw=null}
@@ -632,4 +632,6 @@ addEventListener('keyup',e=>keys.delete(e.code));
 addEventListener('pointerdown',()=>{au()},{passive:true});
 addEventListener('blur',()=>{keys.clear();pause()});
 menu();requestAnimationFrame(loop);
-</script></body></html>
+</script>
+<script src="firebase-app-compat.js"></script><script src="firebase-auth-compat.js"></script><script src="firebase-firestore-compat.js"></script><script src="firebase-config.js"></script><script src="online.js"></script>
+</body></html>
