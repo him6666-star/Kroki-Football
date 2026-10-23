@@ -8,7 +8,7 @@ body{background:var(--bg);color:var(--fg);font-family:system-ui,sans-serif;displ
 .wrap{position:relative;width:min(100vw,calc(100vh*1160/740),1160px)}
 canvas{width:100%;height:auto;display:block;border-radius:10px}
 #ov{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(8,16,14,.8);border-radius:10px;overflow:auto}
-.card{background:var(--card);border:1px solid var(--bd);border-radius:18px;padding:20px 26px;text-align:center;max-width:92%}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:18px;padding:20px 26px;text-align:center;max-width:92%;max-height:96%;overflow-y:auto}
 h1{margin:0 0 6px;font-size:26px}
 .row{display:flex;gap:8px;justify-content:center;margin:8px 0;flex-wrap:wrap}
 button{font:600 15px system-ui;padding:10px 20px;border-radius:999px;border:1px solid var(--bd);background:#243f37;color:var(--fg);cursor:pointer}
@@ -53,9 +53,9 @@ const HI='background:#7cc4ee;color:#0b1a16';
 function spg(p){spage=p;cap=null;settings()}
 function settings(from){if(from){sb=from;spage='hub'}inSet=true;ov.style.display='flex';let h='<div class="card">';
  const back='<div class="row"><button onclick="settingsBack()">'+L('Geri','Back')+'</button></div>';
- const ttl={hub:['⚙',L('Ayarlar','Settings')],keys:['🎮',L('Kontroller','Controls')],gen:['⚙',L('Genel','General')],lang:['🌐',L('Dil','Language')],snd:['🔊',L('Ses','Sound')],mus:['🎵',L('Müzik','Music')]}[spage];
+ const ttl={hub:['⚙',L('Ayarlar','Settings')],keys:['🎮',L('Kontroller','Controls')],gen:['⚙',L('Genel','General')],lang:['🌐',L('Dil','Language')],snd:['🔊',L('Ses','Sound')],mus:['🎵',L('Müzik','Music')],theme:['🏟',L('Saha','Pitch')]}[spage];
  h+='<h1>'+ttl[0]+' '+ttl[1]+'</h1>';
- if(spage=='hub'){h+='<div style="display:flex;flex-direction:column;gap:10px;margin:14px auto;width:min(300px,80vw)">'+[['keys','🎮',L('Kontroller','Controls')],['gen','⚙',L('Genel','General')],['lang','🌐',L('Dil','Language')],['snd','🔊',L('Ses','Sound')],['theme','🏟',L('Saha','Pitch')],['mus','🎵',L('Müzik','Music')]].map(([p,i,n])=>'<button style="padding:12px 18px;font-size:16px;text-align:left" onclick="spg(\''+p+'\')">'+i+'  '+n+'</button>').join('')+'</div>'+back}
+ if(spage=='hub'){h+='<div style="display:flex;flex-direction:column;gap:10px;margin:14px auto;width:min(300px,80vw)">'+[['theme','🏟',L('Saha','Pitch')],['keys','🎮',L('Kontroller','Controls')],['gen','⚙',L('Genel','General')],['lang','🌐',L('Dil','Language')],['snd','🔊',L('Ses','Sound')],['mus','🎵',L('Müzik','Music')]].map(([p,i,n])=>'<button style="padding:12px 18px;font-size:16px;text-align:left" onclick="spg(\''+p+'\')">'+i+'  '+n+'</button>').join('')+'</div>'+back}
  else if(spage=='keys'){h+='<table style="margin:6px auto;border-collapse:collapse"><tr><th></th><th style="color:#7cc4ee;padding:4px 10px">'+L('MAVİ','BLUE')+'</th><th style="color:#f0916f;padding:4px 10px">'+L('TURUNCU','ORANGE')+'</th></tr>';
   ACT.forEach(([a,n])=>{h+='<tr><td style="text-align:left;padding:3px 16px 3px 0">'+(ST.lang=='en'?ACTN[n]||n:n)+'</td>'+[K1,K2].map((K,i)=>'<td style="padding:3px 6px"><button style="min-width:96px;padding:6px 10px" onclick="rebind('+(i+1)+',\''+a+'\')">'+(cap&&cap.s==i+1&&cap.a==a?L('tuşa bas…','press key…'):kname(K[a]))+'</button></td>').join('')+'</tr>'});
   h+='</table><div class="row"><button onclick="resetKeys()">'+L('Varsayılana dön','Reset to default')+'</button><button onclick="settingsBack()">'+L('Geri','Back')+'</button></div><small>'+L('Bir tuşa tıkla, sonra yeni tuşa bas (Esc = iptal). Aynı tuş başka işlemdeyse yer değiştirir. P, M, Z ve Esc ayrılmıştır. 1 oyunculu modda iki tuş grubu birlikte çalışır.','Click a key, then press the new key (Esc = cancel). If the key is already used it swaps. P, M, Z and Esc are reserved. In 1-player mode both key sets work together.')+'</small>'}
