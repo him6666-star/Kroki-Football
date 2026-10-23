@@ -28,3 +28,11 @@ EFEKTLER (varyasyon icin kick_hard.mp3, kick_hard2.mp3, kick_hard3.mp3 gibi bird
   rk_bx / rk_by  dev suratin ekran kenarindan seken sesi
   pop            dev suratin patlamasi
 Olmayan dosya icin oyun eski sentez sesi kullanir.
+
+KAYNAKLAR / LISANS
+  music_menu.mp3   : "Gamer Menu" - BackgroundMusicMaster (Pixabay, Pixabay Content License)
+  music_match.mp3  : "Sport Beach Vibes" - Onaldin (Pixabay, Pixabay Content License)
+  Efektler: freesound_community (top vurusu, hakem dudugu), dragon-studio (kalabalik tezahurat), vishiv (stadyum tezahurati),
+            DJARTMUSIC (alkis/tezahurat), arunangshubanerjee (stadyum ortam sesi) - Pixabay / Freesound, Pixabay Content License
+  Yeni: freesound_community (duvara carpma, top vurusu 6235)
+  Yeni: universfield, koiroylers, flutie8211, lordsonny, freesound_community (efektler)

@@ -81,7 +81,7 @@ const L=(t,e)=>ST.lang=='en'?e:t;
 const EN={'GOL!':'GOAL!','PENALTI!':'PENALTY!','SET!':'WALL!','FAUL!':'FOUL!','ALEVLİ ŞUT!':'FIRE SHOT!','ARA PASI!':'THROUGH BALL!','ORTA!':'CROSS!','İKİNCİ YARI':'SECOND HALF','GOL KRALI!':'GOAL KING!','ÇAT!':'SLASH!','SAPLA!':'STAB!','TAK!':'CHOP!','KAPIŞ!':'GRAB!'};
 const trm=s=>ST.lang=='en'?(EN[s]||s):s;
 let MG=null,MU=null,mTimer=null,mStep=0,mNext=0,HAT=null;
-function applyAudio(){if(!MG)return;MG.gain.value=mute?0:ST.sfx;MU.gain.value=(mute||!ST.musOn)?0:ST.mus*.35}
+function applyAudio(){if(!MG)return;MG.gain.value=mute?0:ST.sfx;MU.gain.value=(mute||!ST.musOn)?0:ST.mus*(MFILE?.9:.35)}
 function mt(f,t,d,ty,v){const a=AC,o=a.createOscillator(),g=a.createGain();o.type=ty;o.frequency.setValueAtTime(f,t);g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(v,t+.012);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(MU);o.start(t);o.stop(t+d+.03)}
 function mk2(t,v){const a=AC;if(!HAT){const n=Math.floor(a.sampleRate*.05),b=a.createBuffer(1,n,a.sampleRate),x=b.getChannelData(0);for(let i=0;i<n;i++)x[i]=(Math.random()*2-1)*(1-i/n);HAT=b}const sr=a.createBufferSource(),f=a.createBiquadFilter(),g=a.createGain();sr.buffer=HAT;f.type='highpass';f.frequency.value=6500;g.gain.value=v;sr.connect(f);f.connect(g);g.connect(MU);sr.start(t)}
 const CH_=[[220,261.6,329.6],[174.6,220,261.6],[261.6,329.6,392],[196,246.9,293.7]];
@@ -130,7 +130,7 @@ function sfxKick(shot){sfx(shot?'kick_hard':'kick_soft')}
 function sfxGoal(){sfx('goal')}
 async function loadSamples(){if(SMP||!AC)return;SMP=true;try{const r=await fetch('audio/manifest.json');if(!r.ok)return;const m=await r.json();
  for(const f of (m.sfx||[])){try{const rr=await fetch('audio/'+f);if(!rr.ok)continue;const buf=await AC.decodeAudioData(await rr.arrayBuffer());const n=f.replace(/\d*\.\w+$/,'');(SB[n]=SB[n]||[]).push(buf)}catch(e){}}
- if(m.music){for(const k in m.music){const el=new Audio('audio/'+m.music[k]);el.loop=true;el.preload='auto';try{AC.createMediaElementSource(el).connect(MU)}catch(e){}MUS[k]=el}MFILE=Object.keys(MUS).length>0;if(MFILE&&MCUR)musicSet(MCUR)}
+ if(m.music){for(const k in m.music){const el=new Audio('audio/'+m.music[k]);el.loop=true;el.preload='auto';try{AC.createMediaElementSource(el).connect(MU)}catch(e){}MUS[k]=el}MFILE=Object.keys(MUS).length>0;applyAudio();if(MFILE&&MCUR)musicSet(MCUR)}
  if(m.crowd){const el=new Audio('audio/'+m.crowd);el.loop=true;try{const g=AC.createGain();g.gain.value=.5;AC.createMediaElementSource(el).connect(g);g.connect(MG)}catch(e){}MUS._crowd=el;if(MCUR=='match')try{el.play().catch(()=>{})}catch(e){}}
 }catch(e){}}
 function musicSet(k){MCUR=k;if(!MFILE)return;for(const n in MUS){if(n=='_crowd')continue;const el=MUS[n];if(n==k){try{el.play().catch(()=>{})}catch(e){}}else{try{el.pause()}catch(e){}}}const c=MUS._crowd;if(c){try{if(k=='match')c.play().catch(()=>{});else c.pause()}catch(e){}}}

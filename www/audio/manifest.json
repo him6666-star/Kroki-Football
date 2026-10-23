@@ -1,0 +1,33 @@
+{
+ "sfx": [
+  "bump.mp3",
+  "cele_broom.mp3",
+  "cele_giant.mp3",
+  "cele_king.mp3",
+  "cele_rocket.mp3",
+  "dash.mp3",
+  "fireshot.mp3",
+  "foul_axe.mp3",
+  "foul_glove.mp3",
+  "foul_hammer.mp3",
+  "foul_knife.mp3",
+  "foul_pan.mp3",
+  "goal.mp3",
+  "goal2.mp3",
+  "kick_hard.mp3",
+  "kick_soft.mp3",
+  "pop.mp3",
+  "tackle.mp3",
+  "wallhit.mp3",
+  "wallup.mp3",
+  "whistle_foul.mp3",
+  "whistle_long.mp3",
+  "whistle_pen.mp3",
+  "whistle_start.mp3"
+ ],
+ "music": {
+  "match": "music_match.mp3",
+  "menu": "music_menu.mp3"
+ },
+ "crowd": "crowd.mp3"
+}
