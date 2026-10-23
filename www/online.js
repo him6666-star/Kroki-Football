@@ -6,23 +6,48 @@
  const esc=s=>String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
  firebase.initializeApp(cfg);
  const auth=firebase.auth(),db=firebase.firestore(),FV=firebase.firestore.FieldValue;
- const KR=window.KR={user:null,profile:null,ready:false};
+ const KR=window.KR={user:null,profile:null,ready:false,db:db,FV:FV};
  const PTS={easy:[1,0],medium:[3,1],hard:[5,2]}; // [galibiyet, beraberlik]
  const HI='background:#7cc4ee;color:#0b1a16';
  const back='<div class="row"><button onclick="menu()">'+'←'+'</button></div>';
  async function load(){
   try{const d=await db.collection('users').doc(KR.user.uid).get();KR.profile=d.exists?d.data():null}catch(e){KR.profile=null}
-  KR.ready=true;if(typeof state!='undefined'&&state=='menu')menu();
+  const first=!KR.ready;KR.ready=true;if(first&&typeof state!='undefined'&&state=='menu')menu();
  }
  auth.onAuthStateChanged(u=>{if(!u){auth.signInAnonymously().catch(()=>{KR.ready=true});return}KR.user=u;load()});
- KR.menuRow=()=>'<div class="row"><button onclick="KR.profileUI()">👤 '+(KR.profile?esc(KR.profile.name):T('Profil','Profile'))+'</button><button onclick="KR.boardUI()">🏆 '+T('Skor tablosu','Leaderboard')+'</button></div>';
+ KR.native=!!(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform());
+ const afterAuth=async()=>{KR.user=auth.currentUser;KR.profile=null;await load();KR.profileUI()};
+ KR.googleLogin=async()=>{
+  const m=document.getElementById('krm'),say=t=>{if(m)m.textContent=t};
+  try{
+   say('...');
+   if(!KR.native){
+    const pr=new firebase.auth.GoogleAuthProvider(),cu=auth.currentUser;
+    if(cu&&cu.isAnonymous){try{await cu.linkWithPopup(pr)}catch(e){if(e.code=='auth/credential-already-in-use'&&e.credential){await auth.signInWithCredential(e.credential)}else throw e}}
+    else await auth.signInWithPopup(pr);
+    await afterAuth();return;
+   }
+   const FA=Capacitor.registerPlugin('FirebaseAuthentication');
+   const r=await FA.signInWithGoogle(),idt=r&&r.credential&&r.credential.idToken;
+   if(!idt)throw new Error('token yok');
+   const cred=firebase.auth.GoogleAuthProvider.credential(idt),cu=auth.currentUser;
+   if(cu&&cu.isAnonymous){try{await cu.linkWithCredential(cred)}catch(e){if(e.code=='auth/credential-already-in-use'||e.code=='auth/email-already-in-use'){await auth.signInWithCredential(e.credential||cred)}else throw e}}
+   else await auth.signInWithCredential(cred);
+   await afterAuth();
+  }catch(e){say(T('Giris yapilamadi: ','Sign-in failed: ')+((e&&(e.code||e.message))||''))}
+ };
+ KR.signOut=async()=>{try{if(KR.native)await Capacitor.registerPlugin('FirebaseAuthentication').signOut()}catch(e){}try{await auth.signOut()}catch(e){}KR.user=null;KR.profile=null;menu()};
+ KR.menuRow=()=>'<div class="row"><button onclick="KR.profileUI()">👤 '+(KR.profile?esc(KR.profile.name):T('Profil','Profile'))+'</button><button onclick="KR.boardUI()">🏆 '+T('Skor tablosu','Leaderboard')+'</button>'+(window.NETUI?'<button onclick="NETUI.lobby()">\uD83C\uDF10 Online</button>':'')+'</div>';
  KR.profileUI=()=>{
   if(!KR.user){ov.innerHTML='<div class="card"><h1>👤</h1><p>'+T('Baglanti kurulamadi. Interneti kontrol et.','Could not connect. Check your internet.')+'</p>'+back+'</div>';return}
   const p=KR.profile;
   let h='<div class="card"><h1>👤 '+T('Profil','Profile')+'</h1>';
   if(p)h+='<p style="margin:4px 0 10px;opacity:.9">'+T('Puan','Points')+': <b>'+p.points+'</b> · '+T('Mac','Matches')+': '+p.matches+' · G/B/M: '+p.wins+'/'+p.draws+'/'+p.losses+' · '+T('Gol','Goals')+': '+p.goals+'</p>';
   h+='<div class="row"><input id="krn" maxlength="16" placeholder="'+T('Oyuncu adi (3-16)','Player name (3-16)')+'" value="'+(p?esc(p.name):'')+'" style="padding:10px 14px;border-radius:999px;border:1px solid var(--bd);background:#1a2e28;color:#fff;font:600 15px system-ui;text-align:center;width:210px"></div>';
-  h+='<div id="krm" style="min-height:20px;font-size:13px;opacity:.85"></div><div class="row"><button style="'+HI+'" onclick="KR.saveName()">'+(p?T('Adi degistir','Rename'):T('Profil olustur','Create profile'))+'</button></div>'+back+'</div>';
+  const gu=KR.user&&!KR.user.isAnonymous;
+  h+='<div id="krm" style="min-height:20px;font-size:13px;opacity:.85"></div><div class="row"><button style="'+HI+'" onclick="KR.saveName()">'+(p?T('Adi degistir','Rename'):T('Profil olustur','Create profile'))+'</button></div>';
+  h+='<p style="margin:8px 0 4px;font-size:13px;opacity:.8">'+(gu?'\u2705 Google: '+esc(KR.user.email||''):T('Misafir hesabi (uygulama silinirse puanlar kaybolur)','Guest account (points are lost if the app is deleted)'))+'</p>';
+  h+='<div class="row">'+(gu?'<button onclick="KR.signOut()">'+T('Cikis yap','Sign out')+'</button>':'<button style="background:#fff;color:#222" onclick="KR.googleLogin()">G  '+T('Google ile giris yap','Sign in with Google')+'</button>')+'</div>'+back+'</div>';
   ov.style.display='flex';ov.innerHTML=h;
  };
  KR.saveName=async()=>{
