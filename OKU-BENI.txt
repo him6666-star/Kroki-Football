@@ -1,0 +1,16 @@
+KROKI FUTBOL - APK YAPMA REHBERI (bilgisayarda kurulum yok, sadece tarayici)
+
+1) github.com'a gir, hesabin yoksa ucretsiz olustur.
+2) Sag ustte "+" > "New repository". Adi: kroki-futbol. "Private" secebilirsin. "Create repository".
+3) Acilan sayfada "uploading an existing file" baglantisina tikla.
+4) Bu klasorun ICINDEKI HER SEYI (www, icons, .github, package.json,
+   capacitor.config.json, patch_android.py) tarayiciya surukle birak.
+   ONEMLI: ".github" klasoru gorunmuyorsa Windows'ta "Gizli ogeleri goster" ac,
+   ya da zip'i bilgisayarda cikarip klasoru ile birlikte surukle.
+5) Alta in, "Commit changes" tikla.
+6) Ustte "Actions" sekmesine gir. "APK derle" calisiyor olmali (3-6 dk).
+   Yesil tik olunca ustune tikla, en altta "Artifacts" bolumunden
+   "kroki-futbol-apk" dosyasini indir (zip icinden app-debug.apk cikar).
+7) APK'yi telefonuna gonder (WhatsApp/Drive/USB). Telefonda dosyaya dokun,
+   "Bilinmeyen kaynaklardan kurulum"a izin ver, kur.
+Oyunu guncelledikce www/index.html dosyasini degistirip tekrar yukle, APK yeniden derlenir.

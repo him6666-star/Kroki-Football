@@ -1,0 +1,7 @@
+{
+  "appId": "com.kroki.futbol",
+  "appName": "Kroki Futbol",
+  "webDir": "www",
+  "backgroundColor": "#101c19",
+  "android": { "backgroundColor": "#101c19" }
+}
