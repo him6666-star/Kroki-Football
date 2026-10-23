@@ -15,7 +15,8 @@
  const send=(ch,o)=>{try{if(ch&&ch.readyState=='open')ch.send(JSON.stringify(o))}catch(e){}};
  const gathered=(pc,ms)=>new Promise(res=>{if(pc.iceGatheringState=='complete')return res();const t=setTimeout(res,ms);pc.addEventListener('icegatheringstatechange',()=>{if(pc.iceGatheringState=='complete'){clearTimeout(t);res()}})});
  function releaseRemote(){if(NET&&NET.rm){ACT.forEach((a,i)=>{if(NET.rm&(1<<i))vk('keyup',K2[a][0])});NET.rm=0}}
- function close(){
+ function close(keep){
+  if(!keep)socClean();
   if(unsub){unsub();unsub=null}if(joinTimer){clearTimeout(joinTimer);joinTimer=null}
   const n=NET;if(!n)return;
   releaseRemote();NET=null;NETEV=null;
@@ -32,10 +33,11 @@
  }
  function attach(n,ch){
   if(ch.label=='ctl'){n.ctl=ch;ch.onopen=()=>onOpen(n);ch.onclose=()=>{if(NET===n)lost()};ch.onmessage=e=>{try{onCtl(n,JSON.parse(e.data))}catch(x){}};if(ch.readyState=='open')onOpen(n)}
+  else if(ch.label=='inp'){n.inp=ch;ch.onmessage=e=>{try{const m=JSON.parse(e.data);if(m.k=='in'&&n.role=='host')applyInput(n,m.m|0)}catch(x){}}}
   else if(ch.label=='snap'){n.snap=ch;ch.onmessage=e=>{try{onSnap(n,JSON.parse(e.data))}catch(x){}}}
  }
  function onOpen(n){
-  if(NET!==n||n.opened)return;n.opened=true;
+  if(NET!==n||n.opened)return;n.opened=true;socClean();
   if(joinTimer){clearTimeout(joinTimer);joinTimer=null}
   if(unsub){unsub();unsub=null}
   if(n.role=='host'){db.collection('rooms').doc(n.code).delete().catch(()=>{});card('\ud83c\udf10 '+T('Rakip ba\u011fland\u0131!','Opponent connected!'),'<p style="opacity:.85">'+T('Sen mavi, rakibin turuncu oynar.','You play blue, your opponent plays orange.')+'</p><div class="row"><button style="'+HI+'" onclick="NETUI.start()">'+T('Ma\u00e7\u0131 ba\u015flat','Start match')+'</button></div><div class="row"><button onclick="menu()">\u2190</button></div>')}
@@ -60,7 +62,7 @@
   if(state!='play')return;
   if(NETEV&&NETEV.length)send(n.ctl,{k:'ev',e:NETEV.splice(0)});
   n.acc=(n.acc||0)+dt;
-  if(n.acc>=.05){n.acc=0;try{const s=snapshot(),ch=(n.snap&&n.snap.readyState=='open')?n.snap:n.ctl;if(ch&&ch.readyState=='open')ch.send(s)}catch(e){}}
+  if(n.acc>=.033){n.acc=0;try{const s=snapshot(),ch=(n.snap&&n.snap.readyState=='open')?n.snap:n.ctl;if(ch&&ch.readyState=='open')ch.send(s)}catch(e){}}
  }
  function startHost(){
   const n=NET;if(!n||!n.opened)return;
@@ -111,7 +113,7 @@
  }
  function guestStep(dt){
   const n=NET;if(!n||!n.buf||!n.buf.length)return;
-  const rt=performance.now()-n.off-100,B=n.buf;
+  const rt=performance.now()-n.off-80,B=n.buf;
   while(B.length>2&&B[1].t<=rt)B.shift();
   const a=B[0],b=B[1]||B[0],f=b.t>a.t?Math.max(0,Math.min(1,(rt-a.t)/(b.t-a.t))):1;
   P.forEach((p,i)=>{const u=a.p[i],v=b.p[i];if(!u)return;p.x=u[0]+(v[0]-u[0])*f;p.y=u[1]+(v[1]-u[1])*f});
@@ -122,48 +124,173 @@
   fa.forEach(x=>{x.t+=dt/GS});
   if(msg2t>0)msg2t-=dt/GS;
   let m=0;ACT.forEach((k,i)=>{if(K1[k].some(c=>keys.has(c)))m|=1<<i});
-  const now=performance.now();if(m!==n.lm||now-n.lt>100){n.lm=m;n.lt=now;send(n.ctl,{k:'in',m})}
+  const now=performance.now();if(m!==n.lm||now-n.lt>40){n.lm=m;n.lt=now;send((n.inp&&n.inp.readyState=='open')?n.inp:n.ctl,{k:'in',m})}
  }
  // ---------- UI ----------
  const code5=()=>{const a='ABCDEFGHJKMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<5;i++)s+=a[Math.floor(Math.random()*a.length)];return s};
  window.NETUI={
   lobby(){
+   socListen();
    if(!KR.user){card('\ud83c\udf10 Online','<p>'+T('Ba\u011flant\u0131 kurulamad\u0131. \u0130nterneti kontrol et.','Could not connect. Check your internet.')+'</p><div class="row"><button onclick="menu()">\u2190</button></div>');return}
-   card('\ud83c\udf10 Online','<p style="opacity:.85;margin:4px 0 10px">'+T('Arkada\u015f\u0131nla oda koduyla oyna. Oday\u0131 kuran mavi, kat\u0131lan turuncu oynar.','Play a friend with a room code. The room creator plays blue, the joiner orange.')+'</p><div class="row"><button style="'+HI+'" onclick="NETUI.host()">'+T('Oda kur','Create room')+'</button></div><div class="row"><input id="njc" maxlength="5" placeholder="KOD" style="'+INP+'"><button onclick="NETUI.join()">'+T('Kat\u0131l','Join')+'</button></div><div id="nm" style="min-height:20px;font-size:13px;opacity:.9"></div><div class="row"><button onclick="menu()">\u2190</button></div>');
+   card('\ud83c\udf10 Online','<p style="opacity:.85;margin:4px 0 10px">'+T('Rakip bul ya da arkada\u015f\u0131nla oda koduyla oyna. Oday\u0131 kuran mavi, kat\u0131lan turuncu oynar.','Find an opponent or play a friend with a room code. The room creator plays blue, the joiner orange.')+'</p><div class="row"><button style="'+HI+'" onclick="NETUI.find()">\ud83d\udd0e '+T('Rakip bul','Find opponent')+'</button><button onclick="NETUI.friends()">\ud83d\udc65 '+T('Arkada\u015flar','Friends')+'</button></div><div class="row"><button onclick="NETUI.host()">'+T('Oda kur','Create room')+'</button></div><div class="row"><input id="njc" maxlength="5" placeholder="KOD" style="'+INP+'"><button onclick="NETUI.join()">'+T('Kat\u0131l','Join')+'</button></div><div id="nm" style="min-height:20px;font-size:13px;opacity:.9"></div><div class="row"><button onclick="menu()">\u2190</button></div>');
   },
-  async host(){
-   close();
+  async host(opts){
+   close(opts&&opts.keep);
    const n=NET={role:'host',pc:new RTCPeerConnection(ICE)};wire(n);
    try{
-    attach(n,n.pc.createDataChannel('ctl'));attach(n,n.pc.createDataChannel('snap',{ordered:false,maxRetransmits:0}));
+    attach(n,n.pc.createDataChannel('ctl'));attach(n,n.pc.createDataChannel('snap',{ordered:false,maxRetransmits:0}));attach(n,n.pc.createDataChannel('inp',{ordered:false,maxRetransmits:0}));
     await n.pc.setLocalDescription(await n.pc.createOffer());await gathered(n.pc,3500);
     let ok=false,code;
     for(let i=0;i<4&&!ok;i++){code=code5();try{await db.collection('rooms').doc(code).set({host:KR.user.uid,guest:null,offer:{type:n.pc.localDescription.type,sdp:n.pc.localDescription.sdp},answer:null,created:FV.serverTimestamp()});ok=true}catch(e){if(i==3)throw e}}
     n.code=code;
-    card('\ud83c\udf10 '+T('Oda kuruldu','Room created'),'<div style="font:800 44px ui-monospace,monospace;letter-spacing:.2em;margin:10px 0 4px;color:#7cc4ee">'+code+'</div><p style="opacity:.85;margin:4px 0 10px">'+T('Bu kodu arkada\u015f\u0131na s\u00f6yle. Rakip bekleniyor...','Share this code. Waiting for your opponent...')+'</p><div class="row"><button onclick="menu()">'+T('\u0130ptal','Cancel')+'</button></div>');
+    if(opts&&opts.hosted)opts.hosted(code,n);
+    if(opts&&opts.card)opts.card(code);else card('\ud83c\udf10 '+T('Oda kuruldu','Room created'),'<div style="font:800 44px ui-monospace,monospace;letter-spacing:.2em;margin:10px 0 4px;color:#7cc4ee">'+code+'</div><p style="opacity:.85;margin:4px 0 10px">'+T('Bu kodu arkada\u015f\u0131na s\u00f6yle. Rakip bekleniyor...','Share this code. Waiting for your opponent...')+'</p><div class="row"><button onclick="menu()">'+T('\u0130ptal','Cancel')+'</button></div>');
     unsub=db.collection('rooms').doc(code).onSnapshot(async d=>{const x=d.data();if(x&&x.answer&&NET===n&&!n.pc.remoteDescription){try{await n.pc.setRemoteDescription(x.answer)}catch(e){}}});
    }catch(e){close();NETUI.lobby();setMsg(T('Oda kurulamad\u0131. Tekrar dene.','Could not create the room. Try again.'))}
   },
-  async join(){
-   const el=document.getElementById('njc'),code=((el&&el.value)||'').trim().toUpperCase();
-   if(code.length!=5){setMsg(T('5 haneli kodu yaz.','Enter the 5-character code.'));return}
-   close();setMsg(T('Odaya ba\u011flan\u0131l\u0131yor...','Connecting...'));
+  async join(ca,quiet){
+   const el=document.getElementById('njc'),code=(ca||(el&&el.value)||'').trim().toUpperCase();
+   if(code.length!=5){setMsg(T('5 haneli kodu yaz.','Enter the 5-character code.'));return false}
+   close(quiet);setMsg(T('Odaya ba\u011flan\u0131l\u0131yor...','Connecting...'));
    try{
     const ref=db.collection('rooms').doc(code),d=await ref.get();
-    if(!d.exists){setMsg(T('Oda bulunamad\u0131.','Room not found.'));return}
+    if(!d.exists){setMsg(T('Oda bulunamad\u0131.','Room not found.'));return false}
     const x=d.data();
-    if(x.guest){setMsg(T('Oda dolu.','Room is full.'));return}
+    if(x.guest){setMsg(T('Oda dolu.','Room is full.'));return false}
     const n=NET={role:'guest',pc:new RTCPeerConnection(ICE),code};wire(n);
     n.pc.ondatachannel=e=>attach(n,e.channel);
     await n.pc.setRemoteDescription(x.offer);
     await n.pc.setLocalDescription(await n.pc.createAnswer());await gathered(n.pc,3500);
     await ref.update({guest:KR.user.uid,answer:{type:n.pc.localDescription.type,sdp:n.pc.localDescription.sdp}});
     joinTimer=setTimeout(()=>{if(NET===n&&!n.opened){close();NETUI.lobby();setMsg(T('Ba\u011flan\u0131lamad\u0131. A\u011f engelliyor olabilir (mobil veri).','Could not connect. Your network may be blocking it (mobile data).'))}},20000);
-   }catch(e){close();NETUI.lobby();setMsg(T('Kat\u0131l\u0131namad\u0131. Kodu ve interneti kontrol et.','Could not join. Check the code and your connection.'))}
+    return true;
+   }catch(e){if(quiet){close(true);return false}close();NETUI.lobby();setMsg(T('Kat\u0131l\u0131namad\u0131. Kodu ve interneti kontrol et.','Could not join. Check the code and your connection.'))}
   },
   start(){startHost()},
+  find,friends:friendsUI,addFriend,delFriend,inv:invite,accept,dismiss,
   again(){startHost()}
  };
+
+ // ---------- rakip bul + arkadas listesi ----------
+ const S={on:false,tok:0,tm:null,qd:null,inv:null,fl:[]};
+ const E=x=>String(x==null?'':x).replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';');
+ function socClean(){
+  S.on=false;S.tok++;if(S.tm){clearInterval(S.tm);S.tm=null}
+  if(S.qd){db.collection('queue').doc(S.qd).delete().catch(()=>{});S.qd=null}
+  if(S.inv){db.collection('invites').doc(S.inv).delete().catch(()=>{});S.inv=null}
+ }
+ const myName=()=>(KR.profile&&KR.profile.name)||T('Oyuncu','Player');
+ const fresh=ms=>firebase.firestore.Timestamp.fromMillis(Date.now()-ms);
+ async function candidates(){
+  const sn=await db.collection('queue').where('t','>',fresh(22000)).limit(12).get();
+  const me=KR.user.uid;
+  return sn.docs.map(d=>d.data()).filter(x=>x&&x.uid&&x.uid!=me&&x.code).sort((a,b)=>(a.t&&b.t)?a.t.toMillis()-b.t.toMillis():0);
+ }
+ async function find(){
+  if(!KR.user){NETUI.lobby();return}
+  close();S.on=true;const tok=++S.tok,me=KR.user.uid;
+  const alive=()=>S.on&&S.tok==tok;
+  const wait=()=>card('\U0001f50e '+T('Rakip aran\u0131yor','Searching'),'<p style="opacity:.85;margin:10px 0">'+T('Rakip aran\u0131yor... Ba\u015fka bir oyuncu "Rakip bul"a bas\u0131nca otomatik e\u015fle\u015firsiniz.','Looking for an opponent... You will be matched automatically when someone else searches.')+'</p><div id="nm" style="min-height:20px;font-size:13px;opacity:.9"></div><div class="row"><button onclick="menu()">'+T('\u0130ptal','Cancel')+'</button></div>');
+  wait();
+  const tryJoin=async list=>{for(const x of list){if(!alive())return true;if(await NETUI.join(x.code,true))return true}return false};
+  try{
+   if(await tryJoin(await candidates()))return;
+   if(!alive())return;
+   let ticks=0;
+   await NETUI.host({keep:true,card:wait,hosted:code=>{
+    const ref=db.collection('queue').doc(me);
+    const put=()=>ref.set({uid:me,name:myName(),code,t:FV.serverTimestamp()}).catch(()=>{});
+    S.qd=me;put();
+    S.tm=setInterval(async()=>{
+     if(!alive()){return}
+     if(!NET||NET.code!=code||NET.opened)return;
+     ticks++;
+     if(ticks>24){socClean();close();NETUI.lobby();setMsg(T('Rakip bulunamad\u0131. Biraz sonra tekrar dene ya da arkada\u015f\u0131n\u0131 davet et.','No opponent found. Try again later or invite a friend.'));return}
+     put();
+     try{
+      const o=(await candidates()).find(x=>x.uid<me);
+      if(o&&alive()&&NET&&!NET.opened){
+       clearInterval(S.tm);S.tm=null;
+       db.collection('queue').doc(me).delete().catch(()=>{});S.qd=null;
+       close(true);
+       if(await NETUI.join(o.code,true))return;
+       if(alive())find();
+      }
+     }catch(e){}
+    },5000);
+   }});
+  }catch(e){socClean();NETUI.lobby();setMsg(T('E\u015fle\u015fme ba\u015flat\u0131lamad\u0131.','Could not start matchmaking.'))}
+ }
+ // --- arkadas kodu ---
+ function fcode(uid){
+  let h1=2166136261,h2=5381;
+  for(let i=0;i<uid.length;i++){const c=uid.charCodeAt(i);h1=Math.imul(h1^c,16777619)>>>0;h2=(Math.imul(h2,33)+c)>>>0}
+  const a='ABCDEFGHJKMNPQRSTUVWXYZ23456789';let r='',x=h1,y=h2;
+  for(let i=0;i<7;i++){if(i<4){r+=a[x%a.length];x=Math.floor(x/a.length)}else{r+=a[y%a.length];y=Math.floor(y/a.length)}}
+  return r;
+ }
+ async function friendsUI(msg){
+  if(!KR.user){NETUI.lobby();return}
+  const me=KR.user.uid,fc=fcode(me);
+  try{await db.collection('codes').doc(fc).set({uid:me,name:myName()})}catch(e){}
+  card('\U0001f465 '+T('Arkada\u015flar','Friends'),
+   '<p style="opacity:.85;margin:4px 0 2px;font-size:13px">'+T('Arkada\u015f kodun (arkada\u015f\u0131na ver):','Your friend code (share it):')+'</p>'+
+   '<div style="font:800 28px ui-monospace,monospace;letter-spacing:.18em;margin:2px 0 10px;color:#7cc4ee">'+fc+'</div>'+
+   '<div class="row"><input id="fadd" maxlength="7" placeholder="KOD" style="'+INP+';width:190px;font-size:17px"><button onclick="NETUI.addFriend()">'+T('Ekle','Add')+'</button></div>'+
+   '<div id="nm" style="min-height:20px;font-size:13px;opacity:.9">'+E(msg||'')+'</div><div id="fl" style="max-height:200px;overflow:auto;margin:6px 0"></div>'+
+   '<div class="row"><button onclick="NETUI.lobby()">\u2190</button></div>');
+  const box=document.getElementById('fl');if(box)box.textContent=T('Y\xfckleniyor...','Loading...');
+  try{
+   const sn=await db.collection('users').doc(me).collection('friends').get();
+   const L=await Promise.all(sn.docs.map(async d=>{let u={};try{const x=await db.collection('users').doc(d.id).get();u=x.exists?x.data():{}}catch(e){}return{uid:d.id,name:u.name||d.data().name||'?',points:u.points|0}}));
+   L.sort((a,b)=>b.points-a.points);S.fl=L;
+   const b2=document.getElementById('fl');if(!b2)return;
+   b2.innerHTML=L.length?L.map((f,i)=>'<div class="row" style="align-items:center;justify-content:space-between;gap:8px;margin:4px 0"><span style="text-align:left;flex:1">'+E(f.name)+' <small style="opacity:.7">'+f.points+' '+T('puan','pts')+'</small></span><button style="'+HI+'" onclick="NETUI.inv('+i+')">'+T('Davet et','Invite')+'</button><button onclick="NETUI.delFriend('+i+')">\u2715</button></div>').join(''):'<p style="opacity:.7;font-size:13px">'+T('Hen\xfcz arkada\u015f\u0131n yok. Bir arkada\u015f kodu ekle.','No friends yet. Add a friend code.')+'</p>';
+  }catch(e){const b2=document.getElementById('fl');if(b2)b2.textContent=T('Liste al\u0131namad\u0131.','Could not load the list.')}
+ }
+ async function addFriend(){
+  const el=document.getElementById('fadd'),c=((el&&el.value)||'').trim().toUpperCase();
+  if(c.length!=7){setMsg(T('7 haneli kodu yaz.','Enter the 7-character code.'));return}
+  const me=KR.user.uid;
+  try{
+   const d=await db.collection('codes').doc(c).get();
+   if(!d.exists){setMsg(T('Kod bulunamad\u0131.','Code not found.'));return}
+   const x=d.data();
+   if(x.uid==me){setMsg(T('Bu senin kodun.','That is your own code.'));return}
+   await db.collection('users').doc(me).collection('friends').doc(x.uid).set({name:String(x.name||'').slice(0,16),t:FV.serverTimestamp()});
+   friendsUI(T('Eklendi: ','Added: ')+x.name);
+  }catch(e){setMsg(T('Eklenemedi. \u0130nterneti kontrol et.','Could not add. Check your connection.'))}
+ }
+ function delFriend(i){const f=S.fl[i];if(!f)return;db.collection('users').doc(KR.user.uid).collection('friends').doc(f.uid).delete().catch(()=>{}).then(()=>friendsUI())}
+ function invite(i){
+  const f=S.fl[i];if(!f)return;const me=KR.user.uid;
+  NETUI.host({hosted:code=>{S.inv=f.uid;db.collection('invites').doc(f.uid).set({from:me,name:myName(),code,t:FV.serverTimestamp()}).catch(()=>{})},
+   card:code=>card('\U0001f465 '+T('Davet g\xf6nderildi','Invite sent'),'<p style="opacity:.85;margin:10px 0">'+E(f.name)+' '+T('bekleniyor... Oyunu a\xe7\u0131ksa davet\xee g\xf6recek.','is being waited for... They will see the invite if the game is open.')+'</p><p style="font-size:13px;opacity:.7">'+T('Kod: ','Code: ')+code+'</p><div class="row"><button onclick="menu()">'+T('\u0130ptal','Cancel')+'</button></div>')});
+ }
+ // --- gelen davet ---
+ let invUn=null,invUid=null,invData=null;
+ function banner(x){
+  let b=document.getElementById('invb');
+  if(!b){b=document.createElement('div');b.id='invb';b.style.cssText='position:fixed;top:10px;left:50%;transform:translateX(-50%);z-index:300;background:#12241f;border:1px solid #7cc4ee;border-radius:14px;padding:10px 14px;color:#fff;font:600 14px system-ui,sans-serif;display:flex;gap:10px;align-items:center;box-shadow:0 8px 30px #0008;max-width:92vw';document.body.appendChild(b)}
+  b.innerHTML='<span>\u26bd '+E(x.name||'?')+' '+T('seni ma\xe7a davet ediyor','invites you to a match')+'</span><button style="'+HI+';padding:8px 14px;border-radius:999px;border:0;font-weight:800" onclick="NETUI.accept()">'+T('Kat\u0131l','Join')+'</button><button style="padding:8px 12px;border-radius:999px;border:1px solid #fff4;background:none;color:#fff" onclick="NETUI.dismiss()">\u2715</button>';
+ }
+ function dismiss(del){const b=document.getElementById('invb');if(b)b.remove();if(del!==false&&KR.user)db.collection('invites').doc(KR.user.uid).delete().catch(()=>{});invData=null}
+ function accept(){const x=invData;dismiss();if(!x)return;NETUI.lobby();NETUI.join(x.code)}
+ function socListen(){
+  if(!KR.user)return;
+  if(invUn&&invUid==KR.user.uid)return;
+  if(invUn){invUn();invUn=null}
+  invUid=KR.user.uid;
+  invUn=db.collection('invites').doc(invUid).onSnapshot(d=>{
+   const x=d.exists?d.data():null;
+   if(!x||!x.t||!x.code){dismiss(false);return}
+   if(Date.now()-x.t.toMillis()>90000)return;
+   if(typeof state!='undefined'&&state=='play')return;
+   if(NET&&NET.opened)return;
+   invData=x;banner(x);
+  },()=>{});
+ }
+ setInterval(socListen,3000);
  // oyun kancalari
  const m0=menu;menu=function(){if(NET)close();NETEV=null;m0()};
  window.NETHOOK={hostTick,guestStep,endRow:()=>'<div class="row"><button onclick="NETUI.again()">'+T('Tekrar oyna','Play again')+'</button><button onclick="menu()">Men\u00fc</button></div>'};
