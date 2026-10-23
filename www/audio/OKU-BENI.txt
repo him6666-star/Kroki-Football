@@ -36,3 +36,4 @@ KAYNAKLAR / LISANS
             DJARTMUSIC (alkis/tezahurat), arunangshubanerjee (stadyum ortam sesi) - Pixabay / Freesound, Pixabay Content License
   Yeni: freesound_community (duvara carpma, top vurusu 6235)
   Yeni: universfield, koiroylers, flutie8211, lordsonny, freesound_community (efektler)
+  Stadyum ortam sesi: vishiv (Pixabay)

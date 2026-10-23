@@ -76,8 +76,8 @@ function rebind(si,a){cap={s:si,a};settings()}
 function settingsBack(){cap=null;if(spage!='hub'){spage='hub';settings();return}inSet=false;if(sb=='pause')pauseUI();else menu()}
 loadKeys();rebuildKS();
 const NP=6,HOME=[[.03,.5],[.2,.25],[.2,.75],[.32,.5],[.45,.27],[.45,.73]];
-let mode=1,D=DIF.medium,P=[],ball,score=[0,0],time=0,ext=0,half=0,froze=0,msg='',act=[4,4],ctl=[KS,null],state='menu',shake=0,restart=null,psw=null,ko=null,hold=null,cam={x:500,y:310,z:1},kdg=[false,false];
-const GS=.58;let gcam=null,zm=0,netFx=[null,null],bars=[],bused=[0,0],kult=[0,0],swd=[],trail=[],bh=[],clock=0,fxs=[],AC=null,mute=false,msg2='',msg2t=0;
+let mode=1,D=DIF.medium,P=[],ball,score=[0,0],time=0,ext=0,half=0,froze=0,msg='',act=[4,4],ctl=[KS,null],state='menu',shake=0,restart=null,psw=null,ko=null,hold=null,cam={x:500,y:310,z:1.4},kdg=[false,false];
+const GS=.58;let gcam=null,zm=2,netFx=[null,null],bars=[],bused=[0,0],kult=[0,0],swd=[],trail=[],bh=[],clock=0,fxs=[],AC=null,mute=false,msg2='',msg2t=0;
 let ST={touch:'auto',gfx:'auto',fps:false,lang:'tr',sfx:.8,mus:.5,musOn:true,shk:true};
 try{const j=JSON.parse(localStorage.getItem('kroki-set')||'null');if(j&&typeof j=='object')ST=Object.assign(ST,j)}catch(e){}
 function saveST(){try{localStorage.setItem('kroki-set',JSON.stringify(ST))}catch(e){}}
@@ -193,7 +193,7 @@ function mkWall(t){P.forEach(q=>q.wl=null);const ox=t?PX+PW:PX,db=Math.hypot(ox-
 function special(p){if((p.i==1||p.i==2)&&!bused[p.t]&&!(p.stun>0)&&!(p.off>0)&&!ko&&!restart&&!hold&&!pk&&ball){let dx,dy,sp=Math.hypot(ball.vx,ball.vy);if(sp>80){dx=ball.vx/sp;dy=ball.vy/sp}else if(ball.car){dx=ball.car.fx;dy=ball.car.fy}else{dx=p.t?1:-1;dy=0}const l=Math.hypot(dx,dy)||1;dx/=l;dy/=l;const dist=sp>400?70:48;let bx=ball.x+dx*dist,by=ball.y+dy*dist;bx=clamp(bx,PX+30,PX+PW-30);by=clamp(by,PY+30,PY+PH-30);bars.push({x:bx,y:by,nx:dx,ny:dy,a:0,L:46});bused[p.t]=1;msg2='SET!';msg2t=1;shake=.3;sfx('wallup');for(let q=0;q<22;q++){const u=(Math.random()-.5)*2*46,ang=Math.random()*6.28;fxs.push({x:bx-dy*u,y:by+dx*u,vx:Math.cos(ang)*70,vy:Math.sin(ang)*70-40,l:.6,m:.6,r:3+Math.random()*3,c:'#9a7b55',sp:1,g:1})}}}
 function barPush(x,y,rad){for(const b of bars){if(b.a<.12||b.a>b.life-.3)continue;const rx=x-b.x,ry=y-b.y,u=rx*b.nx+ry*b.ny,v=-rx*b.ny+ry*b.nx,hu=9+rad,hv=b.L+rad;if(Math.abs(u)<hu&&Math.abs(v)<hv)return{b,u,v,hu,s:u>=0?1:-1}}return null}
 function tackle(p,d){if(pk||p.i==0||p.stun>0||p.rec>0||p.lunge>0||p.cdt>0||ko||restart||hold)return;const l=Math.hypot(d[0],d[1])||1;p.td=[d[0]/l,d[1]/l];p.lunge=.28;p.cdt=1.4;p.fx=p.td[0];p.fy=p.td[1];p.hit=false}
-function lungeHit(p){if(p.hit)return;for(const o of P){if(o.t==p.t||o.i==0||o.stun>0||o.off>0)continue;if(Math.hypot(o.x-p.x,o.y-p.y)>R*2.2)continue;p.hit=true;
+function lungeHit(p){if(p.hit)return;for(const o of P){if(o.t==p.t||o.i==0||o.stun>0||o.off>0)continue;if(Math.hypot(o.x-p.x,o.y-p.y)>R*2.2)continue;if(o.skl>0&&ball.car===o){p.hit=true;p.lunge=0;p.rec=.9;p.stun=.45;msg2=ST.lang=='en'?'DRIBBLED!':'ÇALIM!';msg2t=.9;sfx('pop');for(let q=0;q<10;q++){const a=Math.random()*6.28;fxs.push({x:o.x,y:o.y,vx:Math.cos(a)*110,vy:Math.sin(a)*110,l:.4,m:.4,r:3.5,c:'#ffe45a',sp:1})}return}p.hit=true;
  const behind=p.td[0]*o.fx+p.td[1]*o.fy>.3,has=ball.car===o||Math.hypot(ball.x-o.x,ball.y-o.y)<28;
  if(ctl[p.t]&&P[NP*p.t+act[p.t]]==p&&(behind||!has||Math.random()<.18))foul(p,o);
  else{if(ball.car===o){ball.car=null;ball.ct=0;ball.vx=p.td[0]*240+o.vx*.3;ball.vy=p.td[1]*240+o.vy*.3;ball.last=p.t;ball.sq=1}o.cd=.5;o.stun=.35;p.lunge=0;p.rec=.2;fxs.push({x:o.x,y:o.y,l:.3,m:.3,r:22,c:'#ffffff'});sfx('tackle')}
@@ -450,8 +450,8 @@ fxs.forEach(t=>{t.l-=dt;if(t.sp){if(t.fl){t.vy-=(t.fl==2?160:300)*dt;t.vx+=(Math
    if(m&&!p.ch){p.fx=ix;p.fy=iy}
    if(p.sp===undefined)p.sp=1;
    const sdn=dn(k.s);p.sp=Math.min(1,p.sp+dt/GS/4.5);
-   if(sdn&&!p.sk&&!p.ch&&p.sp>=.34){p.sp-=.34;p.dash=.15;p.dd=m?[ix,iy]:[p.fx,p.fy];sfx('dash')}
-   p.sk=sdn;
+   if(sdn&&!p.sk&&!p.ch&&p.sp>=.34){p.sp-=.34;p.dash=.15;p.dd=m?[ix,iy]:[p.fx,p.fy];sfx('dash');if(m&&ball&&ball.car===p&&p.i!=0){let nr=null,nd=1e9;for(const o of P){if(o.t!=p.t&&o.i!=0&&!(o.off>0)){const d=Math.hypot(o.x-p.x,o.y-p.y);if(d<nd){nd=d;nr=o}}}const qx=-iy,qy=ix,sd=nr?(((nr.x-p.x)*qx+(nr.y-p.y)*qy)>0?-1:1):(Math.random()<.5?1:-1);let ex=ix*.5+qx*sd*.87,ey=iy*.5+qy*sd*.87;const el=Math.hypot(ex,ey)||1;p.dd=[ex/el,ey/el];p.dash=.2;p.skl=.55;for(let q=0;q<8;q++){const a=Math.random()*6.28;fxs.push({x:p.x,y:p.y,vx:Math.cos(a)*90,vy:Math.sin(a)*90,l:.35,m:.35,r:3,c:'#fff',sp:1})}}}
+   p.sk=sdn;if(p.skl>0)p.skl-=dt/GS;
    const vs=p.ch?170:265;
    if(p.dash>0){p.dash-=dt/GS;p.vx=p.dd[0]*440;p.vy=p.dd[1]*440}else{p.vx=ix*vs;p.vy=iy*vs}
    const pd=dn(k.p);
