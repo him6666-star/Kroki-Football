@@ -9,7 +9,7 @@ if 'hardwareAccelerated' not in m:
     m = m.replace('<application', '<application\n        android:hardwareAccelerated="true"', 1)
 open(p, 'w', encoding='utf-8').write(m)
 # 2) MainActivity: tam ekran (immersive), ekran acik kalsin, ses otomatik baslasin
-act = '''package com.kroki.futbol;
+act = '''package com.scribblekick.game;
 
 import android.os.Build;
 import android.os.Bundle;
@@ -52,7 +52,7 @@ public class MainActivity extends BridgeActivity {
     }
 }
 '''
-open(glob.glob(base + '/java/com/kroki/futbol/MainActivity.java')[0], 'w', encoding='utf-8').write(act)
+open(glob.glob(base + '/java/com/scribblekick/game/MainActivity.java')[0], 'w', encoding='utf-8').write(act)
 # 3) Ikonlar
 for d in glob.glob('icons/mipmap-*'):
     dst = base + '/res/' + os.path.basename(d)

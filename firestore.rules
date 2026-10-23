@@ -1,0 +1,41 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{uid} {
+      // giris yapmis herkes skor tablosunu okuyabilir
+      allow read: if request.auth != null;
+
+      // profil olusturma: sayaclar sifirdan baslamali
+      allow create: if request.auth != null && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['name','points','wins','draws','losses','goals','matches','last'])
+        && request.resource.data.name is string
+        && request.resource.data.name.size() >= 3 && request.resource.data.name.size() <= 16
+        && request.resource.data.points == 0 && request.resource.data.wins == 0
+        && request.resource.data.draws == 0 && request.resource.data.losses == 0
+        && request.resource.data.goals == 0 && request.resource.data.matches == 0
+        && request.resource.data.last == request.time;
+
+      // sadece ad degisikligi
+      allow update: if request.auth != null && request.auth.uid == uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name'])
+        && request.resource.data.name is string
+        && request.resource.data.name.size() >= 3 && request.resource.data.name.size() <= 16;
+
+      // mac sonucu: sinirli artislar + en az 60 sn ara
+      allow update: if request.auth != null && request.auth.uid == uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['points','wins','draws','losses','goals','matches','last'])
+        && request.resource.data.matches == resource.data.matches + 1
+        && request.resource.data.points >= resource.data.points
+        && request.resource.data.points - resource.data.points <= 5
+        && request.resource.data.wins - resource.data.wins <= 1
+        && request.resource.data.draws - resource.data.draws <= 1
+        && request.resource.data.losses - resource.data.losses <= 1
+        && request.resource.data.wins + request.resource.data.draws + request.resource.data.losses
+           == resource.data.wins + resource.data.draws + resource.data.losses + 1
+        && request.resource.data.goals - resource.data.goals >= 0
+        && request.resource.data.goals - resource.data.goals <= 20
+        && request.resource.data.last == request.time
+        && request.time > resource.data.last + duration.value(60, 's');
+    }
+  }
+}
