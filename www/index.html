@@ -81,7 +81,7 @@ const L=(t,e)=>ST.lang=='en'?e:t;
 const EN={'GOL!':'GOAL!','PENALTI!':'PENALTY!','SET!':'WALL!','FAUL!':'FOUL!','ALEVLİ ŞUT!':'FIRE SHOT!','ARA PASI!':'THROUGH BALL!','ORTA!':'CROSS!','İKİNCİ YARI':'SECOND HALF','GOL KRALI!':'GOAL KING!','ÇAT!':'SLASH!','SAPLA!':'STAB!','TAK!':'CHOP!','KAPIŞ!':'GRAB!'};
 const trm=s=>ST.lang=='en'?(EN[s]||s):s;
 let MG=null,MU=null,mTimer=null,mStep=0,mNext=0,HAT=null;
-function applyAudio(){if(!MG)return;MG.gain.value=mute?0:ST.sfx;MU.gain.value=(mute||!ST.musOn)?0:ST.mus*(MFILE?.9:.35)}
+function applyAudio(){if(!MG)return;const pz_=state=='pause';MG.gain.value=mute?0:ST.sfx*(pz_?.2:1);MU.gain.value=(mute||!ST.musOn)?0:ST.mus*(MFILE?.9:.35)*(pz_?.45:1)}
 function mt(f,t,d,ty,v){const a=AC,o=a.createOscillator(),g=a.createGain();o.type=ty;o.frequency.setValueAtTime(f,t);g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(v,t+.012);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(MU);o.start(t);o.stop(t+d+.03)}
 function mk2(t,v){const a=AC;if(!HAT){const n=Math.floor(a.sampleRate*.05),b=a.createBuffer(1,n,a.sampleRate),x=b.getChannelData(0);for(let i=0;i<n;i++)x[i]=(Math.random()*2-1)*(1-i/n);HAT=b}const sr=a.createBufferSource(),f=a.createBiquadFilter(),g=a.createGain();sr.buffer=HAT;f.type='highpass';f.frequency.value=6500;g.gain.value=v;sr.connect(f);f.connect(g);g.connect(MU);sr.start(t)}
 const CH_=[[220,261.6,329.6],[174.6,220,261.6],[261.6,329.6,392],[196,246.9,293.7]];
@@ -124,14 +124,15 @@ const SFXF={
  rk_by:()=>{tone(220,100,.18,'sine',.3)},
  pop:()=>{noise(.3,.8,700);tone(320,50,.35,'sine',.6)}
 };
-function sfxPlay(n,v){if(mute)return;const b=SB[n];if(b&&b.length&&au()){try{const s=AC.createBufferSource(),g=AC.createGain();s.buffer=b[Math.floor(Math.random()*b.length)];s.playbackRate.value=.96+Math.random()*.08;g.gain.value=v==null?1:v;s.connect(g);g.connect(MG);s.start();return}catch(e){}}const f=SFXF[n];if(f)f()}
+const SVM={wallhit:.2,wallup:.35};function sfxPlay(n,v){if(mute)return;const b=SB[n];if(b&&b.length&&au()){try{const s=AC.createBufferSource(),g=AC.createGain();s.buffer=b[Math.floor(Math.random()*b.length)];s.playbackRate.value=.96+Math.random()*.08;g.gain.value=v==null?(SVM[n]||1):v;s.connect(g);g.connect(MG);s.start();return}catch(e){}}const f=SFXF[n];if(f)f()}
 function sfx(n,v){if(NETEV)NETEV.push(n);sfxPlay(n,v)}
 function sfxKick(shot){sfx(shot?'kick_hard':'kick_soft')}
-function sfxGoal(){sfx('goal')}
+let CRB=0,CRV=.25;function sfxGoal(){sfx('goal');CRB=4}
+function crowdUpd(dt){const g=MUS._cg;if(!g)return;let t=.22;if(state=='play'&&ball){const gx=ball.x<PX+PW/2?PX:PX+PW,d=Math.hypot(ball.x-gx,(ball.y-GY)*1.3),pr=Math.max(0,Math.min(1,1-d/430));t=.22+.78*Math.pow(pr,1.3)}if(CRB>0){CRB-=dt;t=1}CRV+=(t-CRV)*Math.min(1,dt*(t>CRV?3:1.2));try{g.gain.value=CRV*1.3}catch(e){}}
 async function loadSamples(){if(SMP||!AC)return;SMP=true;try{const r=await fetch('audio/manifest.json');if(!r.ok)return;const m=await r.json();
  for(const f of (m.sfx||[])){try{const rr=await fetch('audio/'+f);if(!rr.ok)continue;const buf=await AC.decodeAudioData(await rr.arrayBuffer());const n=f.replace(/\d*\.\w+$/,'');(SB[n]=SB[n]||[]).push(buf)}catch(e){}}
  if(m.music){for(const k in m.music){const el=new Audio('audio/'+m.music[k]);el.loop=true;el.preload='auto';try{AC.createMediaElementSource(el).connect(MU)}catch(e){}MUS[k]=el}MFILE=Object.keys(MUS).length>0;applyAudio();if(MFILE&&MCUR)musicSet(MCUR)}
- if(m.crowd){const el=new Audio('audio/'+m.crowd);el.loop=true;try{const g=AC.createGain();g.gain.value=.5;AC.createMediaElementSource(el).connect(g);g.connect(MG)}catch(e){}MUS._crowd=el;if(MCUR=='match')try{el.play().catch(()=>{})}catch(e){}}
+ if(m.crowd){const el=new Audio('audio/'+m.crowd);el.loop=true;try{const g=AC.createGain();g.gain.value=.25;AC.createMediaElementSource(el).connect(g);g.connect(MG);MUS._cg=g}catch(e){}MUS._crowd=el;if(MCUR=='match')try{el.play().catch(()=>{})}catch(e){}}
 }catch(e){}}
 function musicSet(k){MCUR=k;if(!MFILE)return;for(const n in MUS){if(n=='_crowd')continue;const el=MUS[n];if(n==k){try{el.play().catch(()=>{})}catch(e){}}else{try{el.pause()}catch(e){}}}const c=MUS._crowd;if(c){try{if(k=='match')c.play().catch(()=>{});else c.pause()}catch(e){}}}
 function give(t,bx,by,ix,iy){ball.x=bx;ball.y=by;ball.vx=ball.vy=0;ball.sq=0;ball.stuck=0;ball.spin=0;
@@ -175,9 +176,9 @@ let dk='medium';
 function helpText(){const n=a=>kname(a);const b1=ST.lang=='en'?`${n(K1.u)}${n(K1.l)}${n(K1.d)}${n(K1.r)} move · ${n(K1.k)} shoot (hold = power, steer while holding = curve) · ${n(K1.p)} pass (on rival wing = CROSS, double tap = THROUGH BALL) · ${n(K1.w)} switch player · ${n(K1.s)} dash · ${n(K1.x)} tackle · ${n(K1.y)} special (defender: WALL in front of the ball, once per half)`:`${n(K1.u)}${n(K1.l)}${n(K1.d)}${n(K1.r)} hareket · ${n(K1.k)} şut (basılı tut = güç, basılıyken yana kay = falso) · ${n(K1.p)} pas (rakip kanadında = ORTA, iki kez bas = ARA PASI) · ${n(K1.w)} oyuncu değiştir · ${n(K1.s)} sıçrama · ${n(K1.x)} müdahale · ${n(K1.y)} özel (defans: topun önüne SET duvarı, yarıda 1 kez)`;
  const b2=ST.lang=='en'?`${n(K2.u)}${n(K2.l)}${n(K2.d)}${n(K2.r)} move · ${n(K2.k)} shoot · ${n(K2.p)} pass · ${n(K2.w)} switch player · ${n(K2.s)} dash · ${n(K2.x)} tackle · ${n(K2.y)} special`:`${n(K2.u)}${n(K2.l)}${n(K2.d)}${n(K2.r)} hareket · ${n(K2.k)} şut · ${n(K2.p)} pas · ${n(K2.w)} oyuncu değiştir · ${n(K2.s)} sıçrama · ${n(K2.x)} müdahale · ${n(K2.y)} özel`;
  return `<div class="row"><button onclick="settings('menu')">⚙ ${L('Ayarlar','Settings')}</button></div><small${tcOn()?' style="display:none"':''}><b style="color:#7cc4ee">${L('MAVİ','BLUE')}:</b> ${b1}<br><b style="color:#f0916f">${L('TURUNCU','ORANGE')}:</b> ${b2}<br>${L('1 Oyuncu modunda mavi takımı her iki tuş grubuyla oynayabilirsin.','In 1-player mode you can control the blue team with either key set.')}<br>${L('Z: yakınlaştırma · M: ses aç/kapat · P/Esc: durdur · Maç 2 × '+HL/60+' dakika.','Z: zoom · M: mute · P/Esc: pause · Match: 2 × '+HL/60+' min.')}</small>`}
-function pause(){if(NET||state!='play')return;state='pause';keys.clear();pz.style.display='none';pauseUI()}
+function pause(){if(NET||state!='play')return;state='pause';keys.clear();pz.style.display='none';applyAudio();musicSet('menu');pauseUI()}
 function pauseUI(){ov.style.display='flex';ov.innerHTML=`<div class="card"><h1>⏸ ${L('Duraklatıldı','Paused')}</h1><div class="row"><button onclick="resume()">${L('Devam et','Resume')}</button><button onclick="go(mode,dk)">${L('Yeniden başlat','Restart')}</button><button onclick="settings('pause')">⚙ ${L('Ayarlar','Settings')}</button><button onclick="menu()">${L('Ana menü','Main menu')}</button></div><small>${L('P veya Esc ile de devam edebilirsin.','You can also resume with P or Esc.')}</small></div>`}
-function resume(){if(state!='pause')return;state='play';ov.style.display='none';pz.style.display='block';last=performance.now()}
+function resume(){if(state!='pause')return;state='play';applyAudio();musicSet('match');ov.style.display='none';pz.style.display='block';last=performance.now()}
 function go(m,d){HL=HLn;bused=[0,0];kult=[0,0];dk=d;pz.style.display='block';mode=m;D=DIF[d]||DIF.medium;ctl=m==1?[KS,null]:[K1,K2];score=[0,0];time=0;ext=0;half=0;msg='';mk();froze=0;reset(0);cam.x=W/2;cam.y=GY;cam.tx=cam.ty=undefined;trail=[];bh=[];state='play';ov.style.display='none';musicSet('match');sfx('whistle_start')}
 function mk(){P=[];for(let t=0;t<2;t++)HOME.forEach((h,i)=>P.push({t,i,hx:t?PX+PW*(1-h[0]):PX+PW*h[0],hy:PY+PH*h[1],x:0,y:0,vx:0,vy:0,fx:t?-1:1,fy:0,cd:0,tc:0,rt:0,tx:0,ty:0,save:true,press:false}))}
 function inBox(x,y,t){const ox=t?PX+PW:PX,sd=t?-1:1;return(x-ox)*sd>-5&&(x-ox)*sd<150&&Math.abs(y-GY)<150}
@@ -464,7 +465,7 @@ fxs.forEach(t=>{t.l-=dt;if(t.sp){if(t.fl){t.vy-=(t.fl==2?160:300)*dt;t.vx+=(Math
  koFix();
  for(let i=0;i<P.length;i++)for(let j=i+1;j<P.length;j++){const a=P[i],b=P[j],dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy);
   if(d>0&&d<2*R){const o=(2*R-d)/2,nx=dx/d,ny=dy/d;a.x-=nx*o;a.y-=ny*o;b.x+=nx*o;b.y+=ny*o}}
- for(let i=0;i<P.length;i++)for(let j=i+1;j<P.length;j++){const a=P[i],b=P[j];if(a.off>0||b.off>0)continue;const dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy),rr=R*2;if(d<rr&&d>.01){const nx=dx/d,ny=dy/d,ov=rr-d,wa=.5;a.x-=nx*ov*wa;a.y-=ny*ov*wa;b.x+=nx*ov*(1-wa);b.y+=ny*ov*(1-wa);const cl=((a.vx-b.vx)*nx+(a.vy-b.vy)*ny),im=Math.min(260,70+Math.max(0,cl)*.55);if(!(a.stun>0))(a.kx=(a.kx||0)-nx*im,a.ky=(a.ky||0)-ny*im);if(!(b.stun>0))(b.kx=(b.kx||0)+nx*im,b.ky=(b.ky||0)+ny*im);if(cl>230&&clock-(a.bs||0)>.3){a.bs=clock;sfx('bump');fxs.push({x:(a.x+b.x)/2,y:(a.y+b.y)/2,l:.2,m:.2,r:10,c:'#ffffff'})}}}
+ for(let i=0;i<P.length;i++)for(let j=i+1;j<P.length;j++){const a=P[i],b=P[j];if(a.off>0||b.off>0)continue;const dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy),rr=R*2;if(d<rr&&d>.01){const nx=dx/d,ny=dy/d,ov=rr-d,wa=.5;a.x-=nx*ov*wa;a.y-=ny*ov*wa;b.x+=nx*ov*(1-wa);b.y+=ny*ov*(1-wa);const cl=((a.vx-b.vx)*nx+(a.vy-b.vy)*ny),im=Math.min(260,70+Math.max(0,cl)*.55);if(!(a.stun>0))(a.kx=(a.kx||0)-nx*im,a.ky=(a.ky||0)-ny*im);if(!(b.stun>0))(b.kx=(b.kx||0)+nx*im,b.ky=(b.ky||0)+ny*im);if(cl>300&&clock-(a.bs||0)>.5){a.bs=clock;sfx('bump',.3);fxs.push({x:(a.x+b.x)/2,y:(a.y+b.y)/2,l:.2,m:.2,r:10,c:'#ffffff'})}}}
  ball.ct=(ball.ct||0)-dt;
  if(bars.length){P.forEach(p=>{if(p.off>0)return;const h=barPush(p.x,p.y,R);if(h){const o=h.hu-Math.abs(h.u)+.5;p.x+=h.b.nx*h.s*o;p.y+=h.b.ny*h.s*o}});
   if(!(ball.h>14)){const h=barPush(ball.x,ball.y,BR);if(h){const o=h.hu-Math.abs(h.u)+.5;ball.x+=h.b.nx*h.s*o;ball.y+=h.b.ny*h.s*o;const vn=ball.vx*h.b.nx+ball.vy*h.b.ny;if(vn*h.s<0){ball.vx-=1.5*vn*h.b.nx;ball.vy-=1.5*vn*h.b.ny;ball.fire=false;ball.shot=false;ball.sq=Math.max(ball.sq||0,.7);if(!h.b.hit||h.b.hit<h.b.a-.15){h.b.hit=h.b.a;sfx('wallhit');for(let q=0;q<6;q++)fxs.push({x:ball.x,y:ball.y,vx:(Math.random()-.5)*160,vy:(Math.random()-.5)*160,l:.4,m:.4,r:2.5,c:'#b89c74',sp:1,g:1})}}}}}
@@ -648,7 +649,7 @@ function draw(){
 }
 let last=0,pcar=null,xr=null,sdt=[0,0],fk=null,fa=[],rk=null,pk=null;
 function loop(t){clock=t/1000;tcUpdate();const dt=Math.min(.033,(t-last)/1000);if(ST.gfx=='low')LQ=true;else if(ST.gfx=='high')LQ=false;setRS(ST.gfx=='high'?1:LQ?.62:1);if(LQ&&fxs.length>50)fxs.splice(0,fxs.length-50);{const fr=Math.min(100,t-last);fpsA+=(fr-fpsA)*.05;if(state=='play'){if(ST.gfx=='auto'){if(!LQ&&fpsA>26){lowT+=fr;if(lowT>2500){LQ=true;fpsA=16}}else if(!LQ)lowT=0}}}last=t;
- if(NET&&NET.role=='guest'){if(state=='play')NETHOOK.guestStep(dt)}else if(state=='play'){upd(dt*GS);if(shake>0)shake-=dt;if(rk)rkUpdate(dt);}if(NET&&NET.role=='host')NETHOOK.hostTick(dt);
+ if(NET&&NET.role=='guest'){if(state=='play')NETHOOK.guestStep(dt)}else if(state=='play'){upd(dt*GS);if(shake>0)shake-=dt;if(rk)rkUpdate(dt);}if(NET&&NET.role=='host')NETHOOK.hostTick(dt);crowdUpd(dt);
  if(state!='menu'){if(ball){if(!(froze>0))gcam=null;cam.lx=cam.lx||0;cam.ly=cam.ly||0;cam.vx=cam.vx||0;cam.vy=cam.vy||0;{const sp=Math.hypot(ball.vx,ball.vy),on=sp>260&&!gcam,kk=Math.min(1,dt*.9);cam.lx+=((on?clamp(ball.vx*.17,-85,85):0)-cam.lx)*kk;cam.ly+=((on?clamp(ball.vy*.17,-55,55):0)-cam.ly)*kk}
  const bx=gcam?gcam.x:ball.x+cam.lx,by=gcam?gcam.y:ball.y+cam.ly;cam.tx=bx;cam.ty=by;
  if(zm==0){const d=Math.min(1,Math.abs((gcam?gcam.x:ball.x)-(PX+PW/2))/(PW/2)),u=Math.min(1,Math.max(0,(d-.2)/.42)),zt=1+.6*u*u*(3-2*u);cam.z+=(zt-cam.z)*Math.min(1,dt*.7)}
