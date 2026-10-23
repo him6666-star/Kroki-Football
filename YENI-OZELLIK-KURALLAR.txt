@@ -1,0 +1,12 @@
+RAKIP BUL + ARKADAS LISTESI - YAPILMASI GEREKEN 2 SEY
+
+1) Firebase konsolu > Firestore Database > Rules sekmesi.
+   Zip'teki firestore.rules dosyasinin TAMAMINI kopyala, oradaki her seyin yerine yapistir, "Publish" de.
+   (Bu yapilmazsa "Rakip bul" ve "Arkadaslar" calismaz, izin hatasi verir.)
+
+2) GitHub'a www klasorundeki net.js dosyasini yeniden yukle (index.html ayni kalir).
+
+Nasil calisir:
+- Online > "Rakip bul": bekleyen biri varsa otomatik baglanir, yoksa sen beklersin. Iki kisi ayni anda aradiginda da eslesir.
+- Online > "Arkadaslar": 7 haneli arkadas kodun var. Arkadasinin kodunu yazip "Ekle" de, listeden "Davet et"e bas.
+  Davet edilen kisinin oyunu aciksa ustte "seni maca davet ediyor" cikar, "Katil" ile baglanir.
