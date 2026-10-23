@@ -24,7 +24,7 @@
  }
  function lost(why){
   if(!NET)return;close();menu();
-  card('📶 '+T('Bağlantı koptu','Disconnected'),'<p style="opacity:.85">'+(why||'')+'</p><div class="row"><button onclick="menu()">Menü</button></div>');
+  card('\ud83d\udcf6 '+T('Ba\u011flant\u0131 koptu','Disconnected'),'<p style="opacity:.85">'+(why||'')+'</p><div class="row"><button onclick="menu()">Men\u00fc</button></div>');
  }
  function wire(n){
   const pc=n.pc;
@@ -38,8 +38,8 @@
   if(NET!==n||n.opened)return;n.opened=true;
   if(joinTimer){clearTimeout(joinTimer);joinTimer=null}
   if(unsub){unsub();unsub=null}
-  if(n.role=='host'){db.collection('rooms').doc(n.code).delete().catch(()=>{});card('🌐 '+T('Rakip bağlandı!','Opponent connected!'),'<p style="opacity:.85">'+T('Sen mavi, rakibin turuncu oynar.','You play blue, your opponent plays orange.')+'</p><div class="row"><button style="'+HI+'" onclick="NETUI.start()">'+T('Maçı başlat','Start match')+'</button></div><div class="row"><button onclick="menu()">←</button></div>')}
-  else{card('🌐 '+T('Bağlandı!','Connected!'),'<p style="opacity:.85">'+T('Host maçı başlatınca başlar. Sen turuncu oynarsın.','The match starts when the host starts it. You play orange.')+'</p><div class="row"><button onclick="menu()">←</button></div>')}
+  if(n.role=='host'){db.collection('rooms').doc(n.code).delete().catch(()=>{});card('\ud83c\udf10 '+T('Rakip ba\u011fland\u0131!','Opponent connected!'),'<p style="opacity:.85">'+T('Sen mavi, rakibin turuncu oynar.','You play blue, your opponent plays orange.')+'</p><div class="row"><button style="'+HI+'" onclick="NETUI.start()">'+T('Ma\u00e7\u0131 ba\u015flat','Start match')+'</button></div><div class="row"><button onclick="menu()">\u2190</button></div>')}
+  else{card('\ud83c\udf10 '+T('Ba\u011fland\u0131!','Connected!'),'<p style="opacity:.85">'+T('Host ma\u00e7\u0131 ba\u015flat\u0131nca ba\u015flar. Sen turuncu oynars\u0131n.','The match starts when the host starts it. You play orange.')+'</p><div class="row"><button onclick="menu()">\u2190</button></div>')}
  }
  // ---------- host ----------
  function snapshot(){
@@ -107,7 +107,7 @@
  }
  function guestEnd(sc){
   state='end';const a=sc[0],b=sc[1];
-  card(b>a?T('KAZANDIN!','YOU WIN!'):a>b?T('KAYBETTİN','YOU LOST'):T('BERABERE','DRAW'),'<p style="font-size:22px">'+a+' — '+b+'</p><p style="opacity:.8;font-size:14px">'+T('Host yeni maç başlatabilir.','The host can start a rematch.')+'</p><div class="row"><button onclick="menu()">Menü</button></div>');
+  card(b>a?T('KAZANDIN!','YOU WIN!'):a>b?T('KAYBETT\u0130N','YOU LOST'):T('BERABERE','DRAW'),'<p style="font-size:22px">'+a+' \u2014 '+b+'</p><p style="opacity:.8;font-size:14px">'+T('Host yeni ma\u00e7 ba\u015flatabilir.','The host can start a rematch.')+'</p><div class="row"><button onclick="menu()">Men\u00fc</button></div>');
  }
  function guestStep(dt){
   const n=NET;if(!n||!n.buf||!n.buf.length)return;
@@ -128,8 +128,8 @@
  const code5=()=>{const a='ABCDEFGHJKMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<5;i++)s+=a[Math.floor(Math.random()*a.length)];return s};
  window.NETUI={
   lobby(){
-   if(!KR.user){card('🌐 Online','<p>'+T('Bağlantı kurulamadı. İnterneti kontrol et.','Could not connect. Check your internet.')+'</p><div class="row"><button onclick="menu()">←</button></div>');return}
-   card('🌐 Online','<p style="opacity:.85;margin:4px 0 10px">'+T('Arkadaşınla oda koduyla oyna. Odayı kuran mavi, katılan turuncu oynar.','Play a friend with a room code. The room creator plays blue, the joiner orange.')+'</p><div class="row"><button style="'+HI+'" onclick="NETUI.host()">'+T('Oda kur','Create room')+'</button></div><div class="row"><input id="njc" maxlength="5" placeholder="KOD" style="'+INP+'"><button onclick="NETUI.join()">'+T('Katıl','Join')+'</button></div><div id="nm" style="min-height:20px;font-size:13px;opacity:.9"></div><div class="row"><button onclick="menu()">←</button></div>');
+   if(!KR.user){card('\ud83c\udf10 Online','<p>'+T('Ba\u011flant\u0131 kurulamad\u0131. \u0130nterneti kontrol et.','Could not connect. Check your internet.')+'</p><div class="row"><button onclick="menu()">\u2190</button></div>');return}
+   card('\ud83c\udf10 Online','<p style="opacity:.85;margin:4px 0 10px">'+T('Arkada\u015f\u0131nla oda koduyla oyna. Oday\u0131 kuran mavi, kat\u0131lan turuncu oynar.','Play a friend with a room code. The room creator plays blue, the joiner orange.')+'</p><div class="row"><button style="'+HI+'" onclick="NETUI.host()">'+T('Oda kur','Create room')+'</button></div><div class="row"><input id="njc" maxlength="5" placeholder="KOD" style="'+INP+'"><button onclick="NETUI.join()">'+T('Kat\u0131l','Join')+'</button></div><div id="nm" style="min-height:20px;font-size:13px;opacity:.9"></div><div class="row"><button onclick="menu()">\u2190</button></div>');
   },
   async host(){
    close();
@@ -140,17 +140,17 @@
     let ok=false,code;
     for(let i=0;i<4&&!ok;i++){code=code5();try{await db.collection('rooms').doc(code).set({host:KR.user.uid,guest:null,offer:{type:n.pc.localDescription.type,sdp:n.pc.localDescription.sdp},answer:null,created:FV.serverTimestamp()});ok=true}catch(e){if(i==3)throw e}}
     n.code=code;
-    card('🌐 '+T('Oda kuruldu','Room created'),'<div style="font:800 44px ui-monospace,monospace;letter-spacing:.2em;margin:10px 0 4px;color:#7cc4ee">'+code+'</div><p style="opacity:.85;margin:4px 0 10px">'+T('Bu kodu arkadaşına söyle. Rakip bekleniyor...','Share this code. Waiting for your opponent...')+'</p><div class="row"><button onclick="menu()">'+T('İptal','Cancel')+'</button></div>');
+    card('\ud83c\udf10 '+T('Oda kuruldu','Room created'),'<div style="font:800 44px ui-monospace,monospace;letter-spacing:.2em;margin:10px 0 4px;color:#7cc4ee">'+code+'</div><p style="opacity:.85;margin:4px 0 10px">'+T('Bu kodu arkada\u015f\u0131na s\u00f6yle. Rakip bekleniyor...','Share this code. Waiting for your opponent...')+'</p><div class="row"><button onclick="menu()">'+T('\u0130ptal','Cancel')+'</button></div>');
     unsub=db.collection('rooms').doc(code).onSnapshot(async d=>{const x=d.data();if(x&&x.answer&&NET===n&&!n.pc.remoteDescription){try{await n.pc.setRemoteDescription(x.answer)}catch(e){}}});
-   }catch(e){close();NETUI.lobby();setMsg(T('Oda kurulamadı. Tekrar dene.','Could not create the room. Try again.'))}
+   }catch(e){close();NETUI.lobby();setMsg(T('Oda kurulamad\u0131. Tekrar dene.','Could not create the room. Try again.'))}
   },
   async join(){
    const el=document.getElementById('njc'),code=((el&&el.value)||'').trim().toUpperCase();
    if(code.length!=5){setMsg(T('5 haneli kodu yaz.','Enter the 5-character code.'));return}
-   close();setMsg(T('Odaya bağlanılıyor...','Connecting...'));
+   close();setMsg(T('Odaya ba\u011flan\u0131l\u0131yor...','Connecting...'));
    try{
     const ref=db.collection('rooms').doc(code),d=await ref.get();
-    if(!d.exists){setMsg(T('Oda bulunamadı.','Room not found.'));return}
+    if(!d.exists){setMsg(T('Oda bulunamad\u0131.','Room not found.'));return}
     const x=d.data();
     if(x.guest){setMsg(T('Oda dolu.','Room is full.'));return}
     const n=NET={role:'guest',pc:new RTCPeerConnection(ICE),code};wire(n);
@@ -158,13 +158,13 @@
     await n.pc.setRemoteDescription(x.offer);
     await n.pc.setLocalDescription(await n.pc.createAnswer());await gathered(n.pc,3500);
     await ref.update({guest:KR.user.uid,answer:{type:n.pc.localDescription.type,sdp:n.pc.localDescription.sdp}});
-    joinTimer=setTimeout(()=>{if(NET===n&&!n.opened){close();NETUI.lobby();setMsg(T('Bağlanılamadı. Ağ engelliyor olabilir (mobil veri).','Could not connect. Your network may be blocking it (mobile data).'))}},20000);
-   }catch(e){close();NETUI.lobby();setMsg(T('Katılınamadı. Kodu ve interneti kontrol et.','Could not join. Check the code and your connection.'))}
+    joinTimer=setTimeout(()=>{if(NET===n&&!n.opened){close();NETUI.lobby();setMsg(T('Ba\u011flan\u0131lamad\u0131. A\u011f engelliyor olabilir (mobil veri).','Could not connect. Your network may be blocking it (mobile data).'))}},20000);
+   }catch(e){close();NETUI.lobby();setMsg(T('Kat\u0131l\u0131namad\u0131. Kodu ve interneti kontrol et.','Could not join. Check the code and your connection.'))}
   },
   start(){startHost()},
   again(){startHost()}
  };
  // oyun kancalari
  const m0=menu;menu=function(){if(NET)close();NETEV=null;m0()};
- window.NETHOOK={hostTick,guestStep,endRow:()=>'<div class="row"><button onclick="NETUI.again()">'+T('Tekrar oyna','Play again')+'</button><button onclick="menu()">Menü</button></div>'};
+ window.NETHOOK={hostTick,guestStep,endRow:()=>'<div class="row"><button onclick="NETUI.again()">'+T('Tekrar oyna','Play again')+'</button><button onclick="menu()">Men\u00fc</button></div>'};
 })();
