@@ -1,0 +1,25 @@
+GOOGLE ILE GIRIS (Android)
+==========================
+1) Firebase konsolu > Build > Authentication > Sign-in method > Google > Etkinlestir
+   (destek e-postasi sec) > Kaydet.
+
+2) Proje ayarlari (disli) > Genel > "Uygulamalariniz" > "Uygulama ekle" > Android simgesi:
+     Android paket adi : com.scribblekick.game
+     Takma ad          : Scribble Kick
+     SHA-1 sertifika   : F3:97:D0:60:29:E6:C2:37:CA:B5:97:39:C8:50:DA:72:39:D0:82:2E
+   "Uygulamayi kaydet" > "google-services.json dosyasini indir" > kalan adimlari atla (Next/Continue).
+   (Bu SHA-1, zip'teki scribble-debug.keystore dosyasina aittir. APK her derlemede ayni imzayla imzalanir.)
+
+3) Indirdigin google-services.json dosyasini GitHub deposunun KOKUNE yukle
+   (package.json ile ayni yer). Ayrica zip'teki scribble-debug.keystore dosyasini da kok klasore yukle.
+   Not: SHA-1 ekledikten SONRA indirdiysen dosya dogrudur. Daha once indirdiysen yeniden indir.
+
+4) Zip'teki dosyalarin geri kalani da (www, package.json, capacitor.config.json, patch_android.py)
+   depoda guncel olsun. Derleme bitince APK'yi kur.
+
+5) Oyunda: Profil > "Google ile giris yap". Misafir hesabin Google'a baglanir, puanlarin korunur.
+   Baska telefonda ayni Google hesabiyla girersen ayni profil acilir.
+
+Notlar
+- Google Play'e yukleyince Play'in uygulama imza anahtarinin SHA-1'ini de Firebase'e eklemen gerekecek.
+- Giris hatasi olursa ekranda cikan hata kodunu bana yaz.

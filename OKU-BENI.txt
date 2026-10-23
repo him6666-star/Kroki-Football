@@ -14,3 +14,13 @@ KROKI FUTBOL - APK YAPMA REHBERI (bilgisayarda kurulum yok, sadece tarayici)
 7) APK'yi telefonuna gonder (WhatsApp/Drive/USB). Telefonda dosyaya dokun,
    "Bilinmeyen kaynaklardan kurulum"a izin ver, kur.
 Oyunu guncelledikce www/index.html dosyasini degistirip tekrar yukle, APK yeniden derlenir.
+
+
+=== GUNCEL DURUM (Scribble Kick) ===
+Depoya YUKLENECEK dosyalar (zipteki her sey):
+  www/ (index.html, net.js, online.js, firebase-*.js, audio/ ...), package.json, capacitor.config.json,
+  patch_android.py, scribble-debug.keystore, icons/, .github/workflows/build.yml (degismedi)
+Ayrica: google-services.json (GOOGLE-GIRIS.txt) ve firestore.rules'u Firebase'e yapistir (FIREBASE-KURULUM.txt).
+Ses dosyalari icin: www/audio/OKU-BENI.txt
+Cevrimici mac: menu > Online > Oda kur / Katil. Iki telefon da internete bagli olmali.
+Not: Cok nadir durumlarda mobil veri (CGNAT) dogrudan baglantiyi engelleyebilir; Wi-Fi'da sorunsuz calisir.

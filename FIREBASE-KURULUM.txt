@@ -1,0 +1,26 @@
+FIREBASE KURULUMU (Giris + Profil + Skor tablosu)
+==================================================
+
+1) Firebase konsolu (console.firebase.google.com) > "Proje ekle" > ad: scribble-kick
+   (Google Analytics istemezsen kapat).
+
+2) Giris yontemi:
+   Build > Authentication > "Baslayin" > Giris yontemi sekmesi > "Anonim" > Etkinlestir > Kaydet.
+
+3) Veritabani:
+   Build > Firestore Database > "Veritabani olustur" > Uretim modu > konum: eur3 (Avrupa) veya europe-west1.
+   Sonra "Kurallar" sekmesi > icindekileri sil > bu klasordeki firestore.rules dosyasinin
+   icerigini yapistir > "Yayinla".
+
+4) Web uygulamasi ekle:
+   Proje ayarlari (disli simge) > Genel > "Uygulamalariniz" > </> (Web) > takma ad: kroki > Kaydet.
+   Ekranda cikan firebaseConfig = { ... } blogunu bana at (apiKey gizli degildir, guvenlik kurallarla saglanir).
+   Ya da kendin www/firebase-config.js dosyasindaki "window.KR_CFG = null;" satirini
+   "window.KR_CFG = { ... };" ile degistir.
+
+5) GitHub'a yukle: www klasorunun TAMAMINI (index.html, online.js, firebase-*.js, firebase-config.js) depoya yukle
+   ve eski www dosyalarinin ustune yaz. Derleme otomatik baslar, yeni APK'yi kur.
+
+Notlar
+- Misafir hesabi uygulama silinince kaybolur. Google ile giris sonraki adim (hesabi baglayarak puanlar korunur).
+- Firebase Spark (ucretsiz) plani bu is icin fazlasiyla yeter.

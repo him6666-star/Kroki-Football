@@ -1,0 +1,30 @@
+SES DOSYALARI
+=============
+Bu klasore mp3 / ogg / wav koy, sonra depo kokunden:   python3 tools/make_manifest.py
+(ya da dosyalari bana at, ben yerlestirip manifest'i olustururum.)
+
+MUZIK
+  music_menu.mp3     menu muzigi (dongu)
+  music_match.mp3    mac muzigi (dongu)
+  crowd.mp3          stadyum kalabalik ortam sesi (dongu, hafif)
+
+EFEKTLER (varyasyon icin kick_hard.mp3, kick_hard2.mp3, kick_hard3.mp3 gibi birden cok dosya olabilir)
+  kick_soft      hafif pas vurusu
+  kick_hard      sert sut
+  goal           gol sevinci (kalabalik)
+  net            top fileye girer
+  whistle_start  mac basi dudugu (kisa)
+  whistle_long   yari/mac sonu dudugu (uzun)
+  whistle_foul   faul dudugu
+  whistle_pen    penalti dudugu
+  tackle         mudahale
+  bump           oyuncu carpismasi
+  wallhit        topun duvara/direge carpmasi
+  dash           sicrama
+  wallup         savunma duvari cikisi
+  fireshot       alevli sut
+  foul_knife / foul_axe / foul_hammer / foul_pan / foul_glove   faul silahi vurus sesleri
+  cele_broom / cele_rocket / cele_giant / cele_ufo / cele_king  gol sevinci animasyon sesleri
+  rk_bx / rk_by  dev suratin ekran kenarindan seken sesi
+  pop            dev suratin patlamasi
+Olmayan dosya icin oyun eski sentez sesi kullanir.
