@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "307843857448",
+    "project_id": "scribble-kick",
+    "storage_bucket": "scribble-kick.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:307843857448:android:804590db4df0d62772891d",
+        "android_client_info": {
+          "package_name": "com.scribblekick.game"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "307843857448-1takg3ujmqkreokmd7jrq9lp1f3vj1v9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.scribblekick.game",
+            "certificate_hash": "f397d06029e6c237cab59739c850da7239d0822e"
+          }
+        },
+        {
+          "client_id": "307843857448-8cb9plcm3e2qvpteje48gqs7il0ngdtj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBcwC0jcoWytsxAaFVWT_L388dJEpiCybA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "307843857448-8cb9plcm3e2qvpteje48gqs7il0ngdtj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
