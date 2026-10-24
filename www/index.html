@@ -55,6 +55,8 @@ button:hover{background:#7cc4ee;color:#0b1a16}
 .emf{position:absolute;z-index:9;bottom:30%;font-size:44px;pointer-events:none;animation:emfly 1.7s ease-out forwards}
 @keyframes emfly{to{transform:translateY(-230px) scale(1.3);opacity:0}}
 .t9{--c1:#d9532e;--c2:#9a2f18}
+.card{position:relative}
+.xcl{position:absolute;top:8px;right:10px;width:34px;height:34px;padding:0;border-radius:50%;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.1);color:#fff;font-size:17px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .skb b{font-size:14px;color:#ffd54f}
 .skb.on{background:rgba(255,120,30,.85);box-shadow:0 0 14px #ff8a2a;animation:skp .6s infinite alternate}
 @keyframes skp{to{transform:scale(1.08)}}
@@ -82,6 +84,42 @@ button:hover{background:#7cc4ee;color:#0b1a16}
 .mnK{grid-column:1/-1;animation:mnIn .55s both;animation-delay:var(--d)}
 .mnK .row{margin:0;gap:calc(var(--u)*1.2)}.mnK .row button{flex:1;padding:calc(var(--u)*1.3) calc(var(--u)*1.6);font:800 max(12px,calc(var(--u)*2.2)) system-ui;border-radius:calc(var(--u)*2);background:rgba(8,24,16,.55);border:calc(var(--u)*.25) solid rgba(255,255,255,.3);color:#fff}.mnK .row button:hover{background:#fff;color:#14452c}
 .mnH{grid-column:1/-1;font-size:max(10px,calc(var(--u)*1.7));opacity:.85}.mnH summary{cursor:pointer;font-weight:700}.mnH small{display:block;margin-top:4px;line-height:1.35}.mnH .row{display:none}
+/* === SADE TEMA === */
+.mn{background:radial-gradient(110% 90% at 20% 10%,#16352a 0,#0d211a 55%,#08140f 100%)}
+.mn::before{background:none;animation:none}
+.mn::after{left:50%;top:50%;width:calc(var(--u)*64);height:calc(var(--u)*64);margin:calc(var(--u)*-32) 0 0 calc(var(--u)*-32);border:calc(var(--u)*.3) solid rgba(230,245,235,.07)}
+.mnL::before{content:'';position:absolute;left:calc(var(--u)*-4);right:calc(var(--u)*-4);top:50%;height:calc(var(--u)*.3);background:rgba(230,245,235,.06)}
+.mnT{background:none;-webkit-text-stroke:0;color:#f2f7f3;filter:none;transform:none;animation:none;letter-spacing:.04em;font:800 calc(var(--u)*11)/.95 'Trebuchet MS',system-ui,sans-serif;text-align:left;align-self:flex-start;border-left:calc(var(--u)*1) solid #b6f04a;padding-left:calc(var(--u)*2)}
+.mnT{text-shadow:none}
+.mnS{align-self:flex-start;margin-left:calc(var(--u)*3);color:#8fb09c;text-shadow:none;font-weight:600;letter-spacing:.18em}
+.mnJ{margin-top:calc(var(--u)*1)}
+.mnQ{background:rgba(255,255,255,.04);border:1px solid rgba(230,245,235,.12);color:#b9cfc2;align-self:flex-start;border-radius:calc(var(--u)*1.6)}
+.mnQ b{color:#e9f5ec}
+.mtl{background:rgba(255,255,255,.045);border:1px solid rgba(230,245,235,.13);box-shadow:none;border-radius:calc(var(--u)*2);color:#e9f5ec;gap:calc(var(--u)*1.8)}
+.mtl::after{display:none}
+.mtl:hover{transform:none;filter:none;background:rgba(182,240,74,.09);border-color:rgba(182,240,74,.5)}
+.mtl:active{transform:scale(.985);box-shadow:none}
+.mtl .ti{display:flex;align-items:center;justify-content:center;width:calc(var(--u)*7);height:calc(var(--u)*7);flex:0 0 auto;border-radius:50%;background:rgba(255,255,255,.07);font-size:max(16px,calc(var(--u)*3.6));filter:none}
+.mtl .tt{text-shadow:none;font-weight:800;letter-spacing:.07em;font-size:max(12px,calc(var(--u)*2.5))}
+.mtl .tt small{color:#8fb09c;opacity:1;font-weight:500;letter-spacing:.01em}
+.mtl.big{background:linear-gradient(135deg,#b6f04a,#8ed12e);border-color:transparent;color:#10260f}
+.mtl.big:hover{background:linear-gradient(135deg,#c4f65f,#9bdc3a)}
+.mtl.big .ti{background:rgba(16,38,15,.12);width:calc(var(--u)*9);height:calc(var(--u)*9);font-size:max(20px,calc(var(--u)*5.2))}
+.mtl.big .tt small{color:#2d4a1c}
+.mtl.big .tt{font-size:max(14px,calc(var(--u)*3.2))}
+.mtl.big .mp{background:rgba(16,38,15,.14)!important;border:1px solid rgba(16,38,15,.4)!important;color:#10260f!important}
+.mtl.big .mp:hover{background:#10260f!important;color:#b6f04a!important;transform:none}
+.t2,.t3,.t4,.t5,.t6,.t7,.t8,.t9{--c1:transparent;--c2:transparent}
+.mnK .row button{background:rgba(255,255,255,.045);border:1px solid rgba(230,245,235,.13);color:#e9f5ec;border-radius:calc(var(--u)*1.6)}
+.mnK .row button:hover{background:rgba(182,240,74,.12);color:#fff}
+.mnH{color:#8fb09c}
+/* alt menüler */
+#ov{background:rgba(5,12,9,.86)}
+.card{background:#0f221b;border:1px solid rgba(230,245,235,.12);border-radius:20px;box-shadow:0 20px 50px rgba(0,0,0,.5)}
+.card h1{font-size:24px;letter-spacing:.02em;color:#f2f7f3}
+.card button{background:rgba(255,255,255,.06);border:1px solid rgba(230,245,235,.16);color:#e9f5ec;border-radius:12px;font-weight:600}
+.card button:hover{background:#b6f04a;color:#10260f;border-color:#b6f04a}
+.card .xcl{border-radius:50%;padding:0}
 @media (prefers-reduced-motion:reduce){.mn::before,.mnT,.mtl{animation:none}}
 #cm{z-index:30;display:none;position:absolute;top:10px;right:62px;height:42px;min-width:62px;padding:0 12px;border-radius:999px;border:0;background:rgba(20,40,25,.75);color:#fff;font:700 13px system-ui,sans-serif;cursor:pointer;white-space:nowrap}
 #fs{z-index:30;display:none;position:absolute;top:10px;right:62px;width:42px;height:42px;border-radius:50%;border:0;background:rgba(20,40,25,.75);color:#fff;font-size:18px;cursor:pointer;padding:0}
@@ -1120,6 +1158,9 @@ function chatShow(t,side){const w=document.querySelector('.wrap'),d=document.cre
 function chatSend(t){chOpen=false;document.getElementById('cp').style.display='none';chatShow(t,0);if(NET){try{NETHOOK.chat&&NETHOOK.chat(t)}catch(e){}}else if(Math.random()<.65){const en=ST.lang=='en',r=[...CHE.map(e=>e),...CHP.map(x=>x[en?1:0])];setTimeout(()=>chatShow(r[Math.floor(Math.random()*r.length)],1),900+Math.random()*900)}}
 function chatRecv(t){chatShow(String(t).slice(0,40),1)}
 
+function ovBackBtn(){const c=ov.querySelector('.card');if(!c)return null;return [...c.querySelectorAll('button')].reverse().find(b=>/^(Geri|Back)$/i.test(b.textContent.trim()))||null}
+new MutationObserver(()=>{const c=ov.querySelector('.card');if(!c||c.querySelector('.xcl'))return;if(!ovBackBtn())return;const x=document.createElement('button');x.className='xcl';x.textContent='✕';x.setAttribute('aria-label','Kapat');x.onclick=e=>{e.stopPropagation();const b=ovBackBtn();if(b)b.click()};c.appendChild(x)}).observe(ov,{childList:true});
+ov.addEventListener('click',e=>{if(e.target===ov&&ov.style.display!='none'){const b=ovBackBtn();if(b)b.click()}});
 function comment(){}
 let stopCm=false;
 let last=0,pcar=null,xr=null,sdt=[0,0],fk=null,fa=[],rk=null,pk=null;
