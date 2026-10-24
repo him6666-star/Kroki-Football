@@ -41,8 +41,9 @@
   if(NET!==n||n.opened)return;n.opened=true;socClean();n.lastRx=Date.now();n.hb=setInterval(()=>{if(NET!==n){clearInterval(n.hb);return}send(n.ctl,{k:'ping'});if(Date.now()-n.lastRx>14000){weak(false);lost(T('Rakipten veri gelmiyor.','No data from the opponent.'))}},2000);
   if(joinTimer){clearTimeout(joinTimer);joinTimer=null}
   if(unsub){unsub();unsub=null}
-  if(n.role=='host'){db.collection('rooms').doc(n.code).delete().catch(()=>{});card('\ud83c\udf10 '+T('Rakip ba\u011fland\u0131!','Opponent connected!'),'<p style="opacity:.85">'+T('Sen mavi, rakibin turuncu oynar.','You play blue, your opponent plays orange.')+'</p><div class="row"><button style="'+HI+'" onclick="NETUI.start()">'+T('Ma\u00e7\u0131 ba\u015flat','Start match')+'</button></div><div class="row"><button onclick="menu()">\u2190</button></div>')}
-  else{card('\ud83c\udf10 '+T('Ba\u011fland\u0131!','Connected!'),'<p style="opacity:.85">'+T('Host ma\u00e7\u0131 ba\u015flat\u0131nca ba\u015flar. Sen turuncu oynars\u0131n.','The match starts when the host starts it. You play orange.')+'</p><div class="row"><button onclick="menu()">\u2190</button></div>')}
+  if(n.role=='host'){db.collection('rooms').doc(n.code).delete().catch(()=>{})}
+  n.me={nm:(KR.profile&&KR.profile.name)||T('Oyuncu','Player'),lv:(window.QS&&QS.lv)||1};send(n.ctl,{k:'hi',nm:n.me.nm,lv:n.me.lv});
+  ov.style.display='flex';ov.innerHTML=vsHTML(n.role=='host',n.me,n.opp);try{sfx('whistle_pen')}catch(e){}
  }
  // ---------- host ----------
  function snapshot(){
@@ -88,6 +89,7 @@
  }
  function onCtl(n,m){
   if(m.k=='in'&&n.role=='host'){applyInput(n,m.m|0)}
+  else if(m.k=='hi'){n.opp={nm:String(m.nm||'').slice(0,20),lv:m.lv|0};const e=document.getElementById('vsn2');if(e){e.textContent=n.opp.nm||'?';const l=document.getElementById('vsl2');if(l)l.textContent=n.opp.lv?'\u2b06 '+(ST.lang=='en'?'Lv.':'Sv.')+n.opp.lv:''}}
   else if(m.k=='start'&&n.role=='guest'){startGuest(n,m)}
   else if(m.k=='ev'&&n.role=='guest'){m.e.forEach(x=>sfxPlay(x))}
   else if(m.k=='end'&&n.role=='guest'){guestEnd(m.sc)}
