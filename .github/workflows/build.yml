@@ -1,6 +1,5 @@
 name: APK derle
 on:
-  push:
   workflow_dispatch:
 jobs:
   build:
