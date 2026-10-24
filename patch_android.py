@@ -60,7 +60,7 @@ for d in glob.glob('icons/mipmap-*'):
     for f in glob.glob(d + '/*.png'):
         shutil.copy(f, dst)
 open(base + '/res/values/ic_launcher_background.xml', 'w', encoding='utf-8').write(
-    '<?xml version="1.0" encoding="utf-8"?>\n<resources>\n    <color name="ic_launcher_background">#257A42</color>\n</resources>\n')
+    '<?xml version="1.0" encoding="utf-8"?>\n<resources>\n    <color name="ic_launcher_background">#2C8A4A</color>\n</resources>\n')
 # 4) Google girisi: Google Play hizmetleri, sabit imza (SHA-1 degismesin), google-services.json
 v = 'android/variables.gradle'
 t = open(v, encoding='utf-8').read()
