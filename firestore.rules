@@ -36,6 +36,14 @@ service cloud.firestore {
         && request.resource.data.goals - resource.data.goals <= 20
         && request.resource.data.last == request.time
         && request.time > resource.data.last + duration.value(60, 's');
+
+      // gorev/basarim odulu: yalnizca puan, tek seferde en fazla 25, en az 10 sn ara
+      allow update: if request.auth != null && request.auth.uid == uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['points','qlast'])
+        && request.resource.data.points > resource.data.points
+        && request.resource.data.points - resource.data.points <= 25
+        && request.resource.data.qlast == request.time
+        && request.time > resource.data.get('qlast', request.time - duration.value(1, 'h')) + duration.value(10, 's');
     }
 
     // arkadas listesi (sadece kendi listen)

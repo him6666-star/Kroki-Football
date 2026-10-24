@@ -72,6 +72,8 @@
    ov.innerHTML=h+'</div>'+back+'</div>';
   }catch(e){ov.innerHTML='<div class="card"><h1>\ud83c\udfc6</h1><p>'+T('Tablo y\u00fcklenemedi.','Could not load the leaderboard.')+'</p>'+back+'</div>'}
  };
+ // gorev/basarim odulu (kurallar: tek seferde en fazla 25 puan)
+ KR.bonus=(n)=>db.collection('users').doc(KR.user.uid).update({points:FV.increment(Math.max(1,Math.min(25,n|0))),qlast:FV.serverTimestamp()}).then(()=>{if(KR.profile)KR.profile.points+=n});
  // 1 oyunculu mac bitince cagrilir; ekrana eklenecek HTML dondurur
  KR.matchEnd=(a,b,diff)=>{
   const w=a>b,dr=a==b;

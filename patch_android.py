@@ -77,4 +77,23 @@ if os.path.exists('google-services.json'):
     print('google-services.json kopyalandi')
 else:
     print('UYARI: google-services.json yok, Google girisi calismaz')
+
+# 5) Acilis ekrani (splash): varsayilan Capacitor logosu yerine oyun logosu
+res = base + '/res'
+for f in glob.glob(res + '/drawable*/splash.*'):
+    os.remove(f)
+os.makedirs(res + '/drawable', exist_ok=True)
+shutil.copy('splash/splash_logo.png', res + '/drawable/splash_logo.png')
+open(res + '/drawable/splash.xml', 'w', encoding='utf-8').write(
+    '<?xml version="1.0" encoding="utf-8"?>\n<layer-list xmlns:android="http://schemas.android.com/apk/res/android">\n'
+    '    <item><shape android:shape="rectangle"><solid android:color="#101C19"/></shape></item>\n'
+    '    <item android:gravity="center"><bitmap android:src="@drawable/splash_logo" android:gravity="center"/></item>\n'
+    '</layer-list>\n')
+sp = res + '/values/styles.xml'
+if os.path.exists(sp):
+    t = open(sp, encoding='utf-8').read()
+    if 'windowSplashScreenBackground' not in t and 'NoActionBarLaunch' in t:
+        t = re.sub(r'(<style name="AppTheme.NoActionBarLaunch"[^>]*>)', r'\1\n        <item name="windowSplashScreenBackground">#101C19</item>\n        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_logo</item>', t, 1)
+        open(sp, 'w', encoding='utf-8').write(t)
+print('splash tamam')
 print('patch tamam')

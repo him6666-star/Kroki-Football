@@ -5,7 +5,7 @@
  const db=KR.db,FV=KR.FV;
  const T=(tr,en)=>(window.ST&&ST.lang=='en')?en:tr;
  const ACT=['u','d','l','r','k','p','s','w','x','y'];
- const ICE={iceServers:[{urls:['stun:stun.l.google.com:19302','stun:stun1.l.google.com:19302']}].concat(window.KR_ICE||[])};
+ const ICE={iceServers:[{urls:['stun:stun.l.google.com:19302','stun:stun1.l.google.com:19302']},{urls:['turn:openrelay.metered.ca:80','turn:openrelay.metered.ca:443','turn:openrelay.metered.ca:443?transport=tcp'],username:'openrelayproject',credential:'openrelayproject'}].concat(window.KR_ICE||[]),iceCandidatePoolSize:2};
  const q1=v=>Math.round(v*10)/10,q2=v=>Math.round(v*100)/100;
  const HI='background:#7cc4ee;color:#0b1a16';
  const INP='padding:10px 14px;border-radius:999px;border:1px solid var(--bd);background:#1a2e28;color:#fff;font:700 20px ui-monospace,monospace;text-align:center;width:130px;letter-spacing:.25em;text-transform:uppercase';
@@ -20,24 +20,25 @@
   if(unsub){unsub();unsub=null}if(joinTimer){clearTimeout(joinTimer);joinTimer=null}
   const n=NET;if(!n)return;
   releaseRemote();NET=null;NETEV=null;
-  try{n.ctl&&n.ctl.close()}catch(e){}try{n.snap&&n.snap.close()}catch(e){}try{n.pc&&n.pc.close()}catch(e){}
+  if(n.hb){clearInterval(n.hb);n.hb=null}try{n.ctl&&n.ctl.close()}catch(e){}try{n.snap&&n.snap.close()}catch(e){}try{n.pc&&n.pc.close()}catch(e){}
   if(n.role=='host'&&n.code)db.collection('rooms').doc(n.code).delete().catch(()=>{});
  }
  function lost(why){
   if(!NET)return;close();menu();
   card('\ud83d\udcf6 '+T('Ba\u011flant\u0131 koptu','Disconnected'),'<p style="opacity:.85">'+(why||'')+'</p><div class="row"><button onclick="menu()">Men\u00fc</button></div>');
  }
+ function weak(on){let e=document.getElementById('nweak');if(on){if(!e){e=document.createElement('div');e.id='nweak';e.style.cssText='position:absolute;left:50%;top:84px;transform:translateX(-50%);z-index:70;background:rgba(190,60,40,.92);color:#fff;font:700 14px system-ui;padding:6px 14px;border-radius:999px;pointer-events:none';e.textContent='\ud83d\udcf6 '+T('Ba\u011flant\u0131 zay\u0131f...','Weak connection...');(document.querySelector('.wrap')||document.body).appendChild(e)}}else if(e)e.remove()}
  function wire(n){
   const pc=n.pc;
-  pc.onconnectionstatechange=()=>{const s=pc.connectionState;if(s=='failed'||s=='closed'){lost()}else if(s=='disconnected'){setTimeout(()=>{if(NET===n&&pc.connectionState=='disconnected')lost()},4000)}};
+  pc.onconnectionstatechange=()=>{const s=pc.connectionState;if(s=='failed'||s=='closed'){lost()}else if(s=='disconnected'){weak(true);setTimeout(()=>{if(NET===n&&pc.connectionState=='disconnected')lost()},12000)}else if(s=='connected')weak(false)};
  }
  function attach(n,ch){
-  if(ch.label=='ctl'){n.ctl=ch;ch.onopen=()=>onOpen(n);ch.onclose=()=>{if(NET===n)lost()};ch.onmessage=e=>{try{onCtl(n,JSON.parse(e.data))}catch(x){}};if(ch.readyState=='open')onOpen(n)}
-  else if(ch.label=='inp'){n.inp=ch;ch.onmessage=e=>{try{const m=JSON.parse(e.data);if(m.k=='in'&&n.role=='host')applyInput(n,m.m|0)}catch(x){}}}
-  else if(ch.label=='snap'){n.snap=ch;ch.onmessage=e=>{try{onSnap(n,JSON.parse(e.data))}catch(x){}}}
+  if(ch.label=='ctl'){n.ctl=ch;ch.onopen=()=>onOpen(n);ch.onclose=()=>{if(NET===n)lost()};ch.onmessage=e=>{n.lastRx=Date.now();try{onCtl(n,JSON.parse(e.data))}catch(x){}};if(ch.readyState=='open')onOpen(n)}
+  else if(ch.label=='inp'){n.inp=ch;ch.onmessage=e=>{n.lastRx=Date.now();try{const m=JSON.parse(e.data);if(m.k=='in'&&n.role=='host')applyInput(n,m.m|0)}catch(x){}}}
+  else if(ch.label=='snap'){n.snap=ch;ch.onmessage=e=>{n.lastRx=Date.now();try{onSnap(n,JSON.parse(e.data))}catch(x){}}}
  }
  function onOpen(n){
-  if(NET!==n||n.opened)return;n.opened=true;socClean();
+  if(NET!==n||n.opened)return;n.opened=true;socClean();n.lastRx=Date.now();n.hb=setInterval(()=>{if(NET!==n){clearInterval(n.hb);return}send(n.ctl,{k:'ping'});if(Date.now()-n.lastRx>14000){weak(false);lost(T('Rakipten veri gelmiyor.','No data from the opponent.'))}},2000);
   if(joinTimer){clearTimeout(joinTimer);joinTimer=null}
   if(unsub){unsub();unsub=null}
   if(n.role=='host'){db.collection('rooms').doc(n.code).delete().catch(()=>{});card('\ud83c\udf10 '+T('Rakip ba\u011fland\u0131!','Opponent connected!'),'<p style="opacity:.85">'+T('Sen mavi, rakibin turuncu oynar.','You play blue, your opponent plays orange.')+'</p><div class="row"><button style="'+HI+'" onclick="NETUI.start()">'+T('Ma\u00e7\u0131 ba\u015flat','Start match')+'</button></div><div class="row"><button onclick="menu()">\u2190</button></div>')}
@@ -139,7 +140,7 @@
    const n=NET={role:'host',pc:new RTCPeerConnection(ICE)};wire(n);
    try{
     attach(n,n.pc.createDataChannel('ctl'));attach(n,n.pc.createDataChannel('snap',{ordered:false,maxRetransmits:0}));attach(n,n.pc.createDataChannel('inp',{ordered:false,maxRetransmits:0}));
-    await n.pc.setLocalDescription(await n.pc.createOffer());await gathered(n.pc,3500);
+    await n.pc.setLocalDescription(await n.pc.createOffer());await gathered(n.pc,5000);
     let ok=false,code;
     for(let i=0;i<4&&!ok;i++){code=code5();try{await db.collection('rooms').doc(code).set({host:KR.user.uid,guest:null,offer:{type:n.pc.localDescription.type,sdp:n.pc.localDescription.sdp},answer:null,created:FV.serverTimestamp()});ok=true}catch(e){if(i==3)throw e}}
     n.code=code;
@@ -160,9 +161,9 @@
     const n=NET={role:'guest',pc:new RTCPeerConnection(ICE),code};wire(n);
     n.pc.ondatachannel=e=>attach(n,e.channel);
     await n.pc.setRemoteDescription(x.offer);
-    await n.pc.setLocalDescription(await n.pc.createAnswer());await gathered(n.pc,3500);
+    await n.pc.setLocalDescription(await n.pc.createAnswer());await gathered(n.pc,5000);
     await ref.update({guest:KR.user.uid,answer:{type:n.pc.localDescription.type,sdp:n.pc.localDescription.sdp}});
-    joinTimer=setTimeout(()=>{if(NET===n&&!n.opened){close();NETUI.lobby();setMsg(T('Ba\u011flan\u0131lamad\u0131. A\u011f engelliyor olabilir (mobil veri).','Could not connect. Your network may be blocking it (mobile data).'))}},20000);
+    joinTimer=setTimeout(()=>{if(NET===n&&!n.opened){close();NETUI.lobby();setMsg(T('Ba\u011flan\u0131lamad\u0131. A\u011f engelliyor olabilir (mobil veri).','Could not connect. Your network may be blocking it (mobile data).'))}},28000);
     return true;
    }catch(e){if(quiet){close(true);return false}close();NETUI.lobby();setMsg(T('Kat\u0131l\u0131namad\u0131. Kodu ve interneti kontrol et.','Could not join. Check the code and your connection.'))}
   },
