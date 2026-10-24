@@ -79,8 +79,9 @@ loadKeys();rebuildKS();
 const NP=6,HOME=[[.03,.5],[.2,.25],[.2,.75],[.32,.5],[.45,.27],[.45,.73]];
 let tour=null,mode=1,D=DIF.medium,P=[],ball,score=[0,0],time=0,ext=0,half=0,froze=0,msg='',act=[4,4],ctl=[KS,null],state='menu',shake=0,restart=null,psw=null,ko=null,hold=null,cam={x:500,y:310,z:1.4},kdg=[false,false];
 const GS=.58;let kfx=[],gcam=null,zm=2,netFx=[null,null],bars=[],bused=[0,0],kult=[0,0],swd=[],trail=[],bh=[],clock=0,fxs=[],AC=null,mute=false,msg2='',msg2t=0;
-let ST={touch:'auto',gfx:'auto',fps:false,lang:'tr',sfx:.8,mus:.5,musOn:true,shk:true};
+let ST={touch:'auto',gfx:'auto',fps:false,lang:'tr',sfx:.8,mus:.12,musOn:true,shk:true};
 try{const j=JSON.parse(localStorage.getItem('kroki-set')||'null');if(j&&typeof j=='object')ST=Object.assign(ST,j)}catch(e){}
+if(!ST.mv2){ST.mus=.12;ST.mv2=1;try{localStorage.setItem('kroki-set',JSON.stringify(ST))}catch(e){}}
 function saveST(){try{localStorage.setItem('kroki-set',JSON.stringify(ST))}catch(e){}}
 const L=(t,e)=>ST.lang=='en'?e:t;
 const EN={'GOL!':'GOAL!','PENALTI!':'PENALTY!','SET!':'WALL!','FAUL!':'FOUL!','ALEVLİ ŞUT!':'FIRE SHOT!','ARA PASI!':'THROUGH BALL!','ORTA!':'CROSS!','İKİNCİ YARI':'SECOND HALF','GOL KRALI!':'GOAL KING!','ÇAT!':'SLASH!','SAPLA!':'STAB!','TAK!':'CHOP!','KAPIŞ!':'GRAB!'};
