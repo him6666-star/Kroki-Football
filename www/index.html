@@ -27,6 +27,43 @@ button:hover{background:#7cc4ee;color:#0b1a16}
 #toast{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);z-index:60;display:flex;flex-direction:column-reverse;gap:8px;align-items:center;pointer-events:none;width:90%}
 #toast div{background:rgba(16,28,25,.92);border:1px solid rgba(255,214,90,.7);color:#fff;font:700 15px system-ui,sans-serif;padding:9px 16px;border-radius:14px;box-shadow:0 4px 16px rgba(0,0,0,.4);animation:tIn .3s ease-out}
 @keyframes tIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
+
+.mn{--u:min(1vh,.627vw);position:absolute;inset:0;overflow:hidden;display:flex;align-items:center;justify-content:center;gap:calc(var(--u)*3);padding:calc(var(--u)*3) calc(var(--u)*4);background:radial-gradient(120% 95% at 18% 15%,#37995c 0,#17502f 46%,#0a2018 100%);color:#fff;text-align:left;font-family:system-ui,sans-serif}
+.mn::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(255,255,255,.055) 50%,transparent 50%) 0 0/calc(var(--u)*16) 100% repeat-x;animation:mnSl 9s linear infinite}
+.mn::after{content:'';position:absolute;left:50%;top:50%;width:calc(var(--u)*70);height:calc(var(--u)*70);margin:calc(var(--u)*-35) 0 0 calc(var(--u)*-35);border:calc(var(--u)*.5) solid rgba(255,255,255,.06);border-radius:50%;pointer-events:none}
+@keyframes mnSl{to{background-position:calc(var(--u)*16) 0}}
+.mn>*{position:relative;z-index:1}
+.mnL{flex:0 0 calc(var(--u)*58);display:flex;flex-direction:column;align-items:center}
+.mnT{font:900 calc(var(--u)*13)/.88 'Trebuchet MS',system-ui,sans-serif;text-align:center;background:linear-gradient(180deg,#fffbc2,#ffd23d 52%,#ff8a1f);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-stroke:calc(var(--u)*.45) #5a2800;filter:drop-shadow(0 calc(var(--u)*1) 0 rgba(0,0,0,.5));transform:rotate(-4deg);animation:mnBob 3.4s ease-in-out infinite}
+@keyframes mnBob{50%{transform:rotate(-2deg) translateY(calc(var(--u)*-1))}}
+.mnS{margin-top:calc(var(--u)*1.2);font-weight:700;font-size:max(12px,calc(var(--u)*2.4));letter-spacing:.12em;text-transform:uppercase;color:#d8f5df;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+.mnJ{position:relative;width:100%;height:calc(var(--u)*30);margin-top:calc(var(--u)*2);touch-action:manipulation;cursor:pointer}
+.jbl{position:absolute;left:0;bottom:calc(var(--u)*2);width:calc(var(--u)*9);height:calc(var(--u)*9);will-change:transform}
+.jbl svg{width:100%;height:100%;filter:drop-shadow(0 calc(var(--u)*.5) calc(var(--u)*.6) rgba(0,0,0,.45))}
+.jbl.hit{animation:mnHit .25s}
+@keyframes mnHit{40%{scale:1.18 .82}}
+.jsh{position:absolute;left:0;bottom:calc(var(--u)*.8);width:calc(var(--u)*9);height:calc(var(--u)*1.6);border-radius:50%;background:rgba(0,0,0,.38);filter:blur(2px)}
+.jc{position:absolute;left:0;right:0;top:0;text-align:center;font-weight:800;font-size:max(13px,calc(var(--u)*2.8));text-shadow:0 2px 4px rgba(0,0,0,.6);pointer-events:none}
+.mnQ{margin-top:calc(var(--u)*1.5);background:rgba(8,24,16,.55);border:1px solid rgba(255,255,255,.18);padding:calc(var(--u)*.9) calc(var(--u)*2);border-radius:999px;font-size:max(11px,calc(var(--u)*2.1))}
+.mnR{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:calc(var(--u)*1.8);align-content:center;max-height:100%}
+.tl{--c1:#2f6fd0;--c2:#1c4aa0;position:relative;overflow:hidden;display:flex;align-items:center;gap:calc(var(--u)*1.6);padding:calc(var(--u)*1.7) calc(var(--u)*2.2);border-radius:calc(var(--u)*2.6);background:linear-gradient(160deg,var(--c1),var(--c2));border:calc(var(--u)*.3) solid rgba(255,255,255,.28);box-shadow:0 calc(var(--u)*.9) 0 rgba(0,0,0,.32),inset 0 calc(var(--u)*.3) 0 rgba(255,255,255,.25);cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;transition:transform .12s,box-shadow .12s,filter .12s;animation:mnIn .55s cubic-bezier(.2,1.3,.4,1) both;animation-delay:var(--d)}
+.tl::after{content:'';position:absolute;top:0;bottom:0;width:30%;left:-40%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.35),transparent);transform:skewX(-18deg);transition:left .5s}
+.tl:hover{transform:translateY(calc(var(--u)*-.5)) scale(1.02);filter:brightness(1.12)}.tl:hover::after{left:120%}
+.tl:active{transform:translateY(calc(var(--u)*.4)) scale(.98);box-shadow:0 calc(var(--u)*.3) 0 rgba(0,0,0,.32)}
+@keyframes mnIn{from{opacity:0;transform:translateX(calc(var(--u)*8)) scale(.9)}}
+.tl .ti{font-size:max(20px,calc(var(--u)*5.2));line-height:1;filter:drop-shadow(0 2px 2px rgba(0,0,0,.4))}
+.tl .tt{display:flex;flex-direction:column;font-weight:900;font-size:max(13px,calc(var(--u)*2.7));letter-spacing:.04em;text-shadow:0 2px 0 rgba(0,0,0,.3)}
+.tl .tt small{font-weight:600;font-size:max(10px,calc(var(--u)*1.8));letter-spacing:0;opacity:.88;text-shadow:none;margin-top:calc(var(--u)*.2)}
+.tl.big{grid-column:1/-1;--c1:#f0a020;--c2:#d4600a;padding:calc(var(--u)*2) calc(var(--u)*2.6);cursor:default}
+.tl.big .ti{font-size:max(26px,calc(var(--u)*7.5))}.tl.big .tt{font-size:max(15px,calc(var(--u)*3.6))}
+.tl .pr{display:flex;gap:calc(var(--u)*1);margin-top:calc(var(--u)*1.1)}
+.mp{padding:calc(var(--u)*.9) calc(var(--u)*2.2)!important;font:800 max(12px,calc(var(--u)*2.2)) system-ui!important;border-radius:999px;border:calc(var(--u)*.25) solid rgba(255,255,255,.55)!important;background:rgba(0,0,0,.28)!important;color:#fff!important;transition:transform .1s,background .15s}
+.mp:hover{background:#fff!important;color:#b04a00!important;transform:scale(1.07)}
+.t2{--c1:#3fb27a;--c2:#1f7a52}.t3{--c1:#c0489a;--c2:#7e2a8a}.t4{--c1:#3aa7d8;--c2:#2166b0}.t5{--c1:#8a6bd8;--c2:#5136a8}.t6{--c1:#5aa85a;--c2:#2f7035}.t7{--c1:#6a7f8f;--c2:#3b4c59}
+.mnK{grid-column:1/-1;animation:mnIn .55s both;animation-delay:var(--d)}
+.mnK .row{margin:0;gap:calc(var(--u)*1.2)}.mnK .row button{flex:1;padding:calc(var(--u)*1.3) calc(var(--u)*1.6);font:800 max(12px,calc(var(--u)*2.2)) system-ui;border-radius:calc(var(--u)*2);background:rgba(8,24,16,.55);border:calc(var(--u)*.25) solid rgba(255,255,255,.3);color:#fff}.mnK .row button:hover{background:#fff;color:#14452c}
+.mnH{grid-column:1/-1;font-size:max(10px,calc(var(--u)*1.7));opacity:.85}.mnH summary{cursor:pointer;font-weight:700}.mnH small{display:block;margin-top:4px;line-height:1.35}.mnH .row{display:none}
+@media (prefers-reduced-motion:reduce){.mn::before,.mnT,.tl{animation:none}}
 #cm{z-index:30;display:none;position:absolute;top:10px;right:62px;height:42px;min-width:62px;padding:0 12px;border-radius:999px;border:0;background:rgba(20,40,25,.75);color:#fff;font:700 13px system-ui,sans-serif;cursor:pointer;white-space:nowrap}
 #fs{z-index:30;display:none;position:absolute;top:10px;right:62px;width:42px;height:42px;border-radius:50%;border:0;background:rgba(20,40,25,.75);color:#fff;font-size:18px;cursor:pointer;padding:0}
 small{display:block;line-height:1.6;opacity:.85;margin-top:8px}
@@ -177,10 +214,28 @@ function tcBuild(){if(tcBuilt)return;tcBuilt=true;tcEl.innerHTML='<div class="jz
  const end=ev=>{if(ev.pointerId!==pid)return;pid=null;mpend=null;rest();setK({u:0,d:0,l:0,r:0})};jz.addEventListener('pointerup',end);jz.addEventListener('pointercancel',end);jz.addEventListener('lostpointercapture',end);tcEl._rest=rest}
 function goFull(){const d=document,e=d.documentElement;try{if(!d.fullscreenElement&&!d.webkitFullscreenElement){(e.requestFullscreen||e.webkitRequestFullscreen).call(e);if(screen.orientation&&screen.orientation.lock)screen.orientation.lock('landscape').catch(()=>{})}else{(d.exitFullscreen||d.webkitExitFullscreen).call(d)}}catch(_){}}
 function tcUpdate(){const want=state=='play'&&tcOn();if(want){const h=tcEl.offsetHeight||innerHeight;if(h!==tcH){tcH=h;tcEl.style.setProperty('--u',Math.max(30,Math.min(64,h*.105))+'px')}}if(want&&!tcBuilt)tcBuild();if(want!==tcShown){tcShown=want;tcEl.style.display=want?'block':'none';if(!want)keys.clear();else if(tcEl._rest)setTimeout(tcEl._rest,50)}{const cb=document.getElementById('cm'),pl=state=='play';if(cb){const d=pl?'block':'none';if(cb.style.display!==d){cb.style.display=d;if(pl)camLbl()}cb.style.right=(want&&!window.Capacitor&&(document.documentElement.requestFullscreen||document.documentElement.webkitRequestFullscreen))?'114px':'62px'}}fsb.style.display=(want&&!window.Capacitor&&(document.documentElement.requestFullscreen||document.documentElement.webkitRequestFullscreen))?'block':'none';if(want&&tcY&&P.length){const pl=P[act[0]],sh=!!pl&&(pl.i==1||pl.i==2||pl.i>=4);if(sh!==tcYs){tcYs=sh;tcY.style.display=sh?'flex':'none'}}if(want&&tcBuilt&&tcLang!==ST.lang){tcLang=ST.lang;tcEl.querySelectorAll('.tl').forEach(e=>{e.textContent=ST.lang=='en'?e.dataset.e:e.dataset.t})}}
-function menu(){if(tour){tour=null;restoreTheme()}if(rpl)rplStop();RB=[];rplQ=false;if(pen){cam.z=pen.zz;half=pen.hf;pen=null}penRes=null;tour=null;state='menu';musicSet('menu');pz.style.display='none';ov.style.display='flex';ov.innerHTML=`<div class="card"><h1>⚽ Scribble Kick</h1>
-<b>${L('1 Oyuncu (bilgisayara karşı)','1 Player (vs computer)')}</b><div class="row"><button onclick="go(1,'easy')">${L('Kolay','Easy')}</button><button onclick="go(1,'medium')">${L('Orta','Medium')}</button><button onclick="go(1,'hard')">${L('Zor','Hard')}</button></div>
-${tcOn()?'':`<b>${L('2 Oyuncu (aynı klavye)','2 Players (same keyboard)')}</b><div class="row"><button onclick="go(2)">${L('Başla','Start')}</button></div>`}
-<div class="row"><button onclick="tourStart()">🏆 ${L('Turnuva','Tournament')}</button><button onclick="questUI()">🏅 ${L('Görevler','Quests')}</button><button onclick="miniMenu()">🎯 ${L('Mini oyunlar','Mini games')}</button></div>${window.KR?KR.menuRow():''}<div class="row"><button onclick="settings('menu');spg('theme')">🏟 ${L('Saha: ','Pitch: ')}${CT.n[ST.lang=='en'?1:0]}</button></div>${helpText()}</div>`}
+function menu(){if(tour){tour=null;restoreTheme()}if(rpl)rplStop();RB=[];rplQ=false;if(pen){cam.z=pen.zz;half=pen.hf;pen=null}penRes=null;tour=null;state='menu';musicSet('menu');pz.style.display='none';ov.style.display='flex';ov.innerHTML=menuHTML();mnJug()}
+function menuHTML(){const ctrl=!tcOn(),done=QS?QS.q.filter(q=>q.done).length:0,sb=(tx,d)=>'<button class="mp" onclick="event.stopPropagation();mnGo(()=>go(1,\''+d+'\'))">'+tx+'</button>';
+ const tl=(cls,ic,tx,fn,d,sub)=>'<div class="tl '+cls+'" style="--d:'+d+'ms" onclick="mnGo(()=>'+fn+')"><span class="ti">'+ic+'</span><span class="tt">'+tx+(sub?'<small>'+sub+'</small>':'')+'</span></div>';
+ return `<div class="mn"><div class="mnL"><div class="mnT">SCRIBBLE<br>KICK</div><div class="mnS">${L("6'ya 6 mini futbol","6-a-side mini football")}</div>
+<div id="mnJ" class="mnJ"><div class="jbl"><svg viewBox="-20 -20 40 40"><circle r="18" fill="#fafafa" stroke="#1d2523" stroke-width="2"/><polygon points="0,-7 6.7,-2.2 4.1,5.7 -4.1,5.7 -6.7,-2.2" fill="#1d2523"/><g fill="#1d2523"><circle cx="0" cy="-15" r="3"/><circle cx="14" cy="-5" r="3"/><circle cx="9" cy="12" r="3"/><circle cx="-9" cy="12" r="3"/><circle cx="-14" cy="-5" r="3"/></g></svg></div><div class="jsh"></div><div id="mnC" class="jc"></div></div>
+<div class="mnQ">🏅 ${L('Günlük görev','Daily quests')}: <b>${done}/3</b> · ${L('Puan','Pts')}: <b>${QS?QS.pts:0}</b></div></div>
+<div class="mnR">
+<div class="tl big" style="--d:0ms"><span class="ti">⚽</span><span class="tt">${L('TEK OYUNCU','SINGLE PLAYER')}<small>${L('Bilgisayara karşı oyna','Play vs computer')}</small><span class="pr">${sb(L('Kolay','Easy'),'easy')}${sb(L('Orta','Medium'),'medium')}${sb(L('Zor','Hard'),'hard')}</span></span></div>
+${ctrl?tl('t2','👥',L('2 OYUNCU','2 PLAYERS'),'go(2)',60,L('Aynı klavye','Same keyboard')):''}
+${tl('t3','🏆',L('TURNUVA','TOURNAMENT'),'tourStart()',120,L('3 maç, kupa','3 matches, trophy'))}
+${tl('t4','🎯',L('MİNİ OYUNLAR','MINI GAMES'),'miniMenu()',180,L('Penaltı, kaleci…','Penalty, keeper…'))}
+${tl('t5','🏅',L('GÖREVLER','QUESTS'),'questUI()',240,L('Rozetler','Badges'))}
+${window.KR?'<div class="mnK" style="--d:300ms">'+KR.menuRow()+'</div>':''}
+${tl('t6','🏟',L('SAHA','PITCH'),"settings('menu');spg('theme')",360,CT.n[ST.lang=='en'?1:0])}
+${tl('t7','⚙',L('AYARLAR','SETTINGS'),"settings('menu')",420,L('Ses, dil, kontroller','Sound, language'))}
+${ctrl?'<details class="mnH"><summary>ℹ '+L('Kontroller','Controls')+'</summary>'+helpText()+'</details>':''}
+</div></div>`}
+function mnGo(f){try{au();sfxKick(false)}catch(e){}f()}
+function mnJug(){const z=document.getElementById('mnJ');if(!z)return;const b=z.querySelector('.jbl'),cn=document.getElementById('mnC'),H=z.clientHeight||120,Wd=z.clientWidth||200,bs=b.offsetWidth||40;let x=Wd/2,y=0,vx=0,vy=0,r=0,n=0,lt=performance.now();QS.jug=QS.jug||0;
+ const show=()=>{cn.textContent=n>0?n:L('Topa dokun!','Tap the ball!');cn.style.opacity=n>0?1:.8;if(n==0&&QS.jug)cn.textContent=L('Topa dokun! · rekor ','Tap the ball! · best ')+QS.jug};show();
+ z.onpointerdown=e=>{const rc=z.getBoundingClientRect(),px=e.clientX-rc.left,py=e.clientY-rc.top,by=H-y-bs/2;if(Math.hypot(px-x,py-by)>bs*1.1)return;try{au();sfxKick(false)}catch(_){}vy=Math.sqrt(2*H*6*H*.78);vx=(x-px)*7+(Math.random()-.5)*60;n++;if(n>QS.jug){QS.jug=n;qSave()}show();b.classList.remove('hit');void b.offsetWidth;b.classList.add('hit')};
+ const st=t=>{if(!document.body.contains(z)||state!='menu')return;const dt=Math.min(.04,(t-lt)/1000);lt=t;vy-=H*6*dt*1;y+=vy*dt;x+=vx*dt;vx*=Math.pow(.6,dt);if(x<bs/2){x=bs/2;vx=Math.abs(vx)}if(x>Wd-bs/2){x=Wd-bs/2;vx=-Math.abs(vx)}if(y<=0){y=0;if(vy<-H*1.2){vy=-vy*.45}else vy=0;if(n>0&&vy==0){n=0;show()}else if(n>0&&y==0&&vy>0){}}r+=vx*dt*.9;b.style.transform='translate('+(x-bs/2)+'px,'+(-y)+'px) rotate('+r+'deg)';const sh=z.querySelector('.jsh');sh.style.transform='translateX('+(x-bs/2)+'px) scale('+Math.max(.4,1-y/(H*1.3))+')';requestAnimationFrame(st)};requestAnimationFrame(st)}
 let dk='medium';
 function helpText(){const n=a=>kname(a);const b1=ST.lang=='en'?`${n(K1.u)}${n(K1.l)}${n(K1.d)}${n(K1.r)} move · ${n(K1.k)} shoot (hold = power, steer while holding = curve) · ${n(K1.p)} pass (on rival wing = CROSS, double tap = THROUGH BALL) · ${n(K1.w)} switch player · ${n(K1.s)} dash · ${n(K1.x)} tackle · ${n(K1.y)} special (defender: WALL in front of the ball, once per half)`:`${n(K1.u)}${n(K1.l)}${n(K1.d)}${n(K1.r)} hareket · ${n(K1.k)} şut (basılı tut = güç, basılıyken yana kay = falso) · ${n(K1.p)} pas (rakip kanadında = ORTA, iki kez bas = ARA PASI) · ${n(K1.w)} oyuncu değiştir · ${n(K1.s)} sıçrama · ${n(K1.x)} müdahale · ${n(K1.y)} özel (defans: topun önüne SET duvarı, yarıda 1 kez)`;
  const b2=ST.lang=='en'?`${n(K2.u)}${n(K2.l)}${n(K2.d)}${n(K2.r)} move · ${n(K2.k)} shoot · ${n(K2.p)} pass · ${n(K2.w)} switch player · ${n(K2.s)} dash · ${n(K2.x)} tackle · ${n(K2.y)} special`:`${n(K2.u)}${n(K2.l)}${n(K2.d)}${n(K2.r)} hareket · ${n(K2.k)} şut · ${n(K2.p)} pas · ${n(K2.w)} oyuncu değiştir · ${n(K2.s)} sıçrama · ${n(K2.x)} müdahale · ${n(K2.y)} özel`;
