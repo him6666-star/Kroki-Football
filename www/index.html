@@ -45,8 +45,13 @@ button:hover{background:#7cc4ee;color:#0b1a16}
 #sk.tcm .skb{height:38px;min-width:50px;font-size:19px;padding:0 8px}
 #sk{position:absolute;z-index:8;top:86px;left:50%;transform:translateX(-50%);display:none;gap:8px;pointer-events:none}
 .skb{pointer-events:auto;min-width:52px;height:46px;border-radius:14px;border:2px solid rgba(255,255,255,.35);background:rgba(10,24,18,.72);color:#fff;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;padding:0 10px}
-#em{position:absolute;z-index:8;bottom:22%;left:50%;transform:translateX(-50%);display:none;gap:10px}
-#em button{width:54px;height:54px;border-radius:50%;border:2px solid rgba(255,255,255,.4);background:rgba(10,24,18,.7);font-size:28px;cursor:pointer}
+#cb{position:absolute;z-index:8;left:12px;top:64px;width:44px;height:44px;border-radius:50%;border:2px solid rgba(255,255,255,.4);background:rgba(10,24,18,.72);font-size:22px;cursor:pointer;display:none;align-items:center;justify-content:center}
+#cp{position:absolute;z-index:9;left:12px;top:112px;width:min(330px,72vw);display:none;background:rgba(10,24,18,.92);border:1px solid rgba(255,255,255,.25);border-radius:14px;padding:8px}
+.cpe{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+.cpe button{width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);font-size:20px;cursor:pointer}
+.cpt{display:inline-block;width:calc(50% - 3px);vertical-align:top;text-align:left;margin:2px 0;padding:5px 8px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.07);color:#fff;font-size:12px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cbub{position:absolute;z-index:9;top:34%;max-width:40%;padding:8px 14px;border-radius:16px;color:#fff;font-weight:700;font-size:16px;text-shadow:0 1px 2px rgba(0,0,0,.5);pointer-events:none;animation:cbf 3.2s ease-out forwards}
+@keyframes cbf{0%{opacity:0;transform:translateY(10px)}10%{opacity:1;transform:none}85%{opacity:1}100%{opacity:0;transform:translateY(-14px)}}
 .emf{position:absolute;z-index:9;bottom:30%;font-size:44px;pointer-events:none;animation:emfly 1.7s ease-out forwards}
 @keyframes emfly{to{transform:translateY(-230px) scale(1.3);opacity:0}}
 .t9{--c1:#d9532e;--c2:#9a2f18}
@@ -82,7 +87,7 @@ button:hover{background:#7cc4ee;color:#0b1a16}
 #fs{z-index:30;display:none;position:absolute;top:10px;right:62px;width:42px;height:42px;border-radius:50%;border:0;background:rgba(20,40,25,.75);color:#fff;font-size:18px;cursor:pointer;padding:0}
 small{display:block;line-height:1.6;opacity:.85;margin-top:8px}
 </style></head><body>
-<div class="wrap"><canvas id="cv" width="1160" height="740"></canvas><div id="ov"></div><div id="toast"></div><div id="sk"></div><div id="em"></div><div id="tc"></div><button id="cm" onclick="camNext()"></button><button id="fs" onclick="goFull()" title="Tam ekran"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:auto"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button><button id="pz" onclick="pause()" title="Durdur (P / Esc)" style="z-index:30;touch-action:manipulation;display:none;position:absolute;top:10px;right:10px;width:42px;height:42px;border-radius:50%;border:0;background:rgba(20,40,25,.75);color:#fff;font-size:18px;cursor:pointer;padding:0"><svg width="20" height="20" viewBox="0 0 24 24" fill="#fff" style="display:block;margin:auto"><rect x="6" y="4.5" width="4.4" height="15" rx="1.3"/><rect x="13.6" y="4.5" width="4.4" height="15" rx="1.3"/></svg></button></div>
+<div class="wrap"><canvas id="cv" width="1160" height="740"></canvas><div id="ov"></div><div id="toast"></div><div id="sk"></div><button id="cb" onclick="event.stopPropagation();chatToggle()">💬</button><div id="cp"></div><div id="tc"></div><button id="cm" onclick="camNext()"></button><button id="fs" onclick="goFull()" title="Tam ekran"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:auto"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button><button id="pz" onclick="pause()" title="Durdur (P / Esc)" style="z-index:30;touch-action:manipulation;display:none;position:absolute;top:10px;right:10px;width:42px;height:42px;border-radius:50%;border:0;background:rgba(20,40,25,.75);color:#fff;font-size:18px;cursor:pointer;padding:0"><svg width="20" height="20" viewBox="0 0 24 24" fill="#fff" style="display:block;margin:auto"><rect x="6" y="4.5" width="4.4" height="15" rx="1.3"/><rect x="13.6" y="4.5" width="4.4" height="15" rx="1.3"/></svg></button></div>
 <script>
 const cv=document.getElementById('cv');let c=cv.getContext('2d');const ov=document.getElementById('ov');
 const W=1160,H=740,PX=70,PY=100,PW=1020,PH=550,GY=PY+PH/2,R=12,BR=7,GH=65;
@@ -1106,10 +1111,14 @@ function puGet(u,p){const k=u.k.k;try{sfx('pop')}catch(e){}
  for(let i=0;i<14;i++){const a=Math.random()*6.28;fxs.push({x:u.x,y:u.y,vx:Math.cos(a)*120,vy:Math.sin(a)*120,l:.5,m:.5,r:3+Math.random()*2,c:u.k.c,sp:1})}}
 function puDraw(){if(PU){const u=PU,bob=Math.sin(clock*4)*3,a=u.t<3?(Math.sin(clock*18)>0?1:.35):1;c.save();c.globalAlpha=a;c.translate(u.x,u.y+bob);const g=c.createRadialGradient(0,0,2,0,0,24);g.addColorStop(0,u.k.c);g.addColorStop(1,'rgba(255,255,255,0)');c.globalCompositeOperation='lighter';c.fillStyle=g;c.beginPath();c.arc(0,0,24,0,7);c.fill();c.globalCompositeOperation='source-over';c.fillStyle='rgba(10,24,18,.8)';c.strokeStyle=u.k.c;c.lineWidth=2.5;c.beginPath();c.arc(0,0,13,0,7);c.fill();c.stroke();c.font='15px sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillStyle='#fff';c.fillText(u.k.ic,0,1);c.restore()}
  for(const p of P){if(p.i==0||p.off>0)continue;if(tb[p.t]>0){c.save();c.strokeStyle='rgba(255,228,94,.8)';c.lineWidth=2;c.setLineDash([4,3]);c.beginPath();c.arc(p.x,p.y,R+5,clock*4,clock*4+5);c.stroke();c.restore()}if(pb[p.t]>0){c.save();c.strokeStyle='rgba(255,122,58,.85)';c.lineWidth=2;c.beginPath();c.arc(p.x,p.y,R+8,0,7);c.stroke();c.restore()}}}
-function emHud(){const el=document.getElementById('em');if(!el)return;const on=state=='play'&&!NET&&!rpl&&msg=='GOL!';if(on&&!el.dataset.on){el.dataset.on=1;el.innerHTML=['😎','😂','👏','🔥'].map(e=>'<button onclick="emSend(\''+e+'\')">'+e+'</button>').join('')}else if(!on&&el.dataset.on){el.dataset.on='';el.innerHTML=''}el.style.display=on?'flex':'none'}
-setInterval(emHud,200);
-function emFloat(e,side){const w=document.querySelector('.wrap'),d=document.createElement('div');d.className='emf';d.textContent=e;d.style.left=(side?64+Math.random()*12:24+Math.random()*12)+'%';w.appendChild(d);setTimeout(()=>d.remove(),1800)}
-function emSend(e){emFloat(e,0);if(Math.random()<.6)setTimeout(()=>emFloat(['😤','😂','🤝','😮'][Math.floor(Math.random()*4)],1),700+Math.random()*500)}
+const CHE=['😎','😂','👏','🔥','😤','😮'],CHP=[['İyi maç!','Good game!'],['Harika gol!','Great goal!'],['Şansın bitti 😎','Out of luck 😎'],['Yakındı!','So close!'],['Tebrikler 👏','Well played 👏'],['Rövanş?','Rematch?']];
+let chOpen=false;
+function chatHud(){const b=document.getElementById('cb');if(!b)return;const on=state=='play'&&!rpl&&!pen;b.style.display=on?'flex':'none';const pn=document.getElementById('cp');if(!on&&chOpen){chOpen=false;pn.style.display='none'}}
+setInterval(chatHud,250);
+function chatToggle(){chOpen=!chOpen;const pn=document.getElementById('cp');if(chOpen){const en=ST.lang=='en';pn.innerHTML='<div class="cpe">'+CHE.map(e=>'<button onclick="chatSend(\''+e+'\')">'+e+'</button>').join('')+'</div>'+CHP.map(t=>'<button class="cpt" onclick="chatSend(\''+t[en?1:0].replace(/'/g,"\\'")+'\')">'+t[en?1:0]+'</button>').join('')}pn.style.display=chOpen?'block':'none'}
+function chatShow(t,side){const w=document.querySelector('.wrap'),d=document.createElement('div'),em=[...t].length<=2;d.className=em?'emf':'cbub';d.textContent=t;if(em){d.style.left=(side?64+Math.random()*12:24+Math.random()*12)+'%'}else d.style.cssText+=side?'right:5%;background:'+(TC[1]?TC[1][0]:'#f08a4b'):'left:5%;background:'+(TC[0]?TC[0][0]:'#3a82b8');w.appendChild(d);setTimeout(()=>d.remove(),em?1800:3200)}
+function chatSend(t){chOpen=false;document.getElementById('cp').style.display='none';chatShow(t,0);if(NET){try{NETHOOK.chat&&NETHOOK.chat(t)}catch(e){}}else if(Math.random()<.65){const en=ST.lang=='en',r=[...CHE.map(e=>e),...CHP.map(x=>x[en?1:0])];setTimeout(()=>chatShow(r[Math.floor(Math.random()*r.length)],1),900+Math.random()*900)}}
+function chatRecv(t){chatShow(String(t).slice(0,40),1)}
 
 function comment(){}
 let stopCm=false;

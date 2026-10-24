@@ -91,6 +91,7 @@
   else if(m.k=='start'&&n.role=='guest'){startGuest(n,m)}
   else if(m.k=='ev'&&n.role=='guest'){m.e.forEach(x=>sfxPlay(x))}
   else if(m.k=='end'&&n.role=='guest'){guestEnd(m.sc)}
+  else if(m.k=='chat'){if(window.chatRecv)chatRecv(m.t)}
  }
  function onSnap(n,S){
   if(n.role!='guest'||state!='play')return;
@@ -294,5 +295,5 @@
  setInterval(socListen,3000);
  // oyun kancalari
  const m0=menu;menu=function(){if(NET)close();NETEV=null;m0()};
- window.NETHOOK={hostTick,guestStep,endRow:()=>'<div class="row"><button onclick="NETUI.again()">'+T('Tekrar oyna','Play again')+'</button><button onclick="menu()">Men\u00fc</button></div>'};
+ window.NETHOOK={chat:(x)=>{if(NET&&NET.ctl)send(NET.ctl,{k:'chat',t:String(x).slice(0,40)})},hostTick,guestStep,endRow:()=>'<div class="row"><button onclick="NETUI.again()">'+T('Tekrar oyna','Play again')+'</button><button onclick="menu()">Men\u00fc</button></div>'};
 })();
