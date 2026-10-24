@@ -330,7 +330,7 @@ function midOK(){return !!ball&&!hold&&!restart&&!pk&&!fk&&!(ball.car&&ball.car.
 function stopOK(){if(midOK()||ext>=75){ext=0;return true}return false}
 function reset(k){bars=[];swd=[];fk=null;fa=[];pk=null;P.forEach(p=>{p.x=p.hx;p.y=p.hy;p.vx=p.vy=0;p.cd=0;p.mk=null;p.bleed=0;p.stun=0;p.rec=0;p.lunge=0;p.save=true;p.tx=p.hx;p.ty=p.hy;p.fx=p.t?-1:1;p.fy=0});
  const f=P[NP*k+4];f.x=PX+PW/2+(k?30:-30);f.y=GY;ball={x:PX+PW/2,y:GY,vx:0,vy:0,rot:0,last:-1,sq:0,stuck:0};act=[4,4];restart=null;psw=null;ko={t:k,time:0};hold=null;koFix();froze=Math.max(froze,1)}
-function kick(p,dx,dy,pw,spin){stKick(p,dx,dy,pw);kfx.push({x:ball.x,y:ball.y,a:Math.atan2(dy,dx),l:.38,m:.38,sh:pw>=330?1:0});ball.jet=pw>=300;ball.pt=null;ball.air=null;if(pk)p.fireNow=false;ball.fire=!!p.fireNow;if(p.fireNow){p.fireNow=false;msg2='ALEVLİ ŞUT!';msg2t=1;shake=.4;sfx('fireshot')}{const sh=pw>=330;sfxKick(sh);fxs.push({x:ball.x,y:ball.y,l:sh?.4:.28,m:sh?.4:.28,r:sh?30:18,c:'#f4fbff'});const nd=sh?11:7;for(let i=0;i<nd;i++){const a=Math.random()*6.28,v=(sh?110:70)+Math.random()*(sh?150:80);fxs.push({x:ball.x+Math.cos(a)*6,y:ball.y+Math.sin(a)*6,vx:Math.cos(a)*v,vy:Math.sin(a)*v,l:.5,m:.5,r:(sh?3.2:2.4)+Math.random()*1.2,dr:1,sp:1})}}ball.lt=p;if(p.i==0&&dx*(p.t?-1:1)<0)dx=-dx;if(restart&&restart.taker==p){const l=Math.hypot(dx,dy)||1;if((dx*restart.ix+dy*restart.iy)/l<.3){dx=restart.ix;dy=restart.iy}}const d=Math.hypot(dx,dy)||1;ball.vx=dx/d*pw;ball.vy=dy/d*pw;p.cd=.3;ball.last=p.t;ball.sq=1;ball.spin=spin||0;ball.car=null;ball.shot=pw>=330;if(restart&&(restart.taker==p||(!restart.taker&&p.i==0&&p.t==restart.t)))restart=null;
+function kick(p,dx,dy,pw,spin){stKick(p,dx,dy,pw);kfx.push({x:ball.x,y:ball.y,a:Math.atan2(dy,dx),l:.38,m:.38,sh:pw>=330?1:0});ball.jet=pw>=300;ball.pt=null;ball.air=null;if(pk)p.fireNow=false;ball.fire=!!p.fireNow;if(p.fireNow){p.fireNow=false;msg2='ALEVLİ ŞUT!';msg2t=1;shake=.4;sfx('fireshot')}{const sh=pw>=330;sfxKick(sh);fxs.push({x:ball.x,y:ball.y,l:sh?.4:.28,m:sh?.4:.28,r:sh?30:18,c:'#f4fbff'});}ball.lt=p;if(p.i==0&&dx*(p.t?-1:1)<0)dx=-dx;if(restart&&restart.taker==p){const l=Math.hypot(dx,dy)||1;if((dx*restart.ix+dy*restart.iy)/l<.3){dx=restart.ix;dy=restart.iy}}const d=Math.hypot(dx,dy)||1;ball.vx=dx/d*pw;ball.vy=dy/d*pw;p.cd=.3;ball.last=p.t;ball.sq=1;ball.spin=spin||0;ball.car=null;ball.shot=pw>=330;if(restart&&(restart.taker==p||(!restart.taker&&p.i==0&&p.t==restart.t)))restart=null;
  const g=P[NP*(1-p.t)];g.save=Math.random()<par(1-p.t).k*(ball.fire?.8:1);g.e=(Math.random()<.5?-1:1)*(48+Math.random()*34)}
 function sw(k){let b=-1,bd=1e9;for(let i=1;i<NP;i++){if(i==act[k]||P[NP*k+i].off>0)continue;const p=P[NP*k+i],d=Math.hypot(p.x-ball.x,p.y-ball.y);if(d<bd){bd=d;b=i}}if(b>0)act[k]=b}
 
@@ -912,22 +912,23 @@ function questUI(){state=state=='pause'?state:'menu';const en=ST.lang=='en',qd=Q
 
 // ===== ses yorumcusu (cihazın Türkçe/İngilizce sesi) =====
 const CMT={
-goal:[['Goool! {t} golü buldu!','Gooool! Müthiş vuruş!','Gol! Skor {s}.','Ağlar havalandı! Skor {s}.'],['Goal! What a strike!','Gooal! Score is {s}.','It is in the net! {s}.']],
-pgoal:[['Penaltı golü! Soğukkanlı bitiriş!','Gol! Kaleci yanlış köşede kaldı.'],['Penalty scored! Cool finish!','Goal! The keeper went the wrong way.']],
-save:[['Harika kurtarış!','Kaleci devleşti, çıkardı!','Müthiş bir refleks!'],['What a save!','The keeper denies it!','Brilliant reflexes!']],
-post:[['Direkten döndü! Çok yakındı!','Direk! Şanssızlık!'],['Off the post! So close!','Hits the woodwork!']],
-miss:[['Dışarı! Kaçırdı!','Üstünden gitti!'],['Wide! He misses!','Over the bar!']],
+goal:[[[['Goooooooool!',.72,1.7],['Gol gol gol gol!',1.5,1.55],['{t} golü attı!',1.15,1.3]],[['Gooooool! Gooooool!',.78,1.65],['Ne vuruş! Skor {s}!',1.25,1.35]],[['Ağlar havalandı! Goooooool!',.85,1.6],['Skor {s}!',1.2,1.3]]],[[['Goooooooal!',.72,1.6],['Goal goal goal!',1.4,1.5],['What a strike!',1.15,1.3]],[['Gooooal! Gooooal!',.78,1.6],['Score is {s}!',1.2,1.3]]]],
+pgoal:[[[['Goooooool!',.78,1.65],['Penaltı golü!',1.2,1.3]],[['Gooool! Soğukkanlı bitiriş!',.9,1.55]]],[[['Goooooal!',.78,1.6],['Penalty scored!',1.2,1.3]]]],
+save:[[[['Kurtardıııı!',.82,1.55],['Harika kurtarış!',1.2,1.3]],[['Kaleci devleşti! Çıkardı!',1.05,1.45]]],[[['Saaaved!',.82,1.5],['What a save!',1.2,1.3]]]],
+post:[[[['Direkten dööndü!',.82,1.55],['Çok yakındı!',1.2,1.3]]],[[['Off the poooost!',.82,1.5],['So close!',1.2,1.3]]]],
+miss:[[[['Dışarııı!',.82,1.45],['Kaçırdı!',1.2,1.25]]],[[['Wiiide!',.82,1.4],['He misses!',1.2,1.25]]]],
 foul:[['Faul! Hakem düdüğü çaldı.','Sert müdahale, faul!'],['Foul! The referee blows.','A heavy challenge, foul!']],
 half:[['İkinci yarı başlıyor. Takımlar saha değiştirdi.'],['Second half begins. The teams swap sides.']],
 stop:[['Uzatma dakikaları başladı!','Hakem uzatma veriyor.'],['Stoppage time begins!','Added time is on.']],
-end:[['Maç sona erdi! Skor {s}.'],['Full time! The score is {s}.']],
-start:[['Maç başlıyor! İyi eğlenceler!','Hakem düdüğü çaldı, oyun başladı!'],['The match begins! Enjoy!','The referee blows, we are underway!']],
+end:[[[['Maç sona erdi!',1,1.3],['Skor {s}.',1.1,1.15]]],[[['Full time!',1,1.3],['The score is {s}.',1.1,1.15]]]],
+start:[['Maç başladı!','Hakem düdüğü çaldı, maç başladı!'],['The match has started!','The referee blows, we are underway!']],
 pens:[['Penaltı atışlarına geçiyoruz! Sinirler gergin!'],['We go to penalties! The tension is high!']],
-champ:[['Şampiyon! Kupa senin!'],['Champion! The trophy is yours!']]};
+champ:[[[['Şampiyooooon!',.85,1.6],['Kupa senin!',1.2,1.3]]],[[['Chaaampion!',.85,1.6],['The trophy is yours!',1.2,1.3]]]]};
 let CMt=0,stopCm=false;
-function cmVoice(){try{const l=ST.lang=='en'?'en':'tr';return speechSynthesis.getVoices().find(v=>v.lang&&v.lang.toLowerCase().startsWith(l))||null}catch(e){return null}}
+function cmVoice(){try{const l=ST.lang=='en'?'en':'tr',vs=speechSynthesis.getVoices().filter(v=>v.lang&&v.lang.toLowerCase().startsWith(l));if(!vs.length)return null;const sc=v=>(/google|neural|natural|premium|enhanced|wavenet/i.test(v.name)?4:0)+(v.localService?0:2)+(/compact|espeak/i.test(v.name)?-3:0);return vs.sort((a,b)=>sc(b)-sc(a))[0]}catch(e){return null}}
 function comment(k,a){try{if(ST.com===false||mute||NET||rpl||!window.speechSynthesis)return;const now=performance.now(),pri=k=='goal'||k=='pgoal'||k=='end'||k=='champ';if(!pri&&now-CMt<3500)return;const v=cmVoice();if(!v)return;const en=ST.lang=='en',pool=(CMT[k]||[[],[]])[en?1:0];if(!pool.length)return;
- const line=pool[Math.floor(Math.random()*pool.length)].replace('{t}',a!=null?TNm(a):'').replace('{s}',score[0]+(en?' to ':' ')+score[1]);speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(line);u.voice=v;u.lang=v.lang;u.rate=pri?1.1:1.04;u.pitch=pri?1.25:1.1;u.volume=Math.min(1,.55+ST.sfx*.45);speechSynthesis.speak(u);CMt=now}catch(e){}}
+ let line=pool[Math.floor(Math.random()*pool.length)];if(typeof line=='string')line=[[line,1.12,1.2]];const fill=x=>x.replace('{t}',a!=null?TNm(a):'').replace('{s}',score[0]+(en?' to ':' ')+score[1]);
+ speechSynthesis.cancel();line.forEach(sg=>{const u=new SpeechSynthesisUtterance(fill(sg[0]));u.voice=v;u.lang=v.lang;u.rate=sg[1];u.pitch=sg[2];u.volume=1;speechSynthesis.speak(u)});CMt=now}catch(e){}}
 try{if(window.speechSynthesis)speechSynthesis.getVoices()}catch(e){}
 let last=0,pcar=null,xr=null,sdt=[0,0],fk=null,fa=[],rk=null,pk=null;
 function loop(t){clock=t/1000;tcUpdate();const dt=Math.min(.033,(t-last)/1000);if(ST.gfx=='low')LQ=true;else if(ST.gfx=='high')LQ=false;setRS(ST.gfx=='high'?1:LQ?.62:1);if(LQ&&fxs.length>50)fxs.splice(0,fxs.length-50);{const fr=Math.min(100,t-last);fpsA+=(fr-fpsA)*.05;if(state=='play'){if(ST.gfx=='auto'){if(!LQ&&fpsA>26){lowT+=fr;if(lowT>2500){LQ=true;fpsA=16}}else if(!LQ)lowT=0}}}last=t;
