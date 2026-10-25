@@ -25,8 +25,8 @@ button:hover{background:#7cc4ee;color:#0b1a16}
 #tc .tb.big svg{width:52%;height:52%}
 #tc .tb svg .f{fill:#fff}
 #toast{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);z-index:60;display:flex;flex-direction:column-reverse;gap:8px;align-items:center;pointer-events:none;width:90%}
-#ov:has(.hm)~#toast{bottom:auto;top:10px;flex-direction:column}
-#toast div{background:rgba(16,28,25,.92);border:1px solid rgba(255,214,90,.7);color:#fff;font:700 15px system-ui,sans-serif;padding:9px 16px;border-radius:14px;box-shadow:0 4px 16px rgba(0,0,0,.4);animation:tIn .3s ease-out}
+#ov:has(.hm)~#toast,#ov[style*="display: flex"]~#toast{bottom:auto;top:10px;flex-direction:column}#tsum p{margin:2px 0;font-size:13px;line-height:1.25;text-align:center}#toast.bot{top:auto!important;bottom:6px!important;flex-direction:column-reverse!important}#tsum p.tsl{font-size:11px;opacity:.85;font-weight:600}#tsum p.tsh{font-size:14px;color:#ffd54f;border-bottom:1px solid rgba(255,255,255,.18);padding-bottom:4px;margin-bottom:4px}
+#toast div{max-width:min(92%,460px);background:rgba(16,28,25,.92);border:1px solid rgba(255,214,90,.7);color:#fff;font:700 15px system-ui,sans-serif;padding:9px 16px;border-radius:14px;box-shadow:0 4px 16px rgba(0,0,0,.4);animation:tIn .3s ease-out}
 @keyframes tIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
 
 .mn{--u:min(1vh,.627vw);position:absolute;inset:0;overflow:hidden;display:flex;align-items:center;justify-content:center;gap:calc(var(--u)*3);padding:calc(var(--u)*3) calc(var(--u)*4);background:radial-gradient(120% 95% at 18% 15%,#37995c 0,#17502f 46%,#0a2018 100%);color:#fff;text-align:left;font-family:system-ui,sans-serif}
@@ -92,7 +92,7 @@ button:hover{background:#7cc4ee;color:#0b1a16}
 .hmSd .hmLb{margin-top:calc(var(--u)*-1.2);position:relative;z-index:3;font-size:calc(var(--u)*3)}
 .hmSd:hover .ic img{transform:translateY(calc(var(--u)*-.8)) scale(1.05)}
 .hmSd:active .ic img{transform:scale(.95)}
-.hmSd .nt{position:absolute;right:calc(var(--u)*-.8);top:calc(var(--u)*-.8);min-width:calc(var(--u)*4.6);height:calc(var(--u)*4.6);padding:0 calc(var(--u)*.8);border-radius:999px;background:radial-gradient(circle at 35% 30%,#ff7a6a,#d1241a);border:calc(var(--u)*.4) solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.5);color:#fff;font:900 calc(var(--u)*2.6)/calc(var(--u)*3.9) system-ui;text-align:center;z-index:4;animation:hmPls 1.3s ease-in-out infinite}
+.hmB{position:relative}.hmSd .nt,.hmB .nt{position:absolute;right:calc(var(--u)*-.8);top:calc(var(--u)*-.8);min-width:calc(var(--u)*4.6);height:calc(var(--u)*4.6);padding:0 calc(var(--u)*.8);border-radius:999px;background:radial-gradient(circle at 35% 30%,#ff7a6a,#d1241a);border:calc(var(--u)*.4) solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.5);color:#fff;font:900 calc(var(--u)*2.6)/calc(var(--u)*3.9) system-ui;text-align:center;z-index:4;animation:hmPls 1.3s ease-in-out infinite}
 @keyframes hmPls{50%{transform:scale(1.15)}}
 .hmBt{left:50%;bottom:calc(var(--u)*2.2);transform:translateX(-50%);display:flex;gap:calc(var(--u)*1.4);align-items:stretch;z-index:3}
 .hmB{width:calc(var(--u)*21);height:calc(var(--u)*17);border-radius:calc(var(--u)*2.4);background:linear-gradient(180deg,#5f93bb 0,#3a6f97 55%,#2d5a80);border:calc(var(--u)*.55) solid #12304a;box-shadow:inset 0 calc(var(--u)*.7) 0 rgba(255,255,255,.35),inset 0 calc(var(--u)*-.6) 0 rgba(0,0,0,.18),0 calc(var(--u)*1) 0 #0b2136,0 calc(var(--u)*1.6) calc(var(--u)*1.4) rgba(0,0,0,.35);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(var(--u)*.4);cursor:pointer;padding:0;color:inherit;font:inherit;position:relative;transition:transform .12s,filter .12s}
@@ -306,7 +306,7 @@ input[type=range].rg::-moz-range-thumb{width:22px;height:22px;border-radius:50%;
 #tc .tb[data-a=w].on,#tc .tb[data-a=x].on{transform:translateY(3px) scale(.95);box-shadow:inset 0 3px 0 rgba(255,255,255,.4),0 1px 0 #0a1f26,0 2px 4px rgba(0,0,0,.4);filter:brightness(1.15)}
 
 .pmc{width:min(440px,92%)}
-.pmcol{display:flex;flex-direction:column;gap:8px;margin:8px 0}
+.pmcol{display:flex;flex-direction:column;gap:8px;margin:8px 0}.pmcol.g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.pmcol.g2 .pmk{min-width:0;overflow:hidden}.pmcol.g2 .pmk span{min-width:0}.pmcol.g2 .pmk b{font-size:15px}.pmcol.g2 .pmk small{font-size:10px}.pmcol.g2 .pmk img{width:38px;height:38px}
 .pmk{display:flex!important;align-items:center;gap:12px;text-align:left;padding:8px 12px!important;border-radius:16px!important;width:100%;color:#fff}
 .pmk img{width:46px;height:46px;object-fit:contain;filter:drop-shadow(0 2px 2px rgba(0,0,0,.45))}
 .pmk b{display:block;font-size:17px}.pmk small{display:block;font-size:11px;opacity:.9;font-weight:600;margin-top:1px}
@@ -516,27 +516,26 @@ addEventListener('pointermove',mcLook,{passive:true});addEventListener('pointerd
 function mnChar(){try{const o=document.createElement('canvas');o.width=o.height=520;const x=o.getContext('2d'),sc=c;c=x;try{p3Char(260,430,12.6,{t:0,i:4,front:1,fx:0,fy:.25,cele:true,near:true})}finally{c=sc}return o.toDataURL()}catch(e){return ''}}
 function menuHTML(){const ctrl=!tcOn(),done=QS?QS.q.filter(q=>q.done).length:0,lv=(QS&&QS.lv)||1,nd=lvNeed(lv),xp=(QS&&QS.xp)||0,pc=Math.max(3,Math.min(100,xp/nd*100)),nm=(window.KR&&KR.profile&&KR.profile.name)||L('Oyuncu','Player'),E=x=>String(x).replace(/[&<>"']/g,ch=>'&#'+ch.charCodeAt(0)+';');
  const sd=(side,y,ic,lb,fn,note)=>'<div class="hmSd" style="'+side+':calc(var(--u)*7);top:calc(var(--u)*'+y+')" onclick="mnGo(()=>'+fn+')"><div class="ic"><img src="assets/i_'+ic+'.png">'+(note?'<span class="nt">'+note+'</span>':'')+'</div><div class="pd"></div><div class="hmLb">'+lb+'</div></div>';
- const bt=(ic,lb,fn,cls)=>'<button class="hmB '+(cls||'')+'" onclick="mnGo(()=>'+fn+')"><img src="assets/i_'+ic+'.png"><span class="hmLb">'+lb+'</span></button>';
+ const bt=(ic,lb,fn,cls,note)=>'<button class="hmB '+(cls||'')+'" onclick="mnGo(()=>'+fn+')"><img src="assets/i_'+ic+'.png">'+(note?'<span class="nt">'+note+'</span>':'')+'<span class="hmLb">'+lb+'</span></button>';
  const left=3-done;
  return '<div class="hm">'+
  '<div class="hmTop" onclick="mnGo(()=>seasonUI())"><div style="position:relative;z-index:2"><img class="hmBadge" src="assets/badge.png"><div class="hmBadgeN">'+lv+'</div></div><div class="hmXp"><i style="width:'+pc+'%"></i><b>'+xp+' / '+nd+'</b></div></div>'+
  '<div class="hmCoin" onclick="mnGo(()=>shopUI())"><img src="assets/bar_coin.png"><b>'+shopBal()+'</b></div>'+
- (ctrl?'<button class="hmInfo" onclick="mnGo(()=>helpUI())">?</button>':'')+
+ '<button class="hmInfo" style="right:calc(var(--u)*36.5)" onclick="mnGo(()=>settings(\'menu\'))" aria-label="Ayarlar">⚙</button>'+(ctrl?'<button class="hmInfo" style="right:calc(var(--u)*43.5)" onclick="mnGo(()=>helpUI())">?</button>':'')+
  '<div class="hmLogo hmLb">SCRIBBLE KICK<small>'+L("6'ya 6 mini futbol","6-a-side mini football")+'</small></div>'+
  '<div class="hmQ" onclick="mnGo(()=>questUI())"><img src="assets/i_medal.png"><div>'+L('Günlük görev','Daily quests')+' '+done+'/3'+(QS&&QS.st?'<small>🔥 '+QS.st+' '+L('günlük seri','day streak')+'</small>':'<small>'+L('Ödülleri topla','Collect rewards')+'</small>')+'</div></div>'+
  (isWE()?'<div class="hmWe">🎉 '+L('Hafta sonu: altın ×2!','Weekend: gold ×2!')+'</div>':'')+
  '<div class="hmPod"><img src="assets/podium.png"></div>'+
  '<div class="hmCh" id="hmCh" onclick="hmHop()">'+mascotHTML()+'</div>'+
  '<div class="hmNm hmLb">'+E(nm)+'</div>'+
- sd('left',27,'medal',L('GÖREVLER','QUESTS'),'questUI()',(QS&&QS.cl&&QS.cl.length)?'🎁':(left>0?left:''))+
- sd('left',53,'wheel',L('ÇARK','WHEEL'),'wheelUI()',wheelReady()?'!':'')+
- sd('right',27,'basket',L('MAĞAZA','SHOP'),'shopUI()','')+
- sd('right',53,'stadium',L('SAHA','PITCH'),"{settings('menu');spg('theme')}",'')+
- '<div class="hmBt">'+bt('whistle',L('OYNA','PLAY'),'playUI()','pl')+bt('target',L('MİNİ OYUN','MINI GAMES'),'miniMenu()')+bt('trophy',L('TURNUVA','CUP'),'tourEntry()')+bt('shield',L('SOSYAL','SOCIAL'),'socialUI()')+bt('gear',L('AYARLAR','SETTINGS'),"settings('menu')")+'</div>'+
+ '<div class="hmBt">'+bt('whistle',L('OYNA','PLAY'),'playUI()','pl')+bt('medal',L('ÖDÜLLER','REWARDS'),'rewardsUI()','',rwNote())+bt('basket',L('MAĞAZA','SHOP'),'shopUI()')+bt('shield',L('SOSYAL','SOCIAL'),'socialUI()')+'</div>'+
  '</div>'}
 function hmHop(){const e=document.getElementById('hmCh');if(!e)return;mcHap(1300);if(!mcT)mcTick();try{au();sfxKick(false)}catch(_){}e.classList.remove('hop');void e.offsetWidth;e.classList.add('hop')}
+function rwNote(){const n=((QS&&QS.cl&&QS.cl.length)?1:0)+Math.max(0,3-(QS?QS.q.filter(q=>q.done).length:0))+(typeof spAvail=='function'?spAvail():0)+(wheelReady()?1:0);return (QS&&QS.cl&&QS.cl.length)?'🎁':(n>0?n:'')}
+function rewardsUI(){ov.style.display='flex';state=state=='pause'?state:'menu';const done=QS?QS.q.filter(q=>q.done).length:0,en=ST.lang=='en',nA=Object.keys(QS.ach||{}).length,cd=(ic,t,d,f,cl,nt)=>'<button class="pmk '+cl+'" onclick="'+f+'"><img src="assets/'+ic+'.png"><span style="flex:1"><b>'+t+'</b><small>'+d+'</small></span>'+(nt?'<span style="min-width:22px;height:22px;border-radius:11px;background:#e5382c;color:#fff;font:900 13px/22px system-ui;text-align:center;padding:0 5px">'+nt+'</span>':'')+'</button>';
+ ov.innerHTML='<div class="card pmc" style="width:min(560px,94vw)"><h1>🎁 '+L('Ödüller','Rewards')+'</h1><div class="pmcol g2">'+cd('i_medal',L('Görevler','Quests'),L('Günlük görevler: ','Daily quests: ')+done+'/3',"questUI()",'o',(QS.cl&&QS.cl.length)?'🎁':(3-done>0?3-done:''))+cd('i_trophy',L('Sezon yolu','Season path'),L('Seviye atla, ödül kazan','Level up, earn rewards'),"seasonUI()",'b',typeof spAvail=='function'&&spAvail()?spAvail():'')+cd('i_wheel',L('Çark','Wheel'),wheelReady()?L('Çevirmeye hazır!','Ready to spin!'):L('Günlük çark','Daily wheel'),"wheelUI()",'g',wheelReady()?'!':'')+cd('i_shield',L('Rozetler','Badges'),nA+'/'+ACH.length,"badgeUI()",'b','')+'</div><div class="row"><button onclick="menu()">'+L('Geri','Back')+'</button></div></div>'}
 function playUI(){const en=ST.lang=='en',ctrl=!tcOn(),cd=(ic,t,d,f,cl)=>'<button class="pmk '+cl+'" onclick="'+f+'"><img src="assets/'+ic+'.png"><span><b>'+t+'</b><small>'+d+'</small></span></button>';ov.style.display='flex';
- ov.innerHTML='<div class="card pmc"><h1>'+L('Nasıl oynamak istersin?','How do you want to play?')+'</h1><div class="pmcol">'+cd('i_target',L('Bilgisayara karşı','Vs computer'),L('Zorluğu sen seç','Pick the difficulty'),"diffUI()",'g')+cd('i_shield',L('Takım: ','Team: ')+TMS[TMS[ST.team]?ST.team:'blue'].n[en?1:0],L('Takımını ve yeteneğini seç','Pick your team and ability'),"teamPick()",'b')+(window.NETUI?cd('j_globe',L('Çevrimiçi','Online'),L('Arkadaşınla ya da rastgele rakiple','With a friend or a random rival'),"NETUI.lobby()",'b'):'')+(ctrl?cd('k_pad',L('2 Oyuncu','2 Players'),L('Aynı klavyede','On the same keyboard'),"mnGo(()=>go(2))",'o'):'')+'</div><div class="row"><button onclick="menu()">'+L('Geri','Back')+'</button></div></div>'}
+ ov.innerHTML='<div class="card pmc" style="width:min(560px,94vw)"><h1>'+L('Nasıl oynamak istersin?','How do you want to play?')+'</h1><div class="pmcol g2">'+cd('i_target',L('Bilgisayara karşı','Vs computer'),L('Zorluğu sen seç','Pick the difficulty'),"diffUI()",'g')+cd('i_shield',L('Takım: ','Team: ')+TMS[TMS[ST.team]?ST.team:'blue'].n[en?1:0],L('Takımını ve yeteneğini seç','Pick your team and ability'),"teamPick()",'b')+(window.NETUI?cd('j_globe',L('Çevrimiçi','Online'),L('Arkadaşınla ya da rastgele rakiple','With a friend or a random rival'),"NETUI.lobby()",'b'):'')+cd('i_trophy',L('Turnuva','Cup'),L('Sekiz rakibe karşı kupa için oyna','Fight for the cup'),"mnGo(()=>tourEntry())",'o')+cd('i_target',L('Mini oyunlar','Mini games'),L('Penaltı, serbest vuruş ve daha fazlası','Penalties, free kicks and more'),"mnGo(()=>miniMenu())",'g')+(ctrl?cd('k_pad',L('2 Oyuncu','2 Players'),L('Aynı klavyede','On the same keyboard'),"mnGo(()=>go(2))",'o'):'')+'</div><div class="row"><button onclick="menu()">'+L('Geri','Back')+'</button></div></div>'}
 function diffUI(){const en=ST.lang=='en',cd=(k,t,d,st)=>'<button class="pmd '+k+'" onclick="mnGo(()=>go(1,\''+({e:'easy',m:'medium',h:'hard'})[k]+'\'))" style="background-image:url(assets/'+({e:'d_easy',m:'d_med',h:'d_hard'})[k]+'.png)!important"><b>'+t+'</b><small>'+d+'</small></button>';ov.style.display='flex';
  ov.innerHTML='<div class="card pmc" style="width:min(560px,94%)"><h1>'+L('Zorluk','Difficulty')+'</h1><div class="pmr">'+cd('e',L('Kolay','Easy'),L('Rahat maç','Relaxed'),1)+cd('m',L('Orta','Medium'),L('Dengeli','Balanced'),2)+cd('h',L('Zor','Hard'),L('Acımasız','Ruthless'),3)+'</div><div class="row"><button class="bb" onclick="playUI()">'+L('Geri','Back')+'</button></div></div>'}
 function lbRows(a,me){const en=ST.lang=='en';return '<div class="lbl">'+a.map((x,i)=>{const t3=i<3,img=t3?'lb_'+(i+1):(me&&x.id==me?'lb_me':'lb_n'),nm=String(x.name||'').replace(/[<>&]/g,'');return '<div class="lbr'+(t3?' t3'+(i==0?' g1':''):'')+'" style="background-image:url(assets/'+img+'.png)">'+(t3?(i==0?'':'<span class="rk">'+(i+1)+'</span>'):'<span class="rk">'+(i+1)+'</span>')+'<span class="nm">'+nm+'</span><span class="pt">'+x.points+'</span></div>'}).join('')+'</div>'}
@@ -1271,7 +1270,7 @@ function tourEntry(){const t=tourLoad();if(!t){tourStart();return}state='menu';p
 function tourResume(){const t=tourLoad();if(!t){tourStart();return}if(t.res[t.r])t.res.length=t.r;tour=t;tour.opp=tourOpp(Math.min(tour.r,2));CT=TH[tour.opp.th]||CT;FC=null;applyTC();tourScreen()}
 function tourScreen(extra,btns){if(tour&&!(tour.r==2&&tour.res[2]&&tour.res[2].w==0))tourSave();state='end';pz.style.display='none';ov.style.display='flex';const en=ST.lang=='en',o=tourOpp(Math.min(tour.r,2));
  const nx=extra?'':'<div style="display:flex;gap:8px;align-items:center;justify-content:center;font-size:13px;margin:2px 0 6px"><b>▶ '+TRN[tour.r][en?1:0]+'</b>'+tEm(o.id,24)+'<b>'+o.n[en?1:0]+'</b><span style="opacity:.8">· '+TDN[o.d][en?1:0]+'</span></div>';
- ov.innerHTML='<div class="card" style="width:min(640px,97vw)"><h1>🏆 '+L('Turnuva','Tournament')+'</h1>'+(extra||'')+tbHTML()+nx+'<div class="row">'+(btns||'<button onclick="tourPlay()">'+L('Maça başla','Start match')+'</button><button class="bb" onclick="menu()">'+L('Menü','Menu')+'</button>')+'</div></div>'}
+ ov.innerHTML='<div class="card" style="width:min(640px,97vw)"><h1>🏆 '+L('Turnuva','Tournament')+'</h1>'+(extra||'')+tbHTML()+nx+'<div class="row">'+(btns||'<button onclick="tourPlay()">'+L('Maça başla','Start match')+'</button><button class="bb" onclick="menu()">'+L('Menü','Menu')+'</button>')+'</div><button class="xcl" aria-label="Kapat" onclick="menu()">✕</button></div>'}
 function tourPlay(){const o=tourOpp(tour.r);tour.opp=o;CT=TH[o.th];FC=null;applyTC();go(1,o.d)}
 function tourEnd(w,a,b){state='end';sfx('whistle_long');tour.res[tour.r]={a,b,w,pen:penRes?penRes.g:null};if(w==0){ev('tourRound');if(tour.r==2){ev('tourChamp');comment('champ')}}const en=ST.lang=='en';
  if(w==0){if(tour.r==2){tourClear();sfx('goal');tourScreen(statsHtml()+'<p style="font-size:26px;margin:4px 0">🏆 '+L('ŞAMPİYON!','CHAMPION!')+'</p>','<button onclick="tourStart()">'+L('Yeni turnuva','New tournament')+'</button><button onclick="menu()">'+L('Menü','Menu')+'</button>')}
@@ -1435,7 +1434,13 @@ function penHud(){const q=pen;if(!q)return;if(q.mini){const mm=q.mini,tx=mm.kind
 // ===== istatistik + görev/başarım =====
 let MS={};function stReset(){MS={pos:[0,0],shots:[0,0],sot:[0,0],pass:[0,0],passOK:[0,0],tackle:[0,0],foul:[0,0],save:[0,0],clk:0,lastShot:null,pp:null}}
 stReset();
-function toast(h){try{const t=document.getElementById('toast'),d=document.createElement('div');d.innerHTML=h;t.appendChild(d);setTimeout(()=>{d.style.transition='opacity .4s';d.style.opacity='0';setTimeout(()=>d.remove(),450)},3400)}catch(e){}}
+let tsBox=null,tsTm=0,tsFd=0,tsIt=[];
+function toast(h){try{const t=document.getElementById('toast');if(!t)return;if(tsIt.indexOf(h)>=0)return;tsIt.push(h);if(tsIt.length>7)tsIt.shift();
+ if(!tsBox||!tsBox.isConnected){tsBox=document.createElement('div');tsBox.id='tsum';t.appendChild(tsBox)}
+ tsBox.style.opacity='1';tsBox.style.transition='none';let sum=0;tsIt.forEach(x=>{const m=String(x).match(/\+(\d+)\s*🪙/g);if(m)m.forEach(y=>sum+=parseInt(y.replace(/\D/g,''),10)||0)});
+ const many=tsIt.length>1,strip=x=>String(x).replace(/<span[^>]*>[^<]*(topla|collect)[^<]*<\/span>/gi,'').replace(/\s*(Görevler'den topla|Görevlerden topla|Collect in Quests)/gi,'').replace(/\+\d+\s*🪙/g,'').replace(/<[^>]+>/g,'').replace(/🎁|✅/gu,'').replace(/\s+/g,' ').trim();const tp=()=>t.classList.toggle('bot',state=='end'||/KAZANDI|WINS|BERABERE|DRAW|KAYBETT|LOST/i.test((document.querySelector('#ov h1')||{}).textContent||''));tp();setTimeout(tp,350);
+ tsBox.innerHTML=many?'<p class="tsh">🎁 '+L('Ödüllerin','Your rewards')+(sum?' <b>+'+sum+' 🪙</b>':'')+'</p><p class="tsl">'+tsIt.map(strip).filter(Boolean).join(' · ')+'</p>':'<p>'+h+'</p>';
+ clearTimeout(tsTm);clearTimeout(tsFd);tsTm=setTimeout(()=>{if(!tsBox)return;tsBox.style.transition='opacity .4s';tsBox.style.opacity='0';tsFd=setTimeout(()=>{if(tsBox){tsBox.remove();tsBox=null}tsIt=[]},450)},3800)}catch(e){}}
 const QD=[
 {id:'goal3',e:'goal',g:3,r:4,n:['3 gol at','Score 3 goals']},{id:'goal1',e:'goal',g:1,r:2,n:['1 gol at','Score a goal']},
 {id:'win1',e:'win',g:1,r:3,n:['1 maç kazan','Win a match']},{id:'save3',e:'save',g:3,r:3,n:['3 kurtarış yap','Make 3 saves']},
