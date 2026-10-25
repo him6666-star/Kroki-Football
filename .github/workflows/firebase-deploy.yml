@@ -1,0 +1,23 @@
+name: Firebase yukle
+on:
+  workflow_dispatch:
+    inputs:
+      what:
+        description: "Ne yuklensin?"
+        default: "firestore:rules,firestore:indexes,functions"
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Fonksiyon bagimliliklari
+        run: cd functions && npm install
+      - name: Anahtari yaz
+        run: echo '${{ secrets.FIREBASE_KEY }}' > "$RUNNER_TEMP/key.json"
+      - name: Yukle
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/key.json
+        run: npx -y firebase-tools@13 deploy --project scribble-kick --only "${{ github.event.inputs.what }}" --non-interactive --force
