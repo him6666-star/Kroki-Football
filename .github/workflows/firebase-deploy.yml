@@ -17,6 +17,12 @@ jobs:
         run: cd functions && npm install
       - name: Anahtari yaz
         run: echo '${{ secrets.FIREBASE_KEY }}' > "$RUNNER_TEMP/key.json"
+      - name: Gerekli servisleri ac
+        continue-on-error: true
+        run: |
+          gcloud auth activate-service-account --key-file="$RUNNER_TEMP/key.json"
+          gcloud services enable cloudbilling.googleapis.com cloudbuild.googleapis.com cloudfunctions.googleapis.com cloudscheduler.googleapis.com artifactregistry.googleapis.com run.googleapis.com eventarc.googleapis.com pubsub.googleapis.com firebaserules.googleapis.com --project scribble-kick
+          sleep 60
       - name: Yukle
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/key.json
