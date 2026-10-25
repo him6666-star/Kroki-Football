@@ -296,8 +296,8 @@ input[type=range].rg::-moz-range-thumb{width:22px;height:22px;border-radius:50%;
 .whi{pointer-events:none}.whi img{display:block}.whn{position:absolute;left:0;right:0;top:30%;text-align:center;font:900 calc(var(--ws)*.06)/1 system-ui;color:#7a4a00;text-shadow:0 1px 0 #fff3b0}
 .card .whb{background:none;border:12px solid transparent;border-image:url(assets/wh_btn.png) 30 fill/12px;color:#fff;font-weight:900;text-shadow:0 2px 2px rgba(0,0,0,.5);min-height:44px}
 .card .whb.off{border-image-source:url(assets/wh_btnoff.png);opacity:1;color:#e6e6e6}
-.cin:has(#whl){zoom:.8}
-@media(max-height:430px){.cin:has(#whl){zoom:.74}}
+.cin:has(#whl):not(:has(.spl)){zoom:.8}
+@media(max-height:430px){.cin:has(#whl):not(:has(.spl)){zoom:.74}}
 
 #tc .tb[data-a=w],#tc .tb[data-a=x]{border:3px solid #10303a;box-shadow:inset 0 3px 0 rgba(255,255,255,.55),inset 0 -5px 0 rgba(0,0,0,.28),0 4px 0 #0a1f26,0 6px 8px rgba(0,0,0,.4);color:#fff;text-shadow:0 1px 0 rgba(0,0,0,.55)}
 #tc .tb[data-a=w]{background:radial-gradient(circle at 35% 25%,#9fe3ff,#2f8fe0 58%,#1a5fb0)}
@@ -570,14 +570,14 @@ function playUI(keep){NAVS=keep?NAVS:[];const ctrl=!tcOn(),en=ST.lang=='en';ov.s
 function diffUI(){const en=ST.lang=='en',cd=(k,t,d,st)=>'<button class="pmd '+k+'" onclick="mnGo(()=>go(1,\''+({e:'easy',m:'medium',h:'hard'})[k]+'\'))" style="background-image:url(assets/'+({e:'d_easy',m:'d_med',h:'d_hard'})[k]+'.png)!important"><b>'+t+'</b><small>'+d+'</small></button>';ov.style.display='flex';
  ov.innerHTML='<div class="card pmc" style="width:min(560px,94%)"><h1>'+L('Zorluk','Difficulty')+'</h1><div class="pmr">'+cd('e',L('Kolay','Easy'),L('Rahat maç','Relaxed'),1)+cd('m',L('Orta','Medium'),L('Dengeli','Balanced'),2)+cd('h',L('Zor','Hard'),L('Acımasız','Ruthless'),3)+'</div><div class="row"><button class="bb" onclick="playUI()">'+L('Geri','Back')+'</button></div></div>'}
 function lbRows(a,me){const en=ST.lang=='en';return '<div class="lbl">'+a.map((x,i)=>{const t3=i<3,img=t3?'lb_'+(i+1):(me&&x.id==me?'lb_me':'lb_n'),nm=String(x.name||'').replace(/[<>&]/g,'');return '<div class="lbr'+(t3?' t3'+(i==0?' g1':''):'')+'" style="background-image:url(assets/'+img+'.png)">'+(t3?(i==0?'':'<span class="rk">'+(i+1)+'</span>'):'<span class="rk">'+(i+1)+'</span>')+'<span class="nm">'+nm+'</span><span class="pt">'+x.points+'</span></div>'}).join('')+'</div>'}
-let SOT='p';
-function socTab(k){SOT=k;socialUI(1)}
-function socialUI(keep){NAVS=keep?NAVS:[];ov.style.display='flex';const k=window.KR,nm=k&&k.profile?String(k.profile.name).replace(/[<>&]/g,''):L('Profil','Profile');
+let SOT='p',SOCW=0;
+function socTab(k){if(k=='o'){navPush(socialUI);NETUI.lobby();return}SOT=k;socialUI(1)}
+function socItems(){const k=window.KR,nm=k&&k.profile?String(k.profile.name).replace(/[<>&]/g,''):L('Profil','Profile');const it=[{k:'p',im:'i_shield',l:L('Profil','Profile'),d:nm},{k:'l',im:'i_trophy',l:L('Skor tablosu','Leaderboard')}];if(window.NETUI)it.push({k:'o',im:'j_globe',l:'Online',d:L('Arkadaşlarınla oyna','Play with friends')});return it}
+function socialUI(keep){NAVS=keep?NAVS:[];ov.style.display='flex';const k=window.KR;
  if(!(k&&k.profileUI)){ov.innerHTML='<div class="card pmc" style="width:min(540px,96vw)"><h1>🛡 '+L('Sosyal','Social')+'</h1><p style="opacity:.8">'+L('Bağlantı kurulamadı','Not connected')+'</p><button class="xcl" aria-label="Kapat" onclick="retBack()">✕</button></div>';return}
- const items=[{k:'p',im:'i_shield',l:L('Profil','Profile'),d:nm},{k:'l',im:'i_trophy',l:L('Skor tablosu','Leaderboard')}];if(window.NETUI)items.push({k:'o',im:'j_globe',l:'Online'});if(!items.some(x=>x.k==SOT))SOT='p';
- const D={p:['s_profile','navPush(socialUI);KR.profileUI()',nm,L('Profilini düzenle','Edit your profile'),L('Profili aç','Open profile')],l:['s_board','navPush(socialUI);KR.boardUI()',L('Skor tablosu','Leaderboard'),L('Sıralamadaki yerini gör','See your rank'),L('Tabloyu aç','Open board')],o:['s_online','navPush(socialUI);NETUI.lobby()','Online',L('Arkadaşlarınla oyna','Play with friends'),L('Lobiye gir','Open lobby')]}[SOT];
- const right='<div class="mg" style="grid-template-columns:1fr"><div class="mc" onclick="'+D[1]+'" style="background-image:url(assets/'+D[0]+'.png)"><div class="mt"><b>'+D[2]+'</b><small class="dd">'+D[3]+'</small></div></div></div><div class="row"><button class="by" onclick="'+D[1]+'">'+D[4]+'</button></div>';
- ov.innerHTML=splCard('🛡 '+L('Sosyal','Social'),'',items,SOT,'socTab',right,720)}
+ if(SOT=='o')SOT='p';ov.innerHTML=splCard('🛡 '+L('Sosyal','Social'),'',socItems(),SOT,'socTab','<p style="opacity:.8;text-align:center;margin-top:30px">...</p>',720);
+ SOCW=Date.now()+6000;try{SOT=='l'?k.boardUI():k.profileUI()}catch(e){}}
+new MutationObserver(()=>{if(!SOCW||Date.now()>SOCW)return;const c=ov.querySelector(':scope>.card');if(!c||c.querySelector('.spL'))return;const t=document.createElement('div');t.innerHTML=c.innerHTML;t.querySelectorAll('h1,.xcl').forEach(e=>e.remove());t.querySelectorAll('button').forEach(b=>{if(/retBack|navPush/.test(b.getAttribute('onclick')||''))b.remove()});t.querySelectorAll('.row').forEach(r=>{if(!r.children.length)r.remove()});const h='<div class="rwb">'+t.innerHTML+'</div>';ov.innerHTML=splCard('🛡 '+L('Sosyal','Social'),'',socItems(),SOT,'socTab',h,720)}).observe(ov,{childList:true});
 
 function helpUI(){ov.style.display='flex';ov.innerHTML='<div class="card" style="width:min(560px,94%)"><h1>ℹ '+L('Kontroller','Controls')+'</h1>'+helpText()+'<div class="row"><button onclick="retBack()">'+L('Geri','Back')+'</button></div></div>'}
 function mnGo(f){try{au();sfxKick(false)}catch(e){}f()}
@@ -1540,6 +1540,8 @@ const ACH=[
 {id:'passer',i:'🔗',r:6,n:['Oyun kurucu','Playmaker'],d:['100 pas tamamla','100 passes'],t:q=>(q.tot.pass||0)>=100},
 {id:'tackler',i:'🦵',r:6,n:['Kesici','Tackler'],d:['50 müdahale','50 tackles'],t:q=>(q.tot.tackle||0)>=50},
 {id:'mini3',i:'🎮',r:4,n:['Antrenman','Training'],d:['3 mini oyun oyna','Play 3 mini games'],t:q=>(q.tot.mini||0)>=3},
+{id:'wkboard',i:'📊',r:8,n:['Listede','On the board'],d:['Haftalık skor tablosuna gir','Reach the weekly leaderboard'],t:q=>(q.tot.wkBoard||0)>=1},
+{id:'wktop',i:'🏆',r:25,n:['Haftanın yıldızı','Star of the week'],d:['Haftayı ilk 3\'te bitir','Finish a week in the top 3'],t:q=>(q.tot.wkTop||0)>=1},
 {id:'corner',i:'📐',r:8,n:['Köşe avcısı','Corner hunter'],d:['Köşe nişancısında 25+ puan','25+ in Corner Sniper'],t:(q,c)=>(c.mc||0)>=25}];
 let QS=null;
 const SPI={5:'b_gold',10:'t_fire',15:'b_neon',20:'t_ice',25:'b_ice',30:'t_star'},SPMAX=30;
@@ -1572,7 +1574,7 @@ function statsHtml(){const m=MS,tp=(m.pos[0]+m.pos[1])||1,a=Math.round(m.pos[0]/
 function loginBox(){const st=QS.st||1,cur=Math.min(st,7),nx=Math.min(st+1,7)+1;let ch='';for(let d=1;d<=7;d++){const done=d<=cur,now=d==cur;ch+='<div style="flex:1;padding:5px 0;border-radius:9px;text-align:center;font-size:11px;background:'+(now?'rgba(255,213,79,.28)':done?'rgba(95,224,122,.2)':'rgba(255,255,255,.06)')+';border:1px solid '+(now?'#ffd54f':'transparent')+'"><div style="opacity:.75">'+L('Gün ','Day ')+d+'</div><b style="color:'+(done?'#ffd54f':'#fff')+'">'+(done?'✓ ':'')+'🪙'+(d+1)+'</b></div>'}
  return '<div style="margin:6px 0 10px;padding:9px;border-radius:14px;background:rgba(255,255,255,.07);text-align:left"><div style="display:flex;justify-content:space-between;font-size:14px"><b>📅 '+L('Günlük giriş ödülü','Daily login reward')+'</b><span style="color:#ffd54f">'+L('Seri: ','Streak: ')+st+' '+L('gün','d')+'</span></div><div style="display:flex;gap:4px;margin:7px 0">'+ch+'</div><div style="font-size:12px;opacity:.85">✅ '+L('Bugünkü ödül alındı: ','Today claimed: ')+'<b style="color:#ffd54f">+'+(cur+1)+' 🪙</b> · '+L('Yarın gelirsen: ','Come back tomorrow: ')+'<b style="color:#ffd54f">+'+nx+' 🪙</b></div></div>'}
 const QIC={goal:'k_goal',win:'k_trophy',save:'j_glove',pass:'j_boot',tackle:'k_boots',penSave:'k_pen',penGoal:'k_pen',shot:'k_goal',clean:'i_shield',mini:'k_pad',hardPlay:'k_flame',tourRound:'i_trophy',tourWin:'i_trophy',tourWinEasy:'i_trophy',tourWinMedium:'i_trophy',tourWinHard:'i_trophy',badge:'i_shield'};
-const ACHP={first_goal:['goal',1],goals25:['goal',25],goals100:['goal',100],first_win:['win',1],wins10:['win',10],hardwin:['hardWin',1],clean1:['clean',1],saves20:['save',20],penhero:['penSave',3],pengoals:['penGoal',10],champ:['tourChamp',1],passer:['pass',100],tackler:['tackle',50],mini3:['mini',3]};
+const ACHP={first_goal:['goal',1],goals25:['goal',25],goals100:['goal',100],first_win:['win',1],wins10:['win',10],hardwin:['hardWin',1],clean1:['clean',1],saves20:['save',20],penhero:['penSave',3],pengoals:['penGoal',10],champ:['tourChamp',1],passer:['pass',100],tackler:['tackle',50],mini3:['mini',3],wkboard:['wkBoard',1],wktop:['wkTop',1]};
 function badgeUI(){const en=ST.lang=='en',n=Object.keys(QS.ach).length;if((QS.achSeen||0)!=n){QS.achSeen=n;qSave()}
 const ad=ACH.map(a=>{const u=QS.ach[a.id];return '<div title="'+a.d[en?1:0]+'" style="padding:8px 4px;border-radius:12px;background:rgba(255,255,255,'+(u?.1:.04)+');opacity:'+(u?1:.5)+';text-align:center"><div style="font-size:24px;filter:'+(u?'none':'grayscale(1)')+'">'+a.i+'</div><div style="font-size:11px;font-weight:700">'+a.n[en?1:0]+'</div><div style="font-size:10px;opacity:.75">'+a.d[en?1:0]+'</div>'+(ACHP[a.id]?(()=>{const g=ACHP[a.id][1],v=Math.min(g,u?g:(QS.tot[ACHP[a.id][0]]||0));return '<div style="height:6px;border-radius:3px;background:rgba(255,255,255,.15);margin:4px 6px 1px;overflow:hidden"><i style="display:block;height:100%;width:'+v/g*100+'%;background:'+(u?'#7be08f':'#ffd54f')+'"></i></div><div style="font-size:10px;font-weight:700">'+v+' / '+g+'</div>'})():'')+'<div style="font-size:10px;color:#ffd54f">🪙 '+a.r+'</div></div>'}).join('');
  ov.style.display='flex';ov.innerHTML='<div class="card" style="width:min(460px,92vw)"><h1>🎖 '+L('Rozetler','Badges')+' ('+n+'/'+ACH.length+')</h1><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:8px 0">'+ad+'</div><div class="row"><button class="bb" onclick="retBack()">'+L('Geri','Back')+'</button></div></div>'}

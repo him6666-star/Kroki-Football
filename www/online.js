@@ -7,12 +7,13 @@
  firebase.initializeApp(cfg);
  const auth=firebase.auth(),db=firebase.firestore(),FV=firebase.firestore.FieldValue;
  const KR=window.KR={user:null,profile:null,ready:false,db:db,FV:FV};
+ const WK=()=>Math.floor((Date.now()+3*3600e3-345600000)/604800000);KR.week=WK;
  const PTS={easy:[1,0],medium:[3,1],hard:[5,2]}; // [galibiyet, beraberlik]
  const HI='background:#7cc4ee;color:#0b1a16';
  const back='<div class="row"><button onclick="retBack()">'+'\u2190'+'</button></div>';
  async function load(){
   try{const d=await db.collection('users').doc(KR.user.uid).get();KR.profile=d.exists?d.data():null}catch(e){KR.profile=null}
-  const first=!KR.ready;KR.ready=true;if(first&&typeof state!='undefined'&&state=='menu')menu();
+  KR.prizes();const first=!KR.ready;KR.ready=true;if(first&&typeof state!='undefined'&&state=='menu')menu();
  }
  auth.onAuthStateChanged(u=>{if(!u){auth.signInAnonymously().catch(()=>{KR.ready=true});return}KR.user=u;load()});
  KR.native=!!(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform());
@@ -63,16 +64,30 @@
    menu();
   }catch(e){m.textContent=T('Kaydedilemedi. Tekrar dene.','Could not save. Try again.')}
  };
- KR.boardUI=async()=>{
-  ov.style.display='flex';ov.innerHTML='<div class="card"><h1>\ud83c\udfc6</h1><p>...</p></div>';
+ KR.boardUI=async(tab)=>{
+  tab=tab||KR.btab||'w';KR.btab=tab;const wk=WK();
+  ov.style.display='flex';ov.innerHTML='<div class="card"><h1>🏆</h1><p>...</p></div>';
+  const tg='<div class="row" style="margin:0 0 6px">'+[['w',T('Bu hafta','This week')],['a',T('Tüm zamanlar','All time')]].map(([k,n])=>'<button class="'+(tab==k?'by':'')+'" style="min-height:34px;padding:0 12px;font-size:13px" onclick="SOCW=Date.now()+6000;KR.boardUI(\''+k+'\')">'+n+'</button>').join('')+'</div>';
   try{
-   const q=await db.collection('users').orderBy('points','desc').limit(20).get();
-   let h='<div class="card" style="width:min(520px,96vw)"><h1>\ud83c\udfc6 '+T('Skor tablosu','Leaderboard')+'</h1><div style="margin:6px 0">';
-   const arr=[];q.forEach(d=>{const x=d.data();arr.push({id:d.id,name:x.name,points:x.points})});const i=arr.length;
+   const col=db.collection('users');
+   const q=tab=='w'?await col.where('wk','==',wk).orderBy('wp','desc').limit(20).get():await col.orderBy('points','desc').limit(20).get();
+   let h='<div class="card" style="width:min(520px,96vw)"><h1>🏆 '+T('Skor tablosu','Leaderboard')+'</h1>'+tg;
+   if(tab=='w'){const left=Math.max(1,Math.ceil(((wk+1)*604800000+345600000-3*3600e3-Date.now())/864e5));h+='<div style="font-size:12px;opacity:.85;margin-bottom:4px">'+T('İlk 3\'e: 100 / 60 / 30 🪙 · '+left+' gün kaldı','Top 3 win: 100 / 60 / 30 🪙 · '+left+' day(s) left')+'</div>'}
+   h+='<div style="margin:6px 0">';
+   const arr=[];q.forEach(d=>{const x=d.data();arr.push({id:d.id,name:x.name,points:tab=='w'?x.wp:x.points})});const i=arr.length;
+   try{if(tab=='w'&&KR.user&&arr.some(z=>z.id==KR.user.uid)&&window.QS&&QS.bw!==wk){QS.bw=wk;if(typeof qSave=='function')qSave();if(typeof ev=='function')ev('wkBoard')}}catch(e){}
    if(i)h+=(window.lbRows?lbRows(arr,KR.user&&KR.user.uid):'');
-   if(!i)h+='<p style="text-align:center;opacity:.8">'+T('Hen\u00fcz kimse yok.','Nobody yet.')+'</p>';
+   if(!i)h+='<p style="text-align:center;opacity:.8">'+T('Henüz kimse yok.','Nobody yet.')+'</p>';
    ov.innerHTML=h+'</div>'+back+'</div>';
-  }catch(e){ov.innerHTML='<div class="card"><h1>\ud83c\udfc6</h1><p>'+T('Tablo y\u00fcklenemedi.','Could not load the leaderboard.')+'</p>'+back+'</div>'}
+  }catch(e){ov.innerHTML='<div class="card"><h1>🏆</h1><p>'+T('Tablo yüklenemedi.','Could not load the leaderboard.')+'</p>'+tg+back+'</div>'}
+ };
+ // gecen haftanin odulunu al (sunucu yazar): gorev listesine "toplanacak odul" olarak eklenir
+ KR.prizes=async()=>{
+  try{
+   if(!KR.user||typeof grant!='function'||!window.QS)return;
+   const q=await db.collection('prizes').where('uid','==',KR.user.uid).get();
+   for(const d of q.docs){const x=d.data();grant(Math.max(1,Math.min(100,x.gold|0)),'🏆 '+T('Haftalık sıralama #','Weekly rank #')+x.rank);try{if(typeof qSave=='function')qSave()}catch(e){}if(typeof ev=='function')ev('wkTop');await d.ref.delete()}
+  }catch(e){}
  };
  // gorev/basarim odulu (kurallar: tek seferde en fazla 25 puan)
  KR.bonus=(n)=>db.collection('users').doc(KR.user.uid).update({points:FV.increment(Math.max(1,Math.min(25,n|0))),qlast:FV.serverTimestamp()}).then(()=>{if(KR.profile)KR.profile.points+=n});
@@ -83,9 +98,9 @@
   if(!KR.user)return '';
   if(!KR.profile)return '<p style="margin:6px 0;font-size:14px;opacity:.9">'+T('Puan kaydetmek i\u00e7in profil olu\u015ftur.','Create a profile to save points.')+'</p><div class="row"><button onclick="KR.profileUI()">\ud83d\udc64 '+T('Profil','Profile')+'</button></div>';
   const p=KR.profile,g=Math.min(a,20);
-  const upd={points:FV.increment(gain),wins:FV.increment(w?1:0),draws:FV.increment(dr?1:0),losses:FV.increment(!w&&!dr?1:0),goals:FV.increment(g),matches:FV.increment(1),last:FV.serverTimestamp()};
+  const wk=WK(),sw=p.wk===wk;const upd={wk:wk,wp:sw?FV.increment(gain):gain,points:FV.increment(gain),wins:FV.increment(w?1:0),draws:FV.increment(dr?1:0),losses:FV.increment(!w&&!dr?1:0),goals:FV.increment(g),matches:FV.increment(1),last:FV.serverTimestamp()};
   db.collection('users').doc(KR.user.uid).update(upd).catch(()=>{});
-  p.points+=gain;p.wins+=w?1:0;p.draws+=dr?1:0;p.losses+=!w&&!dr?1:0;p.goals+=g;p.matches+=1;
+  p.wp=(sw?(p.wp||0):0)+gain;p.wk=wk;p.points+=gain;p.wins+=w?1:0;p.draws+=dr?1:0;p.losses+=!w&&!dr?1:0;p.goals+=g;p.matches+=1;
   return '<p style="margin:6px 0;font-size:16px;color:#7CFC8A">'+(gain?'+'+gain+' '+T('puan','points'):T('Puan yok','No points'))+' \u00b7 '+T('Toplam','Total')+': <b>'+p.points+'</b></p>';
  };
 })();
