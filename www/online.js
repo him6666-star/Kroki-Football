@@ -9,7 +9,7 @@
  const KR=window.KR={user:null,profile:null,ready:false,db:db,FV:FV};
  const PTS={easy:[1,0],medium:[3,1],hard:[5,2]}; // [galibiyet, beraberlik]
  const HI='background:#7cc4ee;color:#0b1a16';
- const back='<div class="row"><button onclick="menu()">'+'\u2190'+'</button></div>';
+ const back='<div class="row"><button onclick="retBack()">'+'\u2190'+'</button></div>';
  async function load(){
   try{const d=await db.collection('users').doc(KR.user.uid).get();KR.profile=d.exists?d.data():null}catch(e){KR.profile=null}
   const first=!KR.ready;KR.ready=true;if(first&&typeof state!='undefined'&&state=='menu')menu();
