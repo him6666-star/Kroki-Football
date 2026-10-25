@@ -42,13 +42,14 @@
  KR.profileUI=()=>{
   if(!KR.user){ov.innerHTML='<div class="card"><h1>\ud83d\udc64</h1><p>'+T('Ba\u011flant\u0131 kurulamad\u0131. \u0130nterneti kontrol et.','Could not connect. Check your internet.')+'</p>'+back+'</div>';return}
   const p=KR.profile;
-  let h='<div class="card"><h1>\ud83d\udc64 '+T('Profil','Profile')+'</h1>';
-  if(p)h+='<p style="margin:4px 0 10px;opacity:.9">'+T('Puan','Points')+': <b>'+p.points+'</b> \u00b7 '+T('Ma\u00e7','Matches')+': '+p.matches+' \u00b7 G/B/M: '+p.wins+'/'+p.draws+'/'+p.losses+' \u00b7 '+T('Gol','Goals')+': '+p.goals+'</p>';
-  h+='<div class="row"><input id="krn" maxlength="16" placeholder="'+T('Oyuncu ad\u0131 (3-16)','Player name (3-16)')+'" value="'+(p?esc(p.name):'')+'" style="padding:10px 14px;border-radius:999px;border:1px solid var(--bd);background:#1a2e28;color:#fff;font:600 15px system-ui;text-align:center;width:210px"></div>';
+  let h='<div class="card" style="width:min(560px,96vw)"><h1>\ud83d\udc64 '+T('Profil','Profile')+'</h1>';
+  h+='<div class="pav"><div class="pfr">'+(window.mascotHTML?mascotHTML(1):'')+'</div><div class="pnm">';
+  h+='<input id="krn" class="pin" maxlength="16" placeholder="'+T('Oyuncu ad\u0131 (3-16)','Player name (3-16)')+'" value="'+(p?esc(p.name):'')+'">';
   const gu=KR.user&&!KR.user.isAnonymous;
-  h+='<div id="krm" style="min-height:20px;font-size:13px;opacity:.85"></div><div class="row"><button style="'+HI+'" onclick="KR.saveName()">'+(p?T('Ad\u0131 de\u011fi\u015ftir','Rename'):T('Profil olu\u015ftur','Create profile'))+'</button></div>';
+  h+='<div id="krm" style="min-height:16px;font-size:12px;opacity:.85"></div><button class="by" onclick="KR.saveName()">'+(p?T('Ad\u0131 de\u011fi\u015ftir','Rename'):T('Profil olu\u015ftur','Create profile'))+'</button></div></div>';
+  if(p)h+='<div class="tile4"><div class="tl"><b>'+p.points+'</b><small>'+T('Puan','Points')+'</small></div><div class="tl"><b>'+p.matches+'</b><small>'+T('Ma\u00e7','Matches')+'</small></div><div class="tl"><b>'+p.wins+'/'+p.draws+'/'+p.losses+'</b><small>G/B/M</small></div><div class="tl"><b>'+p.goals+'</b><small>'+T('Gol','Goals')+'</small></div></div>';
   h+='<p style="margin:8px 0 4px;font-size:13px;opacity:.8">'+(gu?'\u2705 Google: '+esc(KR.user.email||''):T('Misafir hesab\u0131 (uygulama silinirse puanlar kaybolur)','Guest account (points are lost if the app is deleted)'))+'</p>';
-  h+='<div class="row">'+(gu?'<button onclick="KR.signOut()">'+T('\u00c7\u0131k\u0131\u015f yap','Sign out')+'</button>':'<button style="background:#fff;color:#222" onclick="KR.googleLogin()">G  '+T('Google ile giri\u015f yap','Sign in with Google')+'</button>')+'</div>'+back+'</div>';
+  h+='<div class="row">'+(gu?'<button onclick="KR.signOut()">'+T('\u00c7\u0131k\u0131\u015f yap','Sign out')+'</button>':'<button class="gbt" onclick="KR.googleLogin()"><b style="color:#4285f4">G</b>  '+T('Google ile giri\u015f yap','Sign in with Google')+'</button>')+'</div>'+back+'</div>';
   ov.style.display='flex';ov.innerHTML=h;
  };
  KR.saveName=async()=>{
@@ -66,8 +67,9 @@
   ov.style.display='flex';ov.innerHTML='<div class="card"><h1>\ud83c\udfc6</h1><p>...</p></div>';
   try{
    const q=await db.collection('users').orderBy('points','desc').limit(20).get();
-   let h='<div class="card" style="min-width:min(420px,86%)"><h1>\ud83c\udfc6 '+T('Skor tablosu','Leaderboard')+'</h1><div style="text-align:left;max-height:240px;overflow:auto;margin:6px 0">';
-   let i=0;q.forEach(d=>{const x=d.data();i++;const me=KR.user&&d.id==KR.user.uid;h+='<div style="display:flex;gap:10px;padding:5px 8px;border-radius:8px;'+(me?'background:rgba(124,196,238,.18);':'')+'"><span style="width:24px;opacity:.7">'+i+'</span><span style="flex:1">'+esc(x.name)+'</span><b>'+x.points+'</b></div>'});
+   let h='<div class="card" style="width:min(520px,96vw)"><h1>\ud83c\udfc6 '+T('Skor tablosu','Leaderboard')+'</h1><div style="margin:6px 0">';
+   const arr=[];q.forEach(d=>{const x=d.data();arr.push({id:d.id,name:x.name,points:x.points})});const i=arr.length;
+   if(i)h+=(window.lbRows?lbRows(arr,KR.user&&KR.user.uid):'');
    if(!i)h+='<p style="text-align:center;opacity:.8">'+T('Hen\u00fcz kimse yok.','Nobody yet.')+'</p>';
    ov.innerHTML=h+'</div>'+back+'</div>';
   }catch(e){ov.innerHTML='<div class="card"><h1>\ud83c\udfc6</h1><p>'+T('Tablo y\u00fcklenemedi.','Could not load the leaderboard.')+'</p>'+back+'</div>'}
