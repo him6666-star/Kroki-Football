@@ -42,7 +42,7 @@
   if(joinTimer){clearTimeout(joinTimer);joinTimer=null}
   if(unsub){unsub();unsub=null}
   if(n.role=='host'){db.collection('rooms').doc(n.code).delete().catch(()=>{})}
-  n.me={nm:(KR.profile&&KR.profile.name)||T('Oyuncu','Player'),lv:(window.QS&&QS.lv)||1};send(n.ctl,{k:'hi',nm:n.me.nm,lv:n.me.lv});
+  n.me={nm:(KR.profile&&KR.profile.name)||T('Oyuncu','Player'),lv:(window.QS&&QS.lv)||1};n.me.tm=(window.TMS&&TMS[ST.team]&&tmOpen(ST.team))?ST.team:'blue';send(n.ctl,{k:'hi',nm:n.me.nm,lv:n.me.lv,tm:n.me.tm});
   ov.style.display='flex';ov.innerHTML=vsHTML(n.role=='host',n.me,n.opp);try{sfx('whistle_pen')}catch(e){}
  }
  // ---------- host ----------
@@ -53,7 +53,7 @@
    fa:fa.map(f=>{const o={};for(const k in f){if(k=='a'||k=='v')o[k]=P.indexOf(f[k]);else o[k]=f[k]}return o}),
    bars:bars.map(b=>({...b})),
    rk:rk?(()=>{const o={};for(const k in rk)if(k!='sm')o[k]=rk[k];return o})():null,
-   hd:hold?hold.t:-1,
+   hd:hold?hold.t:-1,tc:[q1(TCD[0]),q1(TCD[1])],ts:TS,
    nf:netFx.map(f=>f&&clock-f.t<4?{ag:q2(clock-f.t),y:q1(f.y),a:q2(f.a)}:null),
    gc:gcam?[q1(gcam.x),q1(gcam.y)]:null};
   return JSON.stringify(S);
@@ -75,6 +75,7 @@
  function applyInput(n,m){
   const old=n.rm||0;if(m===old)return;
   ACT.forEach((a,i)=>{const b=1<<i,was=old&b,now=m&b;if(now&&!was)vk('keydown',K2[a][0]);else if(!now&&was)vk('keyup',K2[a][0])});
+  if((m&1024)&&!(old&1024)){try{teamAct(1)}catch(e){}}
   n.rm=m;
  }
  // ---------- guest ----------
@@ -89,7 +90,7 @@
  }
  function onCtl(n,m){
   if(m.k=='in'&&n.role=='host'){applyInput(n,m.m|0)}
-  else if(m.k=='hi'){n.opp={nm:String(m.nm||'').slice(0,20),lv:m.lv|0};const e=document.getElementById('vsn2');if(e){e.textContent=n.opp.nm||'?';const l=document.getElementById('vsl2');if(l)l.textContent=n.opp.lv?'\u2b06 '+(ST.lang=='en'?'Lv.':'Sv.')+n.opp.lv:''}}
+  else if(m.k=='hi'){n.opp={nm:String(m.nm||'').slice(0,20),lv:m.lv|0,tm:(window.TMS&&TMS[m.tm])?m.tm:'blue'};const e=document.getElementById('vsn2');if(e){e.textContent=n.opp.nm||'?';const l=document.getElementById('vsl2');if(l)l.textContent=n.opp.lv?'\u2b06 '+(ST.lang=='en'?'Lv.':'Sv.')+n.opp.lv:''}}
   else if(m.k=='start'&&n.role=='guest'){startGuest(n,m)}
   else if(m.k=='ev'&&n.role=='guest'){m.e.forEach(x=>sfxPlay(x))}
   else if(m.k=='end'&&n.role=='guest'){guestEnd(m.sc)}
@@ -101,7 +102,7 @@
   if(n.off==null||o<n.off)n.off=o;else n.off+=(o-n.off)*.02;
   n.buf.push(S);if(n.buf.length>30)n.buf.shift();
   // kesikli alanlar hemen
-  score=S.sc;time=S.tm;half=S.h;ext=S.ex;froze=S.fz;msg=S.m;msg2=S.m2;msg2t=S.m2t;if(S.sh>shake)shake=S.sh;act=S.a;
+  if(S.ts&&S.ts.length==2&&TMS[S.ts[0]]&&TMS[S.ts[1]])TS=S.ts;if(S.tc)TCD=S.tc;score=S.sc;time=S.tm;half=S.h;ext=S.ex;froze=S.fz;msg=S.m;msg2=S.m2;msg2t=S.m2t;if(S.sh>shake)shake=S.sh;act=S.a;
   S.p.forEach((a,i)=>{const p=P[i];if(!p)return;p.vx=a[2];p.vy=a[3];p.fx=a[4];p.fy=a[5];p.stun=a[6];p.off=a[7];p.ch=a[8];p.ax=a[9];p.ay=a[10];p.sp=a[11];p.mk=a[12];p.mkt=a[13];p.bleed=a[14]});
   if(S.b&&ball){ball.vx=S.b[2];ball.vy=S.b[3];ball.sq=S.b[5];ball.fire=!!S.b[6];ball.hide=S.b[7]?1:0;ball.jet=!!S.b[8]}
   fa=S.fa.map(f=>({...f,a:P[f.a],v:P[f.v]})).filter(f=>f.a&&f.v);
@@ -127,7 +128,7 @@
   bars.forEach(x=>{x.a+=dt/GS});
   fa.forEach(x=>{x.t+=dt/GS});
   if(msg2t>0)msg2t-=dt/GS;
-  let m=0;ACT.forEach((k,i)=>{if(K1[k].some(c=>keys.has(c)))m|=1<<i});
+  let m=0;ACT.forEach((k,i)=>{if(K1[k].some(c=>keys.has(c)))m|=1<<i});if(keys.has('KeyE'))m|=1024;
   const now=performance.now();if(m!==n.lm||now-n.lt>40){n.lm=m;n.lt=now;send((n.inp&&n.inp.readyState=='open')?n.inp:n.ctl,{k:'in',m})}
  }
  // ---------- UI ----------
