@@ -21,7 +21,7 @@ jobs:
         continue-on-error: true
         run: |
           gcloud auth activate-service-account --key-file="$RUNNER_TEMP/key.json"
-          gcloud services enable cloudbilling.googleapis.com cloudbuild.googleapis.com cloudfunctions.googleapis.com cloudscheduler.googleapis.com artifactregistry.googleapis.com run.googleapis.com eventarc.googleapis.com pubsub.googleapis.com firebaserules.googleapis.com --project scribble-kick
+          gcloud services enable firebasehosting.googleapis.com cloudbilling.googleapis.com cloudbuild.googleapis.com cloudfunctions.googleapis.com cloudscheduler.googleapis.com artifactregistry.googleapis.com run.googleapis.com eventarc.googleapis.com pubsub.googleapis.com firebaserules.googleapis.com --project scribble-kick
           sleep 60
       - name: Yukle
         env:
