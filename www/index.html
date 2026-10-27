@@ -1780,7 +1780,7 @@ function skHud(f){const el=document.getElementById('sk');if(!el)return;const sho
 setInterval(skHud,250);
 
 // ===== MONETIZATION (STUB) — gerçek AdMob/Play Billing bağlanana kadar test sürümü =====
-const MON={prov:'stub',
+const MON_ON=false;const MON={prov:'stub',
  CAT:[{id:'noads',once:1,ic:'🚫',n:['Reklamsız Paket','Ad-Free Pack'],d:['Reklam ödülleri izlemeden verilir','Ad rewards given without watching'],pr:'₺79,99'},
   {id:'coins1',v:100,ic:'🪙',n:['100 Altın','100 Gold'],pr:'₺19,99'},
   {id:'coins2',v:300,ic:'💰',n:['300 Altın','300 Gold'],pr:'₺49,99'},
@@ -1801,7 +1801,7 @@ const MON={prov:'stub',
   qSave();toast('✅ '+it.n[ST.lang=='en'?1:0]);try{sfx('goal')}catch(e){}},
  restore(){toast('↻ '+L('Satın alımlar kontrol edildi','Purchases checked'))}};
 function monBonus(el,n){if(el.dataset.u)return;MON.ad('mend',ok=>{if(!ok)return;el.dataset.u=1;el.disabled=true;el.style.opacity=.5;grant(n,'🎬 '+L('Bonus','Bonus'),1);const x=MXP;if(x>0){xpAdd(x);toast('⭐ XP ×2 <span style="color:#ffd54f">+'+x+' XP</span>')}})}
-function monAdBtn(n){return '<div style="margin:4px 0 6px"><button class="by" onclick="monBonus(this,'+n+')">'+(MON.vip()?'🎁':'🎬')+' '+L('Bonus altın al','Get bonus gold')+' +'+n+' 🪙 &amp; XP ×2</button></div>'}
+function monAdBtn(n){if(!MON_ON)return '';return '<div style="margin:4px 0 6px"><button class="by" onclick="monBonus(this,'+n+')">'+(MON.vip()?'🎁':'🎬')+' '+L('Bonus altın al','Get bonus gold')+' +'+n+' 🪙 &amp; XP ×2</button></div>'}
 function shopAff(){const o={},b=shopBal();if(!QS)return o;SHOP.forEach(it=>{if(!it.c&&!(QS.own&&QS.own[it.id])&&b>=it.p)o[it.id]=it.k});UPG.forEach(u=>{const lv=(QS.up||{})[u.id]||0;if(lv<2&&b>=UPC[lv])o['u_'+u.id+lv]='upg'});Object.keys(THP).forEach(k=>{if(!ownT(k)&&b>=THP[k])o['p_'+k]='pitch'});return o}
 function shopNew(){if(!QS)return {};const a=shopAff(),sn=QS.shopSeen||[],o={};let ch=false;const keep=sn.filter(k=>k in a);if(keep.length!=sn.length){QS.shopSeen=keep;ch=true}for(const k in a)if(!keep.includes(k))o[k]=a[k];if(ch)qSave();return o}
 let SHN={};
@@ -1842,7 +1842,7 @@ let SHT='skill',SHO=0;function shopUI(){const en=ST.lang=='en';if(!SHO){SHO=1;SH
   const inBag=skBag().includes(it.id),bt=it.c?'<button onclick="shopBuy(\''+it.id+'\')" style="padding:5px 10px;font-size:12px;'+(shopBal()<it.p?'opacity:.5':'')+'">🪙 '+it.p+' · '+L('Al','Buy')+'</button><div style="font-size:11px;opacity:.85">'+L('Elinde: ','Owned: ')+'<b>'+skN(it.id)+'</b></div>'+(sk&&skN(it.id)>0?'<button onclick="skToggle(\''+it.id+'\')" style="padding:3px 8px;font-size:11px;'+(inBag?'background:#2f9a50':'')+'">🎒 '+(inBag?L('Çantada ✓','In bag ✓'):L('Çantaya al','Add to bag'))+'</button>':''):own&&sk?'<div style="font-size:12px;color:#7be08f;font-weight:700">✓ '+L('Açık','Owned')+'</div>':own?'<button onclick="shopEquip(\''+it.k+'\',\''+it.id+'\')" style="padding:5px 10px;font-size:12px;'+(eq?'background:#2f9a50':'')+'">'+(eq?L('Takılı ✓','Equipped ✓'):L('Tak','Equip'))+'</button>':'<button onclick="shopBuy(\''+it.id+'\')" style="padding:5px 10px;font-size:12px;'+(shopBal()<it.p?'opacity:.5':'')+'">🪙 '+it.p+'</button>';
   return '<div style="position:relative;padding:8px 4px;border-radius:12px;background:rgba(255,255,255,'+(eq?.16:.07)+');text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px">'+(SHN[it.id]?SDOT:'')+pv+'<div style="font-size:11px;font-weight:700">'+it.n[en?1:0]+'</div>'+(sk?'<div style="font-size:10px;opacity:.75;min-height:26px">'+it.d[en?1:0]+'</div>':'')+bt+'</div>'};
  const sec=(k,t)=>'<b style="display:block;margin-top:10px">'+t+'</b><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:8px 0">'+SHOP.filter(x=>x.k==k).map(card).join('')+'</div>';
- const SDOT='<i class="sdt"></i>',tdot=k=>Object.values(SHN).includes(k)?'<i class="rdot"></i>':'';const TB=[['skill',L('⚔ Yetenekler','⚔ Skills'),()=>bagHdr()+sec('skill','')],['upg',L('⬆ Yükseltme','⬆ Upgrades'),()=>upgSec()],['ball',L('⚽ Toplar','⚽ Balls'),()=>sec('ball','')],['trail',L('☄ İzler','☄ Trails'),()=>sec('trail','')],['pitch',L('🏟 Sahalar','🏟 Pitches'),()=>pitchSec()],['pack',L('💎 Paketler','💎 Packs'),()=>packSec()]];if(!TB.some(x=>x[0]==SHT))SHT='skill';
+ const SDOT='<i class="sdt"></i>',tdot=k=>Object.values(SHN).includes(k)?'<i class="rdot"></i>':'';const TB=[['skill',L('⚔ Yetenekler','⚔ Skills'),()=>bagHdr()+sec('skill','')],['upg',L('⬆ Yükseltme','⬆ Upgrades'),()=>upgSec()],['ball',L('⚽ Toplar','⚽ Balls'),()=>sec('ball','')],['trail',L('☄ İzler','☄ Trails'),()=>sec('trail','')],['pitch',L('🏟 Sahalar','🏟 Pitches'),()=>pitchSec()]].concat(MON_ON?[['pack',L('💎 Paketler','💎 Packs'),()=>packSec()]]:[]);if(!TB.some(x=>x[0]==SHT))SHT='skill';
  const tabsI=TB.map(x=>({k:x[0],l:x[1]+tdot(x[0])}));
  ov.innerHTML=splCard('🛍 '+L('Mağaza','Shop'),'<div style="font-size:14px"><img src="assets/i_coin.png" style="height:18px;vertical-align:-3px"> <b style="color:#ffd54f">'+shopBal()+'</b> <span style="opacity:.7;font-size:12px">'+L('(görevlerden kazanılır)','(earned from quests)')+'</span></div>',tabsI,SHT,'shopTab',TB.find(x=>x[0]==SHT)[2]())}
 ORW={q:questUI,s:seasonUI,w:wheelUI,b:badgeUI};(function(){const M={questUI:'q',seasonUI:'s',wheelUI:'w',badgeUI:'b'};for(const n in M){const o=window[n];window[n]=function(){if(RWCAP)return o.apply(this,arguments);RWT=M[n];return rewardsUI(NAVS.length?1:0)}}})();
@@ -1858,7 +1858,7 @@ const QW=[{id:'w_goal',e:'goal',g:15,r:10,n:['Bu hafta 15 gol at','Score 15 goal
 {id:'w_clean',e:'clean',g:2,r:12,n:['2 maçı gol yemeden kazan','Win 2 matches without conceding']},{id:'w_pen',e:'penGoal',g:6,r:10,n:['6 penaltı at','Score 6 penalties']}];
 function qWeek(){const d=new Date(),m=new Date(d.getFullYear(),d.getMonth(),d.getDate()-((d.getDay()+6)%7)),k=m.getFullYear()+'-'+(m.getMonth()+1)+'-'+m.getDate();if(QS.wk===k&&QS.wq)return;QS.wk=k;let h=0;for(const ch of k)h=(h*37+ch.charCodeAt(0))>>>0;const pool=QW.slice(),pick=[];while(pick.length<3){h=(h*1103515245+12345)>>>0;pick.push(pool.splice(h%pool.length,1)[0])}QS.wq=pick.map(x=>({id:x.id,p:0,done:false}));qSave()}
 function dayKey(){const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()}
-function wheelReady(){return QS.wd!==dayKey()||QS.wex===dayKey()}function wheelExtraOk(){return QS.wd===dayKey()&&QS.wex!==dayKey()&&QS.wed!==dayKey()}function wheelExtra(){MON.ad('wheel',ok=>{if(!ok)return;QS.wex=dayKey();qSave();wheelUI()})}
+function wheelReady(){return QS.wd!==dayKey()||QS.wex===dayKey()}function wheelExtraOk(){return MON_ON&&QS.wd===dayKey()&&QS.wex!==dayKey()&&QS.wed!==dayKey()}function wheelExtra(){MON.ad('wheel',ok=>{if(!ok)return;QS.wex=dayKey();qSave();wheelUI()})}
 const WH=[{t:'g',v:5,w:25},{t:'g',v:10,w:22},{t:'i',id:'s_fire',ic:'🔥',w:9},{t:'g',v:15,w:14},{t:'g',v:25,w:9},{t:'i',id:'s_wall',ic:'🧱',w:9},{t:'g',v:50,w:3},{t:'i',id:'s_ufo',ic:'🛸',w:9}];
 let whBusy=false;
 function wheelUI(){state=state=='pause'?state:'menu';pz.style.display='none';ov.style.display='flex';const rd=wheelReady();
