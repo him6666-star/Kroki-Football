@@ -826,6 +826,7 @@ function bestPass(p,aim,relax,far){const q=par(p.t),dir=p.t?-1:1,k=1.212,mth=rel
  return best}
 function clr(){const pw=Math.hypot(ball.vx,ball.vy);ball.air={t:0,T:Math.max(.3,Math.log(pw/300)/1.212),H:Math.min(75,30+pw/1.212*.1)}}
 function autoDegaj(p){const b=bestPass(p,null,false,true)||bestPass(p,null,true,true);if(b){kick(p,b.tx-ball.x,b.ty-ball.y,b.v0);b.m.rx=b.tx;b.m.ry=b.ty;ball.pt={m:b.m,t:0};b.m.runt=Math.log(b.v0/330)/1.212+.6;psw={t:p.t,idx:b.m.i,time:0}}else{kick(p,p.t?-1:1,(Math.random()-.5)*.8,520);clr()}}
+function xplan(c){const k=wonT[c.t];if(c.xpK!==k){c.xpK=k;c.xp=Math.random()<.45}return c.xp}
 function wide(c){const g=c.t?PX:PX+PW,d=c.t?-1:1;return Math.abs(c.y-GY)>120&&Math.abs(g-c.x)<420&&d*(c.x-(PX+PW/2))>0}
 function throughPass(p){const gxx=p.t?PX:PX+PW,gdr=p.t?-1:1;let best=null;
  for(const m of P){if(m.t!=p.t||m.i==0||m==p||m.off>0)continue;const d0=Math.hypot(m.x-ball.x,m.y-ball.y);if(d0<60)continue;const mv=Math.hypot(m.vx,m.vy),run=mv>40&&gdr*m.vx>0,ld=Math.min(1.2,.5+d0/700);
@@ -875,7 +876,7 @@ function ai(p,dt){
    else if(ctr){const n=Math.max(1,def.length-1),sl=r-1-(n-1)/2;p.tx=own-sdv*Math.max(95,Math.min(175-28*Math.abs(sl),Math.abs(own-c.x)-30));p.ty=GY+sl*72+(c.y-GY)*.25}
    else{const o=att[r-1]||att[0];if(o){p.tx=o.x+sdv*40;p.ty=o.y+(GY-o.y)*.12}else{p.tx=p.hx;p.ty=p.hy}}
    p.tx=clamp(p.tx,PX+R,PX+PW-R);p.ty=clamp(p.ty,PY+R,PY+PH-R)}
-  else if(ball.car&&ball.car.t==p.t&&ball.car!==p&&!hold&&p.i>0){const c=ball.car;if(clock-wonT[p.t]<.5){p.tx=p.x;p.ty=p.y}else{if(!p.sup||clock-p.sup.t>.4||p.sup.c!==c)p.sup=supportSpot(p,c);p.tx=p.sup.x;p.ty=p.sup.y}}
+  else if(ball.car&&ball.car.t==p.t&&ball.car!==p&&!hold&&p.i>0){const c=ball.car;if(clock-wonT[p.t]<.5){p.tx=p.x;p.ty=p.y}else if(p.i>=3&&wide(c)&&Math.abs(gx-c.x)<430&&xplan(c)){const k=p.i-3,sg=(c.y>GY?-1:1)*(k==1?-1:1);p.tx=gx-dir*(42+k*30);p.ty=GY+sg*(k==2?8:34);p.sup=null}else{if(!p.sup||clock-p.sup.t>.4||p.sup.c!==c)p.sup=supportSpot(p,c);p.tx=p.sup.x;p.ty=p.sup.y}}
   else{p.tx=clamp(p.hx+(ball.x-(PX+PW/2))*.35+(ball.last==p.t?dir*100:0),PX+R,PX+PW-R);p.ty=p.hy+(ball.y-GY)*.3}}
  if(!keeper){if(hold){if(p.t==hold.t){p.tx=clamp(p.hx+dir*260,PX+R,PX+PW-R);p.ty=p.hy}else{p.tx=p.hx;p.ty=p.hy}}if(ko&&(p.t!=ko.t||ctl[ko.t])){p.tx=p.hx;p.ty=p.hy}}
  if(p.wl&&fk&&fk.t!=p.t){p.tx=p.wl[0];p.ty=p.wl[1]}else if(p.wl&&!fk)p.wl=null;
@@ -894,7 +895,7 @@ function ai(p,dt){
  if(keeper){if(!restart||(!restart.taker&&restart.t==p.t)){const b=bestPass(p,null,false,true)||bestPass(p,null,true,true);if(b){kick(p,b.tx-ball.x,b.ty-ball.y,b.v0);b.m.rx=b.tx;b.m.ry=b.ty;ball.pt={m:b.m,t:0};b.m.runt=Math.log(b.v0/330)/1.212+.6}else{kick(p,PX+PW/2-ball.x,(Math.random()<.5?-1:1)*(120+Math.random()*120),420);clr()}}return}
  if(!p.press||restart||ctl[p.t])return;
  if(Math.abs(gx-p.x)<260+60*q.sp&&!(p.wps&&Math.abs(p.y-GY)>130)){if(false){p.fireNow=true;kick(p,gx-ball.x,GY+(Math.random()-.5)*200/q.sp-ball.y,Math.min(1200,900*q.sp))}else kick(p,gx-ball.x,GY+(Math.random()-.5)*200/q.sp-ball.y,520*q.sp)}
- else if((p.pc||0)<=0){if(p.i>0&&wide(p)&&Math.abs(gx-p.x)<340&&Math.abs(p.y-GY)>130&&P.some(m=>m.t==p.t&&m.i>0&&m!=p&&!(m.off>0)&&Math.abs(gx-m.x)<340&&Math.abs(m.y-GY)<230)&&Math.random()<.85){humanPass(p,[dir,0]);p.pc=1.2;return}const pr=P.some(o=>o.t!=p.t&&Math.hypot(o.x-p.x,o.y-p.y)<50),b=bestPass(p);
+ else if((p.pc||0)<=0){if(p.i>0&&wide(p)&&Math.abs(gx-p.x)<340&&Math.abs(p.y-GY)>130&&P.some(m=>m.t==p.t&&m.i>0&&m!=p&&!(m.off>0)&&Math.abs(gx-m.x)<340&&Math.abs(m.y-GY)<230)&&Math.random()<(xplan(p)?.85:.1)){humanPass(p,[dir,0]);p.pc=1.2;return}const pr=P.some(o=>o.t!=p.t&&Math.hypot(o.x-p.x,o.y-p.y)<50),b=bestPass(p);
   if(b&&(pr||b.gain>30)){kick(p,b.tx-ball.x,b.ty-ball.y,b.v0);p.pc=1.2;ball.pt={m:b.m,t:0};globalThis.__lp&&globalThis.__lp(p,b.m);
    if(!(ctl[b.m.t]&&P[NP*b.m.t+act[b.m.t]]==b.m)){b.m.rx=b.tx;b.m.ry=b.ty;ball.pt={m:b.m,t:0};b.m.runt=Math.log(b.v0/330)/1.212+.6}}}
 }
