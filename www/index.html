@@ -1738,7 +1738,7 @@ const MON={prov:'stub',
  restore(){toast('↻ '+L('Satın alımlar kontrol edildi','Purchases checked'))}};
 function monBonus(el,n){if(el.dataset.u)return;MON.ad('mend',ok=>{if(!ok)return;el.dataset.u=1;el.disabled=true;el.style.opacity=.5;grant(n,'🎬 '+L('Bonus','Bonus'),1);const x=MXP;if(x>0){xpAdd(x);toast('⭐ XP ×2 <span style="color:#ffd54f">+'+x+' XP</span>')}})}
 function monAdBtn(n){return '<div style="margin:4px 0 6px"><button class="by" onclick="monBonus(this,'+n+')">'+(MON.vip()?'🎁':'🎬')+' '+L('Bonus altın al','Get bonus gold')+' +'+n+' 🪙 &amp; XP ×2</button></div>'}
-function shopAff(){const o={},b=shopBal();if(!QS)return o;SHOP.forEach(it=>{if(it.c?(skN(it.id)<99):!(QS.own&&QS.own[it.id])){if(b>=it.p)o[it.id]=it.k}});UPG.forEach(u=>{const lv=(QS.up||{})[u.id]||0;if(lv<2&&b>=UPC[lv])o['u_'+u.id+lv]='upg'});Object.keys(THP).forEach(k=>{if(!ownT(k)&&b>=THP[k])o['p_'+k]='pitch'});return o}
+function shopAff(){const o={},b=shopBal();if(!QS)return o;SHOP.forEach(it=>{if(!it.c&&!(QS.own&&QS.own[it.id])&&b>=it.p)o[it.id]=it.k});UPG.forEach(u=>{const lv=(QS.up||{})[u.id]||0;if(lv<2&&b>=UPC[lv])o['u_'+u.id+lv]='upg'});Object.keys(THP).forEach(k=>{if(!ownT(k)&&b>=THP[k])o['p_'+k]='pitch'});return o}
 function shopNew(){if(!QS)return {};const a=shopAff(),sn=QS.shopSeen||[],o={};let ch=false;const keep=sn.filter(k=>k in a);if(keep.length!=sn.length){QS.shopSeen=keep;ch=true}for(const k in a)if(!keep.includes(k))o[k]=a[k];if(ch)qSave();return o}
 let SHN={};
 function shopBal(){return Math.max(0,(QS.pts||0)+(QS.bought||0)-(QS.spent||0))}
