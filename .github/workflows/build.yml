@@ -23,7 +23,7 @@ jobs:
         run: npx cap sync android
       - name: APK derle
         working-directory: android
-        run: ./gradlew assembleDebug --no-daemon
+        run: ./gradlew assembleDebug bundleRelease --no-daemon
       - name: APK yukle
         uses: actions/upload-artifact@v4
         with:
