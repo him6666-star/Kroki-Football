@@ -850,6 +850,7 @@ function humanPass(p,ia){const aim=ia||[p.fx,p.fy];if(p.i>0&&backPass(p,aim))ret
    kick(p,tx-ball.x,ty-ball.y,v0);ball.air={t:0,T:Math.log(v0/300)/1.212,H:Math.min(95,48+d*.12)};if(bm){bm.rx=tx;bm.ry=ty;bm.runt=Math.log(v0/300)/1.212+.6;ball.pt={m:bm,t:0};psw={t:p.t,idx:bm.i,time:0}}msg2='ORTA!';msg2t=.8;xr={t:p.t,sy:p.y,time:2};return}}
  const far=p.i==0;let b=bestPass(p,aim,true,far)||bestPass(p,aim,false,far);
  if(!b){const m=P.filter(o=>o.t==p.t&&o.i>0&&o!=p&&!(o.off>0)).sort((x,y)=>Math.hypot(x.x-p.x,x.y-p.y)-Math.hypot(y.x-p.x,y.y-p.y))[0];if(!m)return;const d=Math.hypot(m.x-ball.x,m.y-ball.y);b={m,tx:m.x,ty:m.y,v0:Math.min(far?1700:1230,(d*1.212+330)*1.1)}}
+ if(p.i>0&&!far){const dd=Math.hypot(b.tx-ball.x,b.ty-ball.y);b.v0=PPW>1?Math.min(1500,b.v0*PPW):Math.min(b.v0,dd*1.212+395)}
  kick(p,b.tx-ball.x,b.ty-ball.y,b.v0);b.m.rx=b.tx;b.m.ry=b.ty;ball.pt={m:b.m,t:0};b.m.runt=Math.log(b.v0/330)/1.212+.6;psw={t:p.t,idx:b.m.i,time:0}}
 function ai(p,dt){
  if(pk&&pk.taker===p){p.vx=p.vy=0;p.fx=-pk.sd;p.fy=0;if(pk.time>1.6){kick(p,pk.ox-ball.x,GY+(Math.random()<.5?-1:1)*(35+Math.random()*18)-ball.y,640)}return}
@@ -957,7 +958,7 @@ fxs.forEach(t=>{t.l-=dt;if(t.sp){if(t.fl){t.vy-=(t.fl==2?160:300)*dt;t.vx+=(Math
    const can=p.cd<=0&&!p.ch&&Math.hypot(ball.x-p.x,ball.y-p.y)<44&&(!restart||restart.taker==p)&&(!ko||ko.t==p.t);
    if(pd&&!p.pk&&can){if(p.pq>0&&clock-p.pq<.17&&clock-p.pq>.04){p.pq=-1;throughPass(p)}else if(!(p.pq>0)){p.pq=clock;p.pa=m?[ix,iy]:null}}
    if(pd&&!p.pk&&!can&&p.cd<=0&&Math.hypot(ball.x-p.x,ball.y-p.y)<100)p.pbf=clock+.3;if(p.pbf>clock&&can&&!(p.pq>0)){p.pbf=0;p.pq=clock-.13;p.pa=m?[ix,iy]:p.pa}
-   if(p.pq>0&&clock-p.pq>=.17){p.pq=-1;if(can)humanPass(p,p.pa)}
+   if(p.pq>0&&clock-p.pq>=.17){const held=pd&&clock-p.pq<.62;if(held&&can){p.pcg=Math.min(1,(clock-p.pq-.17)/.45)}else{const f=p.pcg>0?1+.8*p.pcg:1;p.pq=-1;p.pcg=0;if(can){PPW=f;try{humanPass(p,p.pa)}finally{PPW=1}}}}
    p.pk=pd;
    {const yd=dn(k.y);if(yd&&!p.yk){if((p.i==1||p.i==2)&&p.t==0)skWall(p);else special(p)}p.yk=yd}
    {const xd=dn(k.x);if(xd&&!p.xk&&!p.ch)tackle(p,m?[ix,iy]:[p.fx,p.fy]);p.xk=xd}
@@ -1282,6 +1283,7 @@ function draw(){
   {const g=SHG||(SHG=(()=>{const a=c.createRadialGradient(0,0,0,0,0,1);a.addColorStop(0,'rgba(0,18,8,.62)');a.addColorStop(.72,'rgba(0,18,8,.5)');a.addColorStop(.92,'rgba(0,18,8,.18)');a.addColorStop(1,'rgba(0,18,8,0)');return a})());c.save();c.translate(p.x+R*.38,p.y+R*.82);c.scale(R*1.45,R*.62);c.fillStyle=g;c.beginPath();c.arc(0,0,1,0,7);c.fill();c.restore()}
   face(p);fa.forEach(f=>{if(f.a===p)drawWeapon(f)});
   if(p.off>0){c.save();c.fillStyle='#ffd93a';c.strokeStyle='#8a6d00';c.lineWidth=1.2;c.beginPath();c.roundRect(p.x+R+2,p.y-R-12,9,13,2);c.fill();c.stroke();c.fillStyle='rgba(0,0,0,.7)';c.beginPath();c.roundRect(p.x-18,p.y+(p.y<GY?R+4:-R-24),36,18,9);c.fill();c.fillStyle='#fff';c.font='bold 13px system-ui';c.textAlign='center';c.fillText(Math.ceil(p.off)+' sn',p.x,p.y+(p.y<GY?R+17:-R-11));c.restore()}
+  if(p.pcg>0){c.lineWidth=3;c.strokeStyle='rgba(255,255,255,.3)';c.beginPath();c.arc(p.x,p.y,R+9,0,7);c.stroke();c.strokeStyle=p.pcg>.6?'#ff7a4a':'#8fe3ff';c.beginPath();c.arc(p.x,p.y,R+9,-Math.PI/2,-Math.PI/2+p.pcg*Math.PI*2);c.stroke()}
   if(p.ch){c.lineWidth=3;c.strokeStyle='rgba(255,255,255,.3)';c.beginPath();c.arc(p.x,p.y,R+9,0,7);c.stroke();c.strokeStyle='#fff';c.beginPath();c.arc(p.x,p.y,R+9,-Math.PI/2,-Math.PI/2+p.ch*Math.PI*2);c.stroke();c.lineWidth=2;c.beginPath();c.moveTo(p.x+p.ax*(R+13),p.y+p.ay*(R+13));c.lineTo(p.x+p.ax*(R+13+14*p.ch),p.y+p.ay*(R+13+14*p.ch));c.stroke()}
   for(let k=0;k<2;k++)if(ctl[k]&&P[NP*k+act[k]]==p&&state=='play'){
    if(p.sp!==undefined&&p.sp<1){c.fillStyle='rgba(0,0,0,.5)';c.fillRect(p.x-12,p.y+R+6,24,4);c.fillStyle=p.sp>=.34?'#7CFC8A':'#ff7a5c';c.fillRect(p.x-12,p.y+R+6,24*p.sp,4)}
@@ -1718,7 +1720,7 @@ const SHOP=[
 {id:'t_ice',k:'trail',p:25,i:'❄️',n:['Buz izi','Ice trail'],o:{c:['#ffffff','#9fe3ff','#3a9fe8']}},
 {id:'t_rain',k:'trail',p:40,i:'🌈',n:['Gökkuşağı izi','Rainbow trail'],o:{rb:1}},
 {id:'t_star',k:'trail',p:50,i:'✨',n:['Yıldız izi','Star trail'],o:{st:1}}];
-let spdT=0,magT=0,twT=0,skAimA=false,iceZ=null;let skT=0;function skHint(t){if(Date.now()-skT<4000)return;skT=Date.now();toast(t)}
+let PPW=1,spdT=0,magT=0,twT=0,skAimA=false,iceZ=null;let skT=0;function skHint(t){if(Date.now()-skT<4000)return;skT=Date.now();toast(t)}
 let skArm=false,SKC={};const SKLM={s_fire:2,s_wall:2,s_ufo:1,s_spd:2,s_ice:2,s_mag:1,s_aim:2,s_slo:1};function skLim(id){if((SKC[id]||0)>=SKLM[id]){skHint(L('Bu maçta limit doldu ('+SKLM[id]+')','Match limit reached ('+SKLM[id]+')'));return false}return true}function skN(id){return (QS&&QS.inv&&QS.inv[id])||0}
 function skUse(id){ev('skill');SKC[id]=(SKC[id]||0)+1;QS.inv[id]=Math.max(0,skN(id)-1);qSave();skHud(true)}
 function skFire(){if(state!='play'||NET||pen)return;if(skArm){skArm=false;skHud(true);return}if(skN('s_fire')<1||!skLim('s_fire'))return;skArm=true;try{au();sfx('fireshot')}catch(e){}skHud(true)}
