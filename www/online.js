@@ -11,14 +11,26 @@
  const PTS={easy:[1,0],medium:[3,1],hard:[5,2]}; // [galibiyet, beraberlik]
  const HI='background:#7cc4ee;color:#0b1a16';
  const back='<div class="row"><button onclick="retBack()">'+'\u2190'+'</button></div>';
+ const CK=['kroki-q','kroki-tour','kroki-jug'],isG=()=>!!(KR.user&&!KR.user.isAnonymous);
+ const sc=j=>{try{const q=JSON.parse(j);return (q.lv||1)*1e6+(q.xp||0)+Object.keys(q.ach||{}).length*10}catch(e){return 0}};
+ const gl=k=>{try{return localStorage.getItem(k)||''}catch(e){return ''}};
+ KR.cloudPush=async()=>{if(!isG()||KR.pulling)return;try{await db.collection('saves').doc(KR.user.uid).set({q:gl('kroki-q'),tour:gl('kroki-tour'),jug:gl('kroki-jug'),t:FV.serverTimestamp()})}catch(e){}};
+ let pt=0;KR.cloudQueue=()=>{if(!isG())return;clearTimeout(pt);pt=setTimeout(KR.cloudPush,4000)};
+ KR.cloudSync=async(manual)=>{if(!isG())return;KR.pulling=1;let d=null;try{const r=await db.collection('saves').doc(KR.user.uid).get();d=r.exists?r.data():null}catch(e){KR.pulling=0;return}KR.pulling=0;
+  const loc=gl('kroki-q');
+  if(d&&d.q&&sc(d.q)>=sc(loc)&&d.q!==loc){try{localStorage.setItem('kroki-q',d.q);d.tour?localStorage.setItem('kroki-tour',d.tour):localStorage.removeItem('kroki-tour');if(d.jug&&+d.jug>+gl('kroki-jug'))localStorage.setItem('kroki-jug',d.jug)}catch(e){}
+   try{qLoad()}catch(e){}if(typeof state!='undefined'&&state=='menu'){try{menu()}catch(e){}}try{if(typeof toast=='function')toast(T('\u2601\ufe0f Kay\u0131t y\u00fcklendi','\u2601\ufe0f Progress loaded'))}catch(e){}}
+  else await KR.cloudPush()};
+ setTimeout(()=>{if(typeof qSave=='function'&&!qSave._w){const o=qSave;window.qSave=function(){o.apply(this,arguments);KR.cloudQueue()};window.qSave._w=1}if(typeof tourSave=='function'&&!tourSave._w){const o=tourSave;window.tourSave=function(){o.apply(this,arguments);KR.cloudQueue()};window.tourSave._w=1}},0);
+ document.addEventListener('visibilitychange',()=>{if(document.hidden&&isG())KR.cloudPush()});
  async function load(){
   try{const d=await db.collection('users').doc(KR.user.uid).get();KR.profile=d.exists?d.data():null}catch(e){KR.profile=null}
-  KR.prizes();const first=!KR.ready;KR.ready=true;if(first&&typeof state!='undefined'&&state=='menu')menu();
+  KR.prizes();const first=!KR.ready;KR.ready=true;if(first&&isG())KR.cloudSync();if(first&&typeof state!='undefined'&&state=='menu')menu();
  }
  auth.onAuthStateChanged(u=>{if(!u){auth.signInAnonymously().catch(()=>{KR.ready=true});return}KR.user=u;load()});
  KR.native=!!(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform());
  const faPlugin=()=>{const C=window.Capacitor;if(!C)return null;if(C.Plugins&&C.Plugins.FirebaseAuthentication)return C.Plugins.FirebaseAuthentication;if(typeof C.registerPlugin=='function')return C.registerPlugin('FirebaseAuthentication');return null};
- const afterAuth=async()=>{KR.user=auth.currentUser;KR.profile=null;await load();if(KR.glob){KR.glob=0;if(window.NETUI)NETUI.lobby();else KR.profileUI()}else KR.profileUI()};
+ const afterAuth=async()=>{KR.user=auth.currentUser;KR.profile=null;await load();try{await KR.cloudSync(true)}catch(e){}if(KR.glob){KR.glob=0;if(window.NETUI)NETUI.lobby();else KR.profileUI()}else KR.profileUI()};
  KR.googleLogin=async()=>{
   const m=document.getElementById('krm'),say=t=>{if(m)m.textContent=t};
   try{
