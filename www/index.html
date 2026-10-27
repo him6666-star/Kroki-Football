@@ -285,6 +285,7 @@ input[type=range].rg::-moz-range-thumb{width:22px;height:22px;border-radius:50%;
 .card>h1{top:-42px;height:50px;font-size:18px;padding:0 36px 5px}
 .card>h1 img{margin-right:5px}
 .card .xcl{top:-10px;right:-10px;width:32px;height:32px}
+.card .xcl:hover,.card .xcl:focus{background:url(assets/ui_x.png) center/contain no-repeat;color:transparent;filter:brightness(1.2);transform:scale(1.1)}
 .whs{--ws:min(280px,60vh);position:relative;width:var(--ws);aspect-ratio:1;margin:12px auto 10px}
 .whs .whd{position:absolute;left:11%;top:11%;width:78%;height:78%;z-index:1}
 .whs .whr{position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none}
@@ -523,7 +524,7 @@ function mnChar(){try{const o=document.createElement('canvas');o.width=o.height=
 function menuHTML(){const ctrl=!tcOn(),done=QS?QS.q.filter(q=>q.done).length:0,lv=(QS&&QS.lv)||1,nd=lvNeed(lv),xp=(QS&&QS.xp)||0,pc=Math.max(3,Math.min(100,xp/nd*100)),nm=(window.KR&&KR.profile&&KR.profile.name)||L('Oyuncu','Player'),E=x=>String(x).replace(/[&<>"']/g,ch=>'&#'+ch.charCodeAt(0)+';');
  const sd=(side,y,ic,lb,fn,note)=>'<div class="hmSd" style="'+side+':calc(var(--u)*7);top:calc(var(--u)*'+y+')" onclick="mnGo(()=>'+fn+')"><div class="ic"><img src="assets/i_'+ic+'.png">'+(note?'<span class="nt">'+note+'</span>':'')+'</div><div class="pd"></div><div class="hmLb">'+lb+'</div></div>';
  const bt=(ic,lb,fn,cls,note)=>'<button class="hmB '+(cls||'')+'" onclick="mnGo(()=>'+fn+')"><img src="assets/i_'+ic+'.png">'+(note?'<span class="nt">'+note+'</span>':'')+'<span class="hmLb">'+lb+'</span></button>';
- const left=3-done,RD='<i class="rdot"></i>',dQ=!!(QS&&QS.cl&&QS.cl.length),dS=(typeof spAvail=='function'&&spAvail()>0),dW=(typeof wheelReady=='function'&&QS&&wheelReady()),dB=(QS&&Object.keys(QS.ach||{}).length>(QS.achSeen||0));
+ const left=3-done,RD='<i class="rdot"></i>',dQ=!!(QS&&QS.cl&&QS.cl.length),dS=(typeof spAvail=='function'&&spAvail()>0),dW=(typeof wheelReady=='function'&&QS&&wheelReady()),dB=achPend()>0;
  return '<div class="hm">'+
  '<div class="hmTop" onclick="mnGo(()=>seasonUI())">'+(dS?RD:'')+'<div style="position:relative;z-index:2"><img class="hmBadge" src="assets/badge.png"><div class="hmBadgeN">'+lv+'</div></div><div class="hmXp"><i style="width:'+pc+'%"></i><b>'+xp+' / '+nd+'</b></div></div>'+
  '<div class="hmCoin" onclick="mnGo(()=>shopUI())"><img src="assets/bar_coin.png"><b>'+shopBal()+'</b></div>'+
@@ -538,7 +539,7 @@ function menuHTML(){const ctrl=!tcOn(),done=QS?QS.q.filter(q=>q.done).length:0,l
  '<div class="hmBt">'+bt('whistle',L('OYNA','PLAY'),'playUI()','pl')+bt('medal',L('ÖDÜLLER','REWARDS'),'rewardsUI()','',rwNote())+bt('basket',L('MAĞAZA','SHOP'),'shopUI()')+bt('shield',L('SOSYAL','SOCIAL'),'socialUI()')+'</div>'+
  '</div>'}
 function hmHop(){const e=document.getElementById('hmCh');if(!e)return;mcHap(1300);if(!mcT)mcTick();try{au();sfxKick(false)}catch(_){}e.classList.remove('hop');void e.offsetWidth;e.classList.add('hop')}
-function rwNote(){const n=((QS&&QS.cl&&QS.cl.length)?1:0)+(typeof spAvail=='function'?spAvail():0)+(wheelReady()?1:0)+(QS&&Object.keys(QS.ach||{}).length>(QS.achSeen||0)?1:0);return (QS&&QS.cl&&QS.cl.length)?'🎁':(n>0?n:'')}
+function rwNote(){const n=((QS&&QS.cl&&QS.cl.length)?1:0)+(typeof spAvail=='function'?spAvail():0)+(wheelReady()?1:0)+(achPend()>0?1:0);return (QS&&QS.cl&&QS.cl.length)?'🎁':(n>0?n:'')}
 let NAVS=[];function navPush(f){NAVS.push(f)}function retBack(){const f=NAVS.pop();if(f){try{f()}catch(e){menu()}}else menu()}
 let RWT='q',RWCAP=0,ORW={};
 function rwTab(k){RWT=k;rewardsUI(1)}
@@ -1567,52 +1568,52 @@ const QD=[
 {id:'badge',e:'badge',g:1,r:4,n:['Yeni bir rozet kazan','Earn a new badge']}];
 const TOUR_LV=4;function qOk(x){return !x.hid&&(!x.tr||((QS.lv||1)>=TOUR_LV))&&(x.e!='badge'||Object.keys(QS.ach||{}).length<ACH.length)}
 const ACH=[
-{id:'first_goal',i:'⚽',r:3,n:['İlk gol','First goal'],d:['1 gol at','Score 1 goal'],t:q=>(q.tot.goal||0)>=1},
-{id:'goals25',i:'🥅',r:10,n:['Golcü','Striker'],d:['Toplam 25 gol','25 goals total'],t:q=>(q.tot.goal||0)>=25},
-{id:'goals100',i:'👑',r:20,n:['Gol kralı','Golden boot'],d:['Toplam 100 gol','100 goals total'],t:q=>(q.tot.goal||0)>=100},
-{id:'hat',i:'🎩',r:5,n:['Hat-trick','Hat-trick'],d:['Bir maçta 3 gol','3 goals in a match'],t:(q,c)=>(c.g||0)>=3},
-{id:'first_win',i:'🏆',r:3,n:['İlk galibiyet','First win'],d:['1 maç kazan','Win a match'],t:q=>(q.tot.win||0)>=1},
-{id:'wins10',i:'🔥',r:10,n:['Seri galip','On fire'],d:['10 maç kazan','Win 10 matches'],t:q=>(q.tot.win||0)>=10},
-{id:'hardwin',i:'💪',r:8,n:['Zorlu rakip','Tough opponent'],d:['Zor seviyede kazan','Win on Hard'],t:q=>(q.tot.hardWin||0)>=1},
-{id:'clean1',i:'🧤',r:5,n:['Kale kilit','Clean sheet'],d:['Gol yemeden kazan','Win without conceding'],t:q=>(q.tot.clean||0)>=1},
-{id:'saves20',i:'🛡',r:8,n:['Duvar','The wall'],d:['Toplam 20 kurtarış','20 saves total'],t:q=>(q.tot.save||0)>=20},
-{id:'penhero',i:'🦸',r:6,n:['Penaltı avcısı','Penalty hero'],d:['3 penaltı kurtar','Save 3 penalties'],t:q=>(q.tot.penSave||0)>=3},
-{id:'pengoals',i:'🎯',r:6,n:['Soğukkanlı','Cool head'],d:['10 penaltı at','Score 10 penalties'],t:q=>(q.tot.penGoal||0)>=10},
-{id:'champ',i:'🥇',r:15,n:['Şampiyon','Champion'],d:['Turnuvayı kazan','Win the tournament'],t:q=>(q.tot.tourChamp||0)>=1},
-{id:'passer',i:'🔗',r:6,n:['Oyun kurucu','Playmaker'],d:['100 pas tamamla','100 passes'],t:q=>(q.tot.pass||0)>=100},
-{id:'tackler',i:'🦵',r:6,n:['Kesici','Tackler'],d:['50 müdahale','50 tackles'],t:q=>(q.tot.tackle||0)>=50},
-{id:'mini3',i:'🎮',r:4,n:['Antrenman','Training'],d:['3 mini oyun oyna','Play 3 mini games'],t:q=>(q.tot.mini||0)>=3},
-{id:'goals500',i:'🚀',r:40,n:['Gol makinesi','Goal machine'],d:['Toplam 500 gol','500 goals total'],t:q=>(q.tot.goal||0)>=500},
-{id:'wins50',i:'🏅',r:25,n:['Usta','Veteran'],d:['50 maç kazan','Win 50 matches'],t:q=>(q.tot.win||0)>=50},
-{id:'wins100',i:'🎖',r:50,n:['Efsane','Legend'],d:['100 maç kazan','Win 100 matches'],t:q=>(q.tot.win||0)>=100},
-{id:'streak3',i:'📅',r:5,n:['Alışkanlık','Habit'],d:['3 gün üst üste gir','Play 3 days in a row'],t:q=>(q.st||0)>=3},
-{id:'streak7',i:'🔥',r:15,n:['Haftalık seri','Week streak'],d:['7 gün üst üste gir','Play 7 days in a row'],t:q=>(q.st||0)>=7},
-{id:'streak30',i:'🌟',r:60,n:['Sadık oyuncu','Loyal player'],d:['30 gün üst üste gir','Play 30 days in a row'],t:q=>(q.st||0)>=30},
-{id:'lvl5',i:'⭐',r:5,n:['Çaylak','Rookie'],d:['Seviye 5\'e ulaş','Reach level 5'],t:q=>(q.lv||1)>=5},
-{id:'lvl10',i:'💫',r:12,n:['Tecrübeli','Experienced'],d:['Seviye 10\'a ulaş','Reach level 10'],t:q=>(q.lv||1)>=10},
-{id:'lvl20',i:'✨',r:30,n:['Kaptan','Captain'],d:['Seviye 20\'ye ulaş','Reach level 20'],t:q=>(q.lv||1)>=20},
-{id:'lvl30',i:'👑',r:60,n:['Şampiyon adayı','Contender'],d:['Seviye 30\'a ulaş','Reach level 30'],t:q=>(q.lv||1)>=30},
-{id:'wheel10',i:'🎡',r:8,n:['Şanslı','Lucky'],d:['Çarkı 10 kez çevir','Spin the wheel 10 times'],t:q=>(q.tot.wheel||0)>=10},
-{id:'teams5',i:'🛡',r:12,n:['Koleksiyoncu','Collector'],d:['5 takımın kilidini aç','Unlock 5 teams'],t:q=>tmUnl(q)>=5},
-{id:'teamsAll',i:'🏰',r:50,n:['Tüm takımlar','All teams'],d:['Bütün takımları aç','Unlock every team'],t:q=>tmUnl(q)>=Object.keys(TLV).length},
-{id:'abil25',i:'⚡',r:10,n:['Yetenekli','Skilled'],d:['Takım yeteneğini 25 kez kullan','Use your team ability 25 times'],t:q=>(q.tot.ability||0)>=25},
-{id:'abgoal',i:'💥',r:8,n:['Büyülü gol','Magic goal'],d:['Yetenekten hemen sonra gol at','Score right after using your ability'],t:q=>(q.tot.abGoal||0)>=1},
-{id:'tourfinal',i:'🏟',r:10,n:['Finalist','Finalist'],d:['Turnuvada finale çık','Reach a tournament final'],t:q=>(q.tot.tourFinal||0)>=1},
-{id:'tourhard',i:'🏆',r:30,n:['Zorlu şampiyon','Hard champion'],d:['Turnuvayı zor seviyede kazan','Win the tournament on Hard'],t:q=>(q.tot.tourChampHard||0)>=1},
-{id:'online1',i:'🌐',r:6,n:['Çevrimiçi','Online'],d:['İlk online maçını oyna','Play your first online match'],t:q=>(q.tot.onPlay||0)>=1},
-{id:'onwin10',i:'🌍',r:25,n:['Online usta','Online ace'],d:['10 online maç kazan','Win 10 online matches'],t:q=>(q.tot.onWin||0)>=10},
-{id:'jug25',i:'🤹',r:6,n:['Sektirici','Juggler'],d:['Top sektirmede 25','Juggle 25'],t:q=>(q.jug||0)>=25},
-{id:'jug50',i:'🎪',r:15,n:['Hokkabaz','Showman'],d:['Top sektirmede 50','Juggle 50'],t:q=>(q.jug||0)>=50},
-{id:'owngoal',i:'🙈',r:3,n:['Olur öyle','Oops'],d:['Kendi kalene gol at','Score an own goal'],t:q=>(q.tot.ownGoal||0)>=1},
-{id:'blowout',i:'🔨',r:10,n:['Ezici üstünlük','Blowout'],d:['5 farkla kazan','Win by 5 goals'],t:q=>(q.tot.blowout||0)>=1},
-{id:'comeback',i:'🔄',r:12,n:['Geri dönüş','Comeback'],d:['2 gol geriden gelip kazan','Win after trailing by 2'],t:q=>(q.tot.comeback||0)>=1},
-{id:'wkboard',i:'📊',r:8,n:['Listede','On the board'],d:['Haftalık skor tablosuna gir','Reach the weekly leaderboard'],t:q=>(q.tot.wkBoard||0)>=1},
-{id:'wktop',i:'🏆',r:25,n:['Haftanın yıldızı','Star of the week'],d:['Haftayı ilk 3\'te bitir','Finish a week in the top 3'],t:q=>(q.tot.wkTop||0)>=1},
-{id:'corner',i:'📐',r:8,n:['Köşe avcısı','Corner hunter'],d:['Köşe nişancısında 25+ puan','25+ in Corner Sniper'],t:(q,c)=>(c.mc||0)>=25}];
+{id:'first_goal',i:'⚽',r:2,n:['İlk gol','First goal'],d:['1 gol at','Score 1 goal'],t:q=>(q.tot.goal||0)>=1},
+{id:'goals25',i:'🥅',r:5,n:['Golcü','Striker'],d:['Toplam 25 gol','25 goals total'],t:q=>(q.tot.goal||0)>=25},
+{id:'goals100',i:'👑',r:10,n:['Gol kralı','Golden boot'],d:['Toplam 100 gol','100 goals total'],t:q=>(q.tot.goal||0)>=100},
+{id:'hat',i:'🎩',r:2,n:['Hat-trick','Hat-trick'],d:['Bir maçta 3 gol','3 goals in a match'],t:(q,c)=>(c.g||0)>=3},
+{id:'first_win',i:'🏆',r:2,n:['İlk galibiyet','First win'],d:['1 maç kazan','Win a match'],t:q=>(q.tot.win||0)>=1},
+{id:'wins10',i:'🔥',r:5,n:['Seri galip','On fire'],d:['10 maç kazan','Win 10 matches'],t:q=>(q.tot.win||0)>=10},
+{id:'hardwin',i:'💪',r:4,n:['Zorlu rakip','Tough opponent'],d:['Zor seviyede kazan','Win on Hard'],t:q=>(q.tot.hardWin||0)>=1},
+{id:'clean1',i:'🧤',r:2,n:['Kale kilit','Clean sheet'],d:['Gol yemeden kazan','Win without conceding'],t:q=>(q.tot.clean||0)>=1},
+{id:'saves20',i:'🛡',r:4,n:['Duvar','The wall'],d:['Toplam 20 kurtarış','20 saves total'],t:q=>(q.tot.save||0)>=20},
+{id:'penhero',i:'🦸',r:3,n:['Penaltı avcısı','Penalty hero'],d:['3 penaltı kurtar','Save 3 penalties'],t:q=>(q.tot.penSave||0)>=3},
+{id:'pengoals',i:'🎯',r:3,n:['Soğukkanlı','Cool head'],d:['10 penaltı at','Score 10 penalties'],t:q=>(q.tot.penGoal||0)>=10},
+{id:'champ',i:'🥇',r:8,n:['Şampiyon','Champion'],d:['Turnuvayı kazan','Win the tournament'],t:q=>(q.tot.tourChamp||0)>=1},
+{id:'passer',i:'🔗',r:3,n:['Oyun kurucu','Playmaker'],d:['100 pas tamamla','100 passes'],t:q=>(q.tot.pass||0)>=100},
+{id:'tackler',i:'🦵',r:3,n:['Kesici','Tackler'],d:['50 müdahale','50 tackles'],t:q=>(q.tot.tackle||0)>=50},
+{id:'mini3',i:'🎮',r:2,n:['Antrenman','Training'],d:['3 mini oyun oyna','Play 3 mini games'],t:q=>(q.tot.mini||0)>=3},
+{id:'goals500',i:'🚀',r:20,n:['Gol makinesi','Goal machine'],d:['Toplam 500 gol','500 goals total'],t:q=>(q.tot.goal||0)>=500},
+{id:'wins50',i:'🏅',r:12,n:['Usta','Veteran'],d:['50 maç kazan','Win 50 matches'],t:q=>(q.tot.win||0)>=50},
+{id:'wins100',i:'🎖',r:25,n:['Efsane','Legend'],d:['100 maç kazan','Win 100 matches'],t:q=>(q.tot.win||0)>=100},
+{id:'streak3',i:'📅',r:2,n:['Alışkanlık','Habit'],d:['3 gün üst üste gir','Play 3 days in a row'],t:q=>(q.st||0)>=3},
+{id:'streak7',i:'🔥',r:8,n:['Haftalık seri','Week streak'],d:['7 gün üst üste gir','Play 7 days in a row'],t:q=>(q.st||0)>=7},
+{id:'streak30',i:'🌟',r:30,n:['Sadık oyuncu','Loyal player'],d:['30 gün üst üste gir','Play 30 days in a row'],t:q=>(q.st||0)>=30},
+{id:'lvl5',i:'⭐',r:2,n:['Çaylak','Rookie'],d:['Seviye 5\'e ulaş','Reach level 5'],t:q=>(q.lv||1)>=5},
+{id:'lvl10',i:'💫',r:6,n:['Tecrübeli','Experienced'],d:['Seviye 10\'a ulaş','Reach level 10'],t:q=>(q.lv||1)>=10},
+{id:'lvl20',i:'✨',r:15,n:['Kaptan','Captain'],d:['Seviye 20\'ye ulaş','Reach level 20'],t:q=>(q.lv||1)>=20},
+{id:'lvl30',i:'👑',r:30,n:['Şampiyon adayı','Contender'],d:['Seviye 30\'a ulaş','Reach level 30'],t:q=>(q.lv||1)>=30},
+{id:'wheel10',i:'🎡',r:4,n:['Şanslı','Lucky'],d:['Çarkı 10 kez çevir','Spin the wheel 10 times'],t:q=>(q.tot.wheel||0)>=10},
+{id:'teams5',i:'🛡',r:6,n:['Koleksiyoncu','Collector'],d:['5 takımın kilidini aç','Unlock 5 teams'],t:q=>tmUnl(q)>=5},
+{id:'teamsAll',i:'🏰',r:25,n:['Tüm takımlar','All teams'],d:['Bütün takımları aç','Unlock every team'],t:q=>tmUnl(q)>=Object.keys(TLV).length},
+{id:'abil25',i:'⚡',r:5,n:['Yetenekli','Skilled'],d:['Takım yeteneğini 25 kez kullan','Use your team ability 25 times'],t:q=>(q.tot.ability||0)>=25},
+{id:'abgoal',i:'💥',r:4,n:['Büyülü gol','Magic goal'],d:['Yetenekten hemen sonra gol at','Score right after using your ability'],t:q=>(q.tot.abGoal||0)>=1},
+{id:'tourfinal',i:'🏟',r:5,n:['Finalist','Finalist'],d:['Turnuvada finale çık','Reach a tournament final'],t:q=>(q.tot.tourFinal||0)>=1},
+{id:'tourhard',i:'🏆',r:15,n:['Zorlu şampiyon','Hard champion'],d:['Turnuvayı zor seviyede kazan','Win the tournament on Hard'],t:q=>(q.tot.tourChampHard||0)>=1},
+{id:'online1',i:'🌐',r:3,n:['Çevrimiçi','Online'],d:['İlk online maçını oyna','Play your first online match'],t:q=>(q.tot.onPlay||0)>=1},
+{id:'onwin10',i:'🌍',r:12,n:['Online usta','Online ace'],d:['10 online maç kazan','Win 10 online matches'],t:q=>(q.tot.onWin||0)>=10},
+{id:'jug25',i:'🤹',r:3,n:['Sektirici','Juggler'],d:['Top sektirmede 25','Juggle 25'],t:q=>(q.jug||0)>=25},
+{id:'jug50',i:'🎪',r:8,n:['Hokkabaz','Showman'],d:['Top sektirmede 50','Juggle 50'],t:q=>(q.jug||0)>=50},
+{id:'owngoal',i:'🙈',r:2,n:['Olur öyle','Oops'],d:['Kendi kalene gol at','Score an own goal'],t:q=>(q.tot.ownGoal||0)>=1},
+{id:'blowout',i:'🔨',r:5,n:['Ezici üstünlük','Blowout'],d:['5 farkla kazan','Win by 5 goals'],t:q=>(q.tot.blowout||0)>=1},
+{id:'comeback',i:'🔄',r:6,n:['Geri dönüş','Comeback'],d:['2 gol geriden gelip kazan','Win after trailing by 2'],t:q=>(q.tot.comeback||0)>=1},
+{id:'wkboard',i:'📊',r:4,n:['Listede','On the board'],d:['Haftalık skor tablosuna gir','Reach the weekly leaderboard'],t:q=>(q.tot.wkBoard||0)>=1},
+{id:'wktop',i:'🏆',r:12,n:['Haftanın yıldızı','Star of the week'],d:['Haftayı ilk 3\'te bitir','Finish a week in the top 3'],t:q=>(q.tot.wkTop||0)>=1},
+{id:'corner',i:'📐',r:4,n:['Köşe avcısı','Corner hunter'],d:['Köşe nişancısında 25+ puan','25+ in Corner Sniper'],t:(q,c)=>(c.mc||0)>=25}];
 let QS=null;
 const SPI={5:'b_gold',10:'t_fire',15:'b_neon',20:'t_ice',25:'b_ice',30:'t_star'},SPMAX=30;
 function spCoins(l){return 5+l*2+(SPI[l]?15:0)}
-function qLoad(){try{QS=JSON.parse(localStorage.getItem('kroki-q')||'null')}catch(e){QS=null}if(!QS||typeof QS!='object')QS={};QS.tot=QS.tot||{};QS.ach=QS.ach||{};QS.pts=QS.pts||0;QS.pend=QS.pend||0;QS.inv=QS.inv||{};QS.up=QS.up||{};QS.lv=QS.lv||1;QS.xp=QS.xp||0;if(!Array.isArray(QS.cl))QS.cl=[];if(!QS.sp){QS.sp={};for(let l=2;l<=QS.lv;l++)if(!SPI[l])QS.sp[l]=1}qDaily()}
+function qLoad(){try{QS=JSON.parse(localStorage.getItem('kroki-q')||'null')}catch(e){QS=null}if(!QS||typeof QS!='object')QS={};QS.tot=QS.tot||{};QS.ach=QS.ach||{};QS.pts=QS.pts||0;QS.pend=QS.pend||0;QS.inv=QS.inv||{};QS.up=QS.up||{};QS.lv=QS.lv||1;QS.xp=QS.xp||0;if(!QS.achc){QS.achc={};for(const k in QS.ach)QS.achc[k]=1}if(!Array.isArray(QS.cl))QS.cl=[];if(!QS.sp){QS.sp={};for(let l=2;l<=QS.lv;l++)if(!SPI[l])QS.sp[l]=1}qDaily()}
 function qSave(){try{localStorage.setItem('kroki-q',JSON.stringify(QS))}catch(e){}}
 function qDaily(){const d=new Date(),k=d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();if(QS.d===k&&QS.q)return;const prev=QS.d;QS.d=k;QS.dn=0;QS.gen=0;{const y=new Date(d.getTime()-864e5),yk=y.getFullYear()+'-'+(y.getMonth()+1)+'-'+y.getDate();QS.st=prev===yk?(QS.st||0)+1:1;const bn=Math.min(QS.st,7)+1;setTimeout(()=>grant(bn,'📅 '+L('Günlük giriş · seri ','Daily login · streak ')+QS.st,undefined,true),1500)}let h=0;for(const ch of k)h=(h*31+ch.charCodeAt(0))>>>0;const pool=QD.filter(qOk),pick=[];while(pick.length<3){h=(h*1103515245+12345)>>>0;pick.push(pool.splice(h%pool.length,1)[0])}QS.q=pick.map(x=>({id:x.id,p:0,done:false}));qSave()}
 function isWE(){const d=new Date().getDay();return d==0||d==6}
@@ -1627,12 +1628,12 @@ const MILE={goal:[10,1,'⚽ 10 gol'],win:[5,2,'🏆 5 galibiyet'],save:[10,1,'�
 function qMile(){QS.mc=QS.mc||{};for(const k in MILE){const m=MILE[k],f=Math.floor((QS.tot[k]||0)/m[0]);if(QS.mc[k]==null){QS.mc[k]=f;continue}if(f>QS.mc[k]){const n=f-QS.mc[k];QS.mc[k]=f;grant(m[1]*n,'🎖 '+m[2].replace(/^\S+ \d+/,x=>x))}}}
 function qNew(){if((QS.dn||0)>=3||QS.q.length>=3)return;const used=new Set(QS.q.map(q=>q.id)),pool=QD.filter(x=>!used.has(x.id)&&qOk(x));if(!pool.length)return;const x=pool[Math.floor(Math.random()*pool.length)];QS.q.push({id:x.id,p:0,done:false})}
 let qFT=0;function qFlush(){if(!window.KR||!KR.bonus||!KR.user||!KR.profile||QS.pend<=0)return;const now=Date.now();if(now-qFT<12000)return;qFT=now;const x=Math.min(25,QS.pend);QS.pend-=x;qSave();KR.bonus(x).catch(()=>{QS.pend+=x;qSave()})}
-function ev(n,v=1,ctx){if(NET||!QS)return;qDaily();qWeek();QS.tot[n]=(QS.tot[n]||0)+v;if(XPV[n])xpAdd(XPV[n]*v);QS.wq.forEach(q=>{const d=QW.find(x=>x.id==q.id);if(!d||q.done||d.e!=n)return;q.p=Math.min(d.g,q.p+v);if(q.p>=d.g){q.done=true;grant(d.r,'📆 '+d.n[ST.lang=='en'?1:0])}});QS.q.forEach(q=>{const d=QD.find(x=>x.id==q.id);if(!d||q.done||d.e!=n||(QS.dn||0)>=3)return;q.p=Math.min(d.g,q.p+v);if(q.p>=d.g){q.done=true;QS.dn=(QS.dn||0)+1;grant(d.r,L('Görev: ','Quest: ')+d.n[ST.lang=='en'?1:0]);qNew()}});if(n=='play')grant(1,L('Maç oynadın','Match played'));if(n=='win')grant(2,L('Galibiyet bonusu','Win bonus'));qMile();ACH.forEach(a=>{if(!QS.ach[a.id]&&a.t(QS,ctx||{})){QS.ach[a.id]=Date.now();grant(a.r,a.i+' '+a.n[ST.lang=='en'?1:0]);setTimeout(()=>ev('badge'),50)}});qSave()}
+function ev(n,v=1,ctx){if(NET||!QS)return;qDaily();qWeek();QS.tot[n]=(QS.tot[n]||0)+v;if(XPV[n])xpAdd(XPV[n]*v);QS.wq.forEach(q=>{const d=QW.find(x=>x.id==q.id);if(!d||q.done||d.e!=n)return;q.p=Math.min(d.g,q.p+v);if(q.p>=d.g){q.done=true;grant(d.r,'📆 '+d.n[ST.lang=='en'?1:0])}});QS.q.forEach(q=>{const d=QD.find(x=>x.id==q.id);if(!d||q.done||d.e!=n||(QS.dn||0)>=3)return;q.p=Math.min(d.g,q.p+v);if(q.p>=d.g){q.done=true;QS.dn=(QS.dn||0)+1;grant(d.r,L('Görev: ','Quest: ')+d.n[ST.lang=='en'?1:0]);qNew()}});if(n=='play')grant(1,L('Maç oynadın','Match played'));if(n=='win')grant(2,L('Galibiyet bonusu','Win bonus'));qMile();ACH.forEach(a=>{if(!QS.ach[a.id]&&a.t(QS,ctx||{})){QS.ach[a.id]=Date.now();setTimeout(()=>ev('badge'),50)}});qSave()}
 qLoad();
 function stKick(p,dx,dy,pw){if(NET||pen||p.i==0)return;const t=p.t,l=Math.hypot(dx,dy)||1,tow=dx*(t?-1:1)/l;if(pw>=330){if(tow>.45){MS.shots[t]++;MS.lastShot={t,time:MS.clk};if(t==0)ev('shot')}}else{MS.pass[t]++;MS.pp={t,time:MS.clk,from:p}}}
 function stTick(dt){if(NET||pen)return;MS.clk+=dt;const c0=ball&&ball.car;if(MS.lastShot&&MS.clk-MS.lastShot.time>3)MS.lastShot=null;if(MS.pp&&MS.clk-MS.pp.time>3)MS.pp=null;if(!c0)return;MS.pos[c0.t]+=dt;if(MS.pp&&c0.t==MS.pp.t&&c0!==MS.pp.from){MS.passOK[c0.t]++;if(c0.t==0)ev('pass');MS.pp=null}else if(MS.pp&&c0.t!=MS.pp.t)MS.pp=null;
  if(MS.lastShot&&c0.i==0&&c0.t!=MS.lastShot.t){MS.save[c0.t]++;comment('save');MS.sot[MS.lastShot.t]++;if(c0.t==0)ev('save');MS.lastShot=null}}
-const HOLD_MAX=5;let AB_T=-99,CB_MAX=0;function evOnline(win){try{if(!QS)return;QS.tot.onPlay=(QS.tot.onPlay||0)+1;if(win)QS.tot.onWin=(QS.tot.onWin||0)+1;ACH.forEach(a=>{if(!QS.ach[a.id]&&a.t(QS,{})){QS.ach[a.id]=Date.now();grant(a.r,a.i+' '+a.n[ST.lang=='en'?1:0])}});qSave()}catch(e){}}
+const HOLD_MAX=5;let AB_T=-99,CB_MAX=0;function evOnline(win){try{if(!QS)return;QS.tot.onPlay=(QS.tot.onPlay||0)+1;if(win)QS.tot.onWin=(QS.tot.onWin||0)+1;ACH.forEach(a=>{if(!QS.ach[a.id]&&a.t(QS,{})){QS.ach[a.id]=Date.now()}});qSave()}catch(e){}}
 function stGoal(sc){if(NET)return;if(sc==1){CB_MAX=Math.max(CB_MAX,score[1]-score[0]);if(ball&&ball.lt&&ball.lt.t==0)ev('ownGoal')}if(sc==0&&clock-AB_T<7)ev('abGoal');if(MS.lastShot&&MS.lastShot.t==sc){MS.sot[sc]++;MS.lastShot=null}if(sc==0)ev('goal')}
 function stFoul(p){if(!NET&&!pen)MS.foul[p.t]++}
 function stTackle(p){if(NET||pen)return;MS.tackle[p.t]++;if(p.t==0)ev('tackle')}
@@ -1643,9 +1644,12 @@ function loginBox(){const st=QS.st||1,cur=Math.min(st,7),nx=Math.min(st+1,7)+1;l
 const QIC={goal:'k_goal',win:'k_trophy',save:'j_glove',pass:'j_boot',tackle:'k_boots',penSave:'k_pen',penGoal:'k_pen',shot:'k_goal',clean:'i_shield',mini:'k_pad',hardPlay:'k_flame',tourRound:'i_trophy',tourWin:'i_trophy',tourWinEasy:'i_trophy',tourWinMedium:'i_trophy',tourWinHard:'i_trophy',badge:'i_shield'};
 function tmUnl(q){return Object.keys(TLV).filter(k=>TLV[k]<=((q&&q.lv)||1)).length}
 const ACHP={goals500:['goal',500],wins50:['win',50],wins100:['win',100],streak3:['$st',3],streak7:['$st',7],streak30:['$st',30],lvl5:['$lv',5],lvl10:['$lv',10],lvl20:['$lv',20],lvl30:['$lv',30],wheel10:['wheel',10],teams5:[tmUnl,5],teamsAll:[tmUnl,16],abil25:['ability',25],jug25:['$jug',25],jug50:['$jug',50],onwin10:['onWin',10],first_goal:['goal',1],goals25:['goal',25],goals100:['goal',100],first_win:['win',1],wins10:['win',10],hardwin:['hardWin',1],clean1:['clean',1],saves20:['save',20],penhero:['penSave',3],pengoals:['penGoal',10],champ:['tourChamp',1],passer:['pass',100],tackler:['tackle',50],mini3:['mini',3],wkboard:['wkBoard',1],wktop:['wkTop',1]};
-function badgeUI(){const en=ST.lang=='en',n=Object.keys(QS.ach).length;if((QS.achSeen||0)!=n){QS.achSeen=n;qSave()}
-const ad=ACH.map(a=>{const u=QS.ach[a.id];return '<div title="'+a.d[en?1:0]+'" style="padding:8px 4px;border-radius:12px;background:rgba(255,255,255,'+(u?.1:.04)+');opacity:'+(u?1:.5)+';text-align:center"><div style="font-size:24px;filter:'+(u?'none':'grayscale(1)')+'">'+a.i+'</div><div style="font-size:11px;font-weight:700">'+a.n[en?1:0]+'</div><div style="font-size:10px;opacity:.75">'+a.d[en?1:0]+'</div>'+(ACHP[a.id]?(()=>{const k=ACHP[a.id][0],g=ACHP[a.id][1],cur=typeof k=='function'?k(QS):k[0]=='$'?(QS[k.slice(1)]||0):(QS.tot[k]||0),v=Math.min(g,u?g:cur);return '<div style="height:6px;border-radius:3px;background:rgba(255,255,255,.15);margin:4px 6px 1px;overflow:hidden"><i style="display:block;height:100%;width:'+v/g*100+'%;background:'+(u?'#7be08f':'#ffd54f')+'"></i></div><div style="font-size:10px;font-weight:700">'+v+' / '+g+'</div>'})():'')+'<div style="font-size:10px;color:#ffd54f">🪙 '+a.r+'</div></div>'}).join('');
- ov.style.display='flex';ov.innerHTML='<div class="card" style="width:min(460px,92vw)"><h1>🎖 '+L('Rozetler','Badges')+' ('+n+'/'+ACH.length+')</h1><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:8px 0">'+ad+'</div><div class="row"><button class="bb" onclick="retBack()">'+L('Geri','Back')+'</button></div></div>'}
+function achPend(){return QS&&QS.ach?ACH.filter(a=>QS.ach[a.id]&&!(QS.achc||{})[a.id]).length:0}
+function achClaim(id){const a=ACH.find(x=>x.id==id);if(!a||!QS.ach[id]||QS.achc[id])return;QS.achc[id]=1;grant(a.r,a.i+' '+a.n[ST.lang=='en'?1:0]);qSave();badgeUI()}
+function achClaimAll(){ACH.forEach(a=>{if(QS.ach[a.id]&&!QS.achc[a.id]){QS.achc[a.id]=1;grant(a.r,a.i+' '+a.n[ST.lang=='en'?1:0])}});qSave();badgeUI()}
+function badgeUI(){const en=ST.lang=='en',n=Object.keys(QS.ach).length;QS.achc=QS.achc||{};const pn=achPend();
+const ad=ACH.map(a=>{const u=QS.ach[a.id];return '<div title="'+a.d[en?1:0]+'" style="padding:8px 4px;border-radius:12px;background:rgba(255,255,255,'+(u?.1:.04)+');opacity:'+(u?1:.5)+';text-align:center"><div style="font-size:24px;filter:'+(u?'none':'grayscale(1)')+'">'+a.i+'</div><div style="font-size:11px;font-weight:700">'+a.n[en?1:0]+'</div><div style="font-size:10px;opacity:.75">'+a.d[en?1:0]+'</div>'+(ACHP[a.id]?(()=>{const k=ACHP[a.id][0],g=ACHP[a.id][1],cur=typeof k=='function'?k(QS):k[0]=='$'?(QS[k.slice(1)]||0):(QS.tot[k]||0),v=Math.min(g,u?g:cur);return '<div style="height:6px;border-radius:3px;background:rgba(255,255,255,.15);margin:4px 6px 1px;overflow:hidden"><i style="display:block;height:100%;width:'+v/g*100+'%;background:'+(u?'#7be08f':'#ffd54f')+'"></i></div><div style="font-size:10px;font-weight:700">'+v+' / '+g+'</div>'})():'')+''+(u&&!QS.achc[a.id]?'<button onclick="achClaim(\''+a.id+'\')" style="margin-top:4px;padding:3px 8px;font-size:11px;font-weight:800;border-radius:8px;background:#ffd54f;color:#222;border:0">'+L('Al','Claim')+' 🪙 '+a.r+'</button>':'<div style="font-size:10px;color:#ffd54f">🪙 '+a.r+(u?' ✓':'')+'</div>')+'</div>'}).join('');
+ ov.style.display='flex';ov.innerHTML='<div class="card" style="width:min(460px,92vw)"><h1>🎖 '+L('Rozetler','Badges')+' ('+n+'/'+ACH.length+')</h1>'+(pn?'<div class="row"><button onclick="achClaimAll()">'+L('Hepsini al','Claim all')+' ('+pn+')</button></div>':'')+'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:8px 0">'+ad+'</div><div class="row"><button class="bb" onclick="retBack()">'+L('Geri','Back')+'</button></div></div>'}
 function questUI(){state=state=='pause'?state:'menu';const en=ST.lang=='en',qd0=QS.q.filter(q=>!q.done),qdn=QS.q.length-qd0.length,qd=qd0.map(q=>{const d=QD.find(x=>x.id==q.id),pc=Math.min(100,q.p/d.g*100);return '<div class="qc" style="background-image:url(assets/'+(q.done?'q_done':'q_card')+'.png)"><img class="qi" src="assets/'+(QIC[d.e]||'k_goal')+'.png"><div class="qx"><div class="qt">'+d.n[en?1:0]+'</div><div class="qb"><i style="width:'+pc+'%"></i></div><div class="qp">'+q.p+' / '+d.g+'</div></div><div class="qr">+'+d.r+'</div></div>'}).join('');
  const n=Object.keys(QS.ach).length;pz.style.display='none';ov.style.display='flex';
  ov.innerHTML='<div class="card" style="width:min(460px,92vw)"><h1>🏅 '+L('Görevler','Quests')+'</h1><div style="font-size:13px;opacity:.85;margin-bottom:6px">'+L('Toplam kazanılan altın: ','Total gold earned: ')+'<b style="color:#ffd54f">'+QS.pts+'</b>'+(window.KR&&KR.user&&KR.profile?' · '+L('puan tablosuna eklenir','added to leaderboard'):'')+'</div>'+clBox()+loginBox()+'<b>'+L('Bugünkü görevler','Daily quests')+'</b>'+qd+'<div style="font-size:12px;opacity:.75;margin:4px 0">✅ '+L('Bugün tamamlanan: ','Done today: ')+qdn+' · '+L('Günde en çok 3 görev. Yenileri yarın gelir','Max 3 quests a day. New ones tomorrow')+'</div><div style="font-size:12px;opacity:.75">🎖 '+L('Her galibiyet +2 🪙, maç +1 🪙; her 10 gol, 5 galibiyet, 10 kurtarış… ödül verir','Each win +2 🪙, match +1 🪙; milestones every 10 goals, 5 wins, 10 saves… give bonus')+'</div>'+weeklyBox()+'<div class="row" style="margin-top:12px"><button onclick="navPush(questUI);badgeUI()">🎖 '+L('Rozetler','Badges')+' ('+n+'/'+ACH.length+')</button></div><div class="row"><button class="bb" onclick="retBack()">'+L('Geri','Back')+'</button></div></div>'}
