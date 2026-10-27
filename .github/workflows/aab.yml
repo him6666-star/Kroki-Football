@@ -1,0 +1,48 @@
+name: Play AAB derle
+on:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Yukleme anahtarini hazirla
+        env:
+          KS_B64: ${{ secrets.UPLOAD_KEYSTORE_B64 }}
+        run: |
+          if [ -z "$KS_B64" ]; then echo "HATA: UPLOAD_KEYSTORE_B64 secret tanimli degil"; exit 1; fi
+          echo "$KS_B64" | base64 -d > "$RUNNER_TEMP/upload.jks"
+      - name: Bagimliliklari kur
+        run: npm install
+      - name: Android projesini olustur
+        run: npx cap add android
+      - name: Yamalari uygula
+        env:
+          UPLOAD_KS: ${{ runner.temp }}/upload.jks
+          UPLOAD_KS_PASS: ${{ secrets.UPLOAD_KS_PASS }}
+          UPLOAD_KEY_ALIAS: ${{ secrets.UPLOAD_KEY_ALIAS }}
+          UPLOAD_KEY_PASS: ${{ secrets.UPLOAD_KEY_PASS }}
+          VERSION_CODE: ${{ github.run_number }}
+        run: python3 patch_android.py
+      - name: Oyunu projeye kopyala
+        run: npx cap sync android
+      - name: AAB derle
+        working-directory: android
+        env:
+          UPLOAD_KS: ${{ runner.temp }}/upload.jks
+          UPLOAD_KS_PASS: ${{ secrets.UPLOAD_KS_PASS }}
+          UPLOAD_KEY_ALIAS: ${{ secrets.UPLOAD_KEY_ALIAS }}
+          UPLOAD_KEY_PASS: ${{ secrets.UPLOAD_KEY_PASS }}
+        run: ./gradlew bundleRelease --no-daemon
+      - name: AAB yukle
+        uses: actions/upload-artifact@v4
+        with:
+          name: scribble-kick-aab
+          path: android/app/build/outputs/bundle/release/app-release.aab

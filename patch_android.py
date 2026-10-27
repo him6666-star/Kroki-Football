@@ -97,3 +97,20 @@ if os.path.exists(sp):
         open(sp, 'w', encoding='utf-8').write(t)
 print('splash tamam')
 print('patch tamam')
+
+# 5) Play Store (AAB): yukleme anahtari + surum numarasi (sadece ortam degiskenleri varsa)
+t = open(b, encoding='utf-8').read()
+ks = os.environ.get('UPLOAD_KS')
+if ks and 'upload-release' not in t:
+    rel = ('    signingConfigs {\n        release { // upload-release\n'
+           '            storeFile file("%s")\n            storePassword System.getenv("UPLOAD_KS_PASS")\n'
+           '            keyAlias System.getenv("UPLOAD_KEY_ALIAS")\n            keyPassword System.getenv("UPLOAD_KEY_PASS")\n        }\n' % ks)
+    t = t.replace('    signingConfigs {\n', rel, 1)
+    t = re.sub(r'(buildTypes\s*\{\s*release\s*\{)', r'\1\n            signingConfig signingConfigs.release', t, count=1)
+    print('release imzasi eklendi')
+vc = os.environ.get('VERSION_CODE')
+if vc:
+    t = re.sub(r'versionCode\s+\d+', 'versionCode ' + vc, t, count=1)
+    t = re.sub(r'versionName\s+"[^"]*"', 'versionName "1.0.' + vc + '"', t, count=1)
+    print('versionCode', vc)
+open(b, 'w', encoding='utf-8').write(t)
