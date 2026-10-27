@@ -542,7 +542,7 @@ function menuHTML(){SHO=0;const ctrl=!tcOn(),done=QS?QS.q.filter(q=>q.done).leng
  '</div>'}
 function hmHop(){const e=document.getElementById('hmCh');if(!e)return;mcHap(1300);if(!mcT)mcTick();try{au();sfxKick(false)}catch(_){}e.classList.remove('hop');void e.offsetWidth;e.classList.add('hop')}
 function rwNote(){const n=((QS&&QS.cl&&QS.cl.length)?1:0)+(typeof spAvail=='function'?spAvail():0)+(wheelReady()?1:0)+(achPend()>0?1:0);return (QS&&QS.cl&&QS.cl.length)?'🎁':(n>0?n:'')}
-let NAVS=[];function navPush(f){NAVS.push(f)}function retBack(){const f=NAVS.pop();if(f){try{f()}catch(e){menu()}}else menu()}
+let NAVS=[];function navPush(f){NAVS.push(f)}function retBack(){const f=NAVS.pop();if(f){try{f()}catch(e){menu()}}else if(state=='pause'&&typeof ball!='undefined'&&ball&&P&&P.length)(HT?htUI():pauseUI());else menu()}
 let RWT='q',RWCAP=0,ORW={};
 function rwTab(k){RWT=k;rewardsUI(1)}
 function rwBody(k){const fn=ORW[k];if(!fn)return '';RWCAP=1;try{fn()}catch(e){}RWCAP=0;const cd=ov.querySelector('.card');if(!cd)return '';const t=document.createElement('div');t.innerHTML=cd.innerHTML;t.querySelectorAll('h1,.xcl').forEach(e=>e.remove());t.querySelectorAll('button').forEach(b=>{if(/retBack|navPush/.test(b.getAttribute('onclick')||''))b.remove()});t.querySelectorAll('.row').forEach(r=>{if(!r.children.length)r.remove()});return '<div class="rwb">'+t.innerHTML+'</div>'}
