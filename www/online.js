@@ -18,7 +18,7 @@
  auth.onAuthStateChanged(u=>{if(!u){auth.signInAnonymously().catch(()=>{KR.ready=true});return}KR.user=u;load()});
  KR.native=!!(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform());
  const faPlugin=()=>{const C=window.Capacitor;if(!C)return null;if(C.Plugins&&C.Plugins.FirebaseAuthentication)return C.Plugins.FirebaseAuthentication;if(typeof C.registerPlugin=='function')return C.registerPlugin('FirebaseAuthentication');return null};
- const afterAuth=async()=>{KR.user=auth.currentUser;KR.profile=null;await load();KR.profileUI()};
+ const afterAuth=async()=>{KR.user=auth.currentUser;KR.profile=null;await load();if(KR.glob){KR.glob=0;if(window.NETUI)NETUI.lobby();else KR.profileUI()}else KR.profileUI()};
  KR.googleLogin=async()=>{
   const m=document.getElementById('krm'),say=t=>{if(m)m.textContent=t};
   try{
