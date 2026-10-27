@@ -5,7 +5,7 @@
 :root{--bg:#101c19;--fg:#e9f2e6;--card:#1b2e29;--bd:#2e4a42;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 html,body{margin:0;height:100%;overflow:hidden;overscroll-behavior:none}
 body{background:var(--bg);color:var(--fg);font-family:system-ui,sans-serif;display:flex;align-items:center;justify-content:center}
-.wrap{position:relative;width:min(100vw,calc(100vh*var(--ar,1.5676)),calc(740px*var(--ar,1.5676)))}
+.wrap{position:relative;width:min(100vw,calc(100vh*var(--ar,1.5676)))}
 canvas{width:100%;height:auto;display:block;border-radius:10px}
 #ov{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(8,16,14,.8);border-radius:10px;overflow:auto}
 .card{background:var(--card);border:1px solid var(--bd);border-radius:18px;padding:20px 26px;text-align:center;max-width:92%;max-height:96%;overflow-y:auto}
@@ -380,8 +380,8 @@ function rebind(si,a){cap={s:si,a};settings()}
 function settingsBack(){cap=null;if(spage!='hub'){spage='hub';settings();return}inSet=false;if(sb=='pause')pauseUI();else menu()}
 loadKeys();rebuildKS();
 const NP=6,HOME=[[.03,.5],[.2,.25],[.2,.75],[.32,.5],[.45,.27],[.45,.73]];
-let tour=null,mode=1,D=DIF.medium,P=[],ball,score=[0,0],time=0,ext=0,half=0,froze=0,msg='',act=[4,4],ctl=[KS,null],state='menu',shake=0,restart=null,psw=null,ko=null,hold=null,cam={x:500,y:310,z:1.5},kdg=[false,false];
-const GS=.58;let kfx=[],gcam=null,zm=2,netFx=[null,null],bars=[],bused=[0,0],kult=[0,0],swd=[],trail=[],bh=[],clock=0,fxs=[],AC=null,mute=false,msg2='',msg2t=0;
+let tour=null,mode=1,D=DIF.medium,P=[],ball,score=[0,0],time=0,ext=0,half=0,froze=0,msg='',act=[4,4],ctl=[KS,null],state='menu',shake=0,restart=null,psw=null,ko=null,hold=null,cam={x:500,y:310,z:(window.Capacitor||navigator.maxTouchPoints>0)?1.5:1},kdg=[false,false];
+const GS=.58;let kfx=[],gcam=null,zm=(window.Capacitor||navigator.maxTouchPoints>0)?2:1,netFx=[null,null],bars=[],bused=[0,0],kult=[0,0],swd=[],trail=[],bh=[],clock=0,fxs=[],AC=null,mute=false,msg2='',msg2t=0;
 let ST={touch:'auto',gfx:'auto',fps:false,lang:'tr',sfx:.8,mus:.12,musOn:true,shk:true};
 try{const j=JSON.parse(localStorage.getItem('kroki-set')||'null');if(j&&typeof j=='object')ST=Object.assign(ST,j)}catch(e){}
 if(!ST.mv2){ST.mus=.12;ST.mv2=1;try{localStorage.setItem('kroki-set',JSON.stringify(ST))}catch(e){}}
