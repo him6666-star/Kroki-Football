@@ -22,6 +22,22 @@
           }
         },
         {
+          "client_id": "307843857448-5hht3jmg0ka2phun3rpc5j3075h9djbv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.scribblekick.game",
+            "certificate_hash": "6e5143d069dffd7608c545008483f5d6dec6eb9f"
+          }
+        },
+        {
+          "client_id": "307843857448-upvuf3lol9i20ff7cu66b4fdanpcab6u.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.scribblekick.game",
+            "certificate_hash": "406089107441c3ade3658e1c3156b24c4ce439af"
+          }
+        },
+        {
           "client_id": "307843857448-8cb9plcm3e2qvpteje48gqs7il0ngdtj.apps.googleusercontent.com",
           "client_type": 3
         }
