@@ -1275,7 +1275,7 @@ button:focus-visible { outline: 4px solid var(--cheese); outline-offset: 2px; }
     try {
       var src = audio.createBufferSource(), g = audio.createGain();
       src.buffer = buf; if (rate) src.playbackRate.value = rate;
-      g.gain.value = (vol == null ? 1 : vol) * settings.sfxVol / 80;
+      g.gain.value = (vol == null ? 1 : vol) * 0.6 * settings.sfxVol / 80;   // recorded effects sit a bit under the music
       src.connect(g); g.connect(audio.destination); src.start();
       return src;
     } catch (e) { return false; }
@@ -1285,7 +1285,7 @@ button:focus-visible { outline: 4px solid var(--cheese); outline-offset: 2px; }
     if (on && !fanLoop && SND.fan && settings.sfx && !muted) {
       try {
         var src = audio.createBufferSource(), g = audio.createGain();
-        src.buffer = SND.fan; src.loop = true; g.gain.value = 0.35 * settings.sfxVol / 80;
+        src.buffer = SND.fan; src.loop = true; g.gain.value = 0.1 * settings.sfxVol / 80;
         src.connect(g); g.connect(audio.destination); src.start(); fanLoop = src;
       } catch (e) {}
     } else if (!on && fanLoop) { try { fanLoop.stop(); } catch (e) {} fanLoop = null; }
@@ -2824,7 +2824,7 @@ button:focus-visible { outline: 4px solid var(--cheese); outline-offset: 2px; }
         S.gearAng += 0.09; S.ballRot += S.sim.ball.velocity.x / HM.BALL_R;
         // impact sounds: a hard landing of the ball, a crate hitting something, the first domino tipping
         var bv = S.sim.ball.velocity, pv = S.prevV || bv, dvv = Math.hypot(bv.x - pv.x, bv.y - pv.y); S.prevV = { x: bv.x, y: bv.y };
-        if (dvv > 3.2 && S.t - (S.thudT || 0) > 160 && !S.sim.carried) { S.thudT = S.t; SFX.hit(); }
+        if (dvv > 4.5 && S.t - (S.thudT || 0) > 350 && !S.sim.carried) { S.thudT = S.t; SFX.hit(); }
         S.sim.pb.forEach(function (o, i) {
           var pt = S.sim.parts[i].t;
           if (pt === 'box' && o.main) { var v = o.main.velocity, ov = o.pv || v; if (Math.hypot(v.x - ov.x, v.y - ov.y) > 3 && S.t - (o.sT || 0) > 250) { o.sT = S.t; SFX.crash(); } o.pv = { x: v.x, y: v.y }; }
