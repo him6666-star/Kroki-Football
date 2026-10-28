@@ -17,7 +17,8 @@ jobs:
         run: echo '${{ secrets.FIREBASE_KEY }}' > "$RUNNER_TEMP/key.json"
       - name: Site adini ayarla
         working-directory: hamster-web
-        run: sed -i 's/"site": "[^"]*"/"site": "${{ github.event.inputs.site }}"/' firebase.json
+        run: |
+          sed -i 's/"site": "[^"]*"/"site": "${{ github.event.inputs.site }}"/' firebase.json
       - name: Site yoksa olustur
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/key.json
