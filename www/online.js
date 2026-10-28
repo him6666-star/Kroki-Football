@@ -14,7 +14,7 @@
  const CK=['kroki-q','kroki-tour','kroki-jug'],isG=()=>!!(KR.user&&!KR.user.isAnonymous);
  const sc=j=>{try{const q=JSON.parse(j);return (q.lv||1)*1e6+(q.xp||0)+Object.keys(q.ach||{}).length*10}catch(e){return 0}};
  const gl=k=>{try{return localStorage.getItem(k)||''}catch(e){return ''}};
- KR.cloudPush=async()=>{if(!isG()||KR.pulling)return;try{await db.collection('saves').doc(KR.user.uid).set({q:gl('kroki-q'),tour:gl('kroki-tour'),jug:gl('kroki-jug'),t:FV.serverTimestamp()})}catch(e){}};
+ KR.cloudPush=async()=>{if(!isG()||KR.pulling)return;try{const r0=await db.collection('saves').doc(KR.user.uid).get(),d0=r0.exists?r0.data():null;if(d0&&d0.q&&d0.q!==gl('kroki-q')&&sc(d0.q)>sc(gl('kroki-q'))){if(typeof state!='undefined'&&state=='menu')KR.cloudSync();return}}catch(e){}try{await db.collection('saves').doc(KR.user.uid).set({q:gl('kroki-q'),tour:gl('kroki-tour'),jug:gl('kroki-jug'),t:FV.serverTimestamp()})}catch(e){}};
  let pt=0;KR.cloudQueue=()=>{if(!isG())return;clearTimeout(pt);pt=setTimeout(KR.cloudPush,4000)};
  KR.cloudSync=async(manual)=>{if(!isG())return;KR.pulling=1;let d=null;try{const r=await db.collection('saves').doc(KR.user.uid).get();d=r.exists?r.data():null}catch(e){KR.pulling=0;return}KR.pulling=0;
   const loc=gl('kroki-q');
@@ -22,7 +22,7 @@
    try{qLoad()}catch(e){}if(typeof state!='undefined'&&state=='menu'){try{menu()}catch(e){}}try{if(typeof toast=='function')toast(T('\u2601\ufe0f Kay\u0131t y\u00fcklendi','\u2601\ufe0f Progress loaded'))}catch(e){}}
   else await KR.cloudPush()};
  setTimeout(()=>{if(typeof qSave=='function'&&!qSave._w){const o=qSave;window.qSave=function(){o.apply(this,arguments);KR.cloudQueue()};window.qSave._w=1}if(typeof tourSave=='function'&&!tourSave._w){const o=tourSave;window.tourSave=function(){o.apply(this,arguments);KR.cloudQueue()};window.tourSave._w=1}},0);
- document.addEventListener('visibilitychange',()=>{if(document.hidden&&isG())KR.cloudPush()});
+ document.addEventListener('visibilitychange',()=>{if(!isG())return;if(document.hidden)KR.cloudPush();else if(typeof state!='undefined'&&state=='menu')KR.cloudSync()});
  async function load(){
   try{const d=await db.collection('users').doc(KR.user.uid).get();KR.profile=d.exists?d.data():null}catch(e){KR.profile=null}
   KR.prizes();const first=!KR.ready;KR.ready=true;if(first&&isG())KR.cloudSync();if(first&&typeof state!='undefined'&&state=='menu')menu();
