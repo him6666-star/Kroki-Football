@@ -1,0 +1,34 @@
+name: Hamster web yukle
+on:
+  workflow_dispatch:
+    inputs:
+      site:
+        description: "Site adi (site-adi.web.app)"
+        default: "hamster"
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Anahtari yaz
+        run: echo '${{ secrets.FIREBASE_KEY }}' > "$RUNNER_TEMP/key.json"
+      - name: Site adini ayarla
+        working-directory: hamster-web
+        run: sed -i 's/"site": "[^"]*"/"site": "${{ github.event.inputs.site }}"/' firebase.json
+      - name: Site yoksa olustur
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/key.json
+        working-directory: hamster-web
+        run: |
+          npx -y firebase-tools@13 hosting:sites:list --project scribble-kick --json > sites.json || true
+          if grep -q '"name": *"projects/[^"]*/sites/${{ github.event.inputs.site }}"' sites.json; then echo "Site zaten var"; else
+            npx -y firebase-tools@13 hosting:sites:create "${{ github.event.inputs.site }}" --project scribble-kick --non-interactive; fi
+          rm -f sites.json
+      - name: Yukle
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/key.json
+        working-directory: hamster-web
+        run: npx -y firebase-tools@13 deploy --only hosting --project scribble-kick --non-interactive
