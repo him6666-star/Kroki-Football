@@ -2686,7 +2686,7 @@ button:focus-visible { outline: 4px solid var(--cheese); outline-offset: 2px; }
       g.appendChild(d);
     });
   }
-  $('hBadges').onclick = function () { SFX.pick(); buildBadges(); $('badges').hidden = false; };
+  $('hBadges').onclick = function () { SFX.pick(); buildBadges(); $('badges').hidden = false; progress.badgesSeen = badgeCount(); saveProgress(); updateHome(); };
   $('badgesClose').onclick = function () { $('badges').hidden = true; };
 
   /* ---------- home screen ---------- */
@@ -2699,7 +2699,7 @@ button:focus-visible { outline: 4px solid var(--cheese); outline-offset: 2px; }
     for (var i = 0; i < LEVELS.length; i++) if (unlocked(i) && !(progress.stars[i] > 0)) return i;
     return 0;
   }
-  function updateHome() { $('hBadgeCnt').textContent = badgeCount() || ''; $('homeStars').textContent = totalStars() + ' / ' + LEVELS.length * 3; $('hPlaySub').textContent = 'Seviye ' + (nextLevel() + 1); }
+  function updateHome() { var nb = badgeCount() - (progress.badgesSeen || 0); $('hBadgeCnt').textContent = nb > 0 ? nb : ''; $('homeStars').textContent = totalStars() + ' / ' + LEVELS.length * 3; $('hPlaySub').textContent = 'Seviye ' + (nextLevel() + 1); }
   function openHome() {
     S.mode = 'menu'; S.sim = null;
     ['menu', 'win', 'settings', 'shop', 'acct', 'badges'].forEach(function (id) { $(id).hidden = true; });
