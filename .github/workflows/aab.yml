@@ -46,3 +46,18 @@ jobs:
         with:
           name: scribble-kick-aab
           path: android/app/build/outputs/bundle/release/app-release.aab
+      - name: Play kapali teste yukle (taslak)
+        env:
+          PLAY_KEY: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          if [ -z "$PLAY_KEY" ]; then echo "PLAY_SERVICE_ACCOUNT_JSON yok, Play yuklemesi atlandi"; echo "SKIP_PLAY=1" >> "$GITHUB_ENV"; fi
+      - name: Play yukle
+        if: env.SKIP_PLAY != '1'
+        uses: r0adkll/upload-google-play@v1.1.3
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: com.scribblekick.game
+          releaseFiles: android/app/build/outputs/bundle/release/app-release.aab
+          track: alpha
+          status: draft
+          whatsNewDirectory: whatsnew
