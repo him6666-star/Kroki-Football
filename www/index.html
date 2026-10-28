@@ -1687,7 +1687,7 @@ qLoad();
 function stKick(p,dx,dy,pw){if(NET||pen||p.i==0)return;const t=p.t,l=Math.hypot(dx,dy)||1,tow=dx*(t?-1:1)/l;if(pw>=330){if(tow>.45){MS.shots[t]++;MS.lastShot={t,time:MS.clk};if(t==0)ev('shot')}}else{MS.pass[t]++;MS.pp={t,time:MS.clk,from:p}}}
 function stTick(dt){if(NET||pen)return;MS.clk+=dt;const c0=ball&&ball.car;if(MS.lastShot&&MS.clk-MS.lastShot.time>3)MS.lastShot=null;if(MS.pp&&MS.clk-MS.pp.time>3)MS.pp=null;if(!c0)return;MS.pos[c0.t]+=dt;if(MS.pp&&c0.t==MS.pp.t&&c0!==MS.pp.from){MS.passOK[c0.t]++;if(c0.t==0)ev('pass');MS.pp=null}else if(MS.pp&&c0.t!=MS.pp.t)MS.pp=null;
  if(MS.lastShot&&c0.i==0&&c0.t!=MS.lastShot.t){MS.save[c0.t]++;comment('save');MS.sot[MS.lastShot.t]++;if(c0.t==0)ev('save');MS.lastShot=null}}
-const HOLD_MAX=5;let AB_T=-99,CB_MAX=0;function evOnline(win){try{if(!QS)return;QS.tot.onPlay=(QS.tot.onPlay||0)+1;if(win)QS.tot.onWin=(QS.tot.onWin||0)+1;ACH.forEach(a=>{if(!QS.ach[a.id]&&a.t(QS,{})){QS.ach[a.id]=Date.now()}});qSave()}catch(e){}}
+const HOLD_MAX=5;let AB_T=-99,CB_MAX=0;function evOnline(win){try{if(!QS)return;QS.tot.onPlay=(QS.tot.onPlay||0)+1;if(win)QS.tot.onWin=(QS.tot.onWin||0)+1;try{xpAdd(XPV.play+(win?XPV.win:0))}catch(e){}ACH.forEach(a=>{if(!QS.ach[a.id]&&a.t(QS,{})){QS.ach[a.id]=Date.now()}});qSave()}catch(e){}}
 function stGoal(sc){if(NET)return;if(sc==0)ev('goal');try{if(sc==1){CB_MAX=Math.max(CB_MAX,score[1]-score[0]);if(ball&&ball.lt&&ball.lt.t==0)ev('ownGoal')}if(sc==0&&clock-AB_T<7)ev('abGoal');if(MS.lastShot&&MS.lastShot.t==sc){MS.sot[sc]++;MS.lastShot=null}}catch(e){}}
 function stFoul(p){if(!NET&&!pen)MS.foul[p.t]++}
 function stTackle(p){if(NET||pen)return;MS.tackle[p.t]++;if(p.t==0)ev('tackle')}
