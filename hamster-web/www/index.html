@@ -1203,10 +1203,39 @@ button:focus-visible { outline: 4px solid var(--cheese); outline-offset: 2px; }
       inv: { pend: 1, box: 1, belt: 1, gear: 1, balloon: 1, magnet: 1, needle: 1 }, par: 7,
       solution: [{ t: 'pend', x: 50, y: 34, a: -90 }, { t: 'box', x: 420, y: 30, a: 0 }, { t: 'belt', x: 640, y: 440, a: 30, d: -1 }, { t: 'gear', x: 150, y: 525, a: 0, d: 1 },
         { t: 'balloon', x: 920, y: 475 }, { t: 'magnet', x: 1020, y: 30, a: 0, d: 1 }, { t: 'needle', x: 1100, y: 60, a: 180 }]
+    },
+    {
+      name: 'Balonlu Kapı', tip: 'Kutu kapıyı açar, sarkaç hamsteri uyandırır. Balon onu duvarın üstünden aşırsın, iğne peynirin üstünde indirsin.',
+      start: { x: 90, y: 160, dir: 0 }, goal: { x: 1195, y: 538 },
+      fixed: [plank(130, 194, 220), plank(400, 214, 320, 6), { t: 'door', x: 500, y: 150, w: 18, h: 110, g: 'A' }, plank(420, 135, 110), { t: 'button', x: 420, y: 119, g: 'A' }, plank(800, 560, 600, 2), wall(1100, 410, 300), plank(1190, 575, 160), wall(1273, 300, 600)],
+      inv: { pend: 1, box: 1, balloon: 1, needle: 1 }, par: 4,
+      solution: [{ t: 'pend', x: 50, y: 34, a: -90 }, { t: 'box', x: 420, y: 30, a: 0 }, { t: 'balloon', x: 790, y: 250 }, { t: 'needle', x: 1140, y: 55, a: 180 }]
+    },
+    {
+      name: 'Domino Uyandırma', tip: 'Sarkaç ilk dominoyu devirsin. Son domino düğmeye basınca kilitli sarkaç hamsteri uyandırır. Sonra yay ve bant.',
+      start: { x: 600, y: 186, dir: 0 }, goal: { x: 70, y: 313 },
+      fixed: [plank(330, 220, 620), { t: 'button', x: 390, y: 204, g: 'B' }, plank(382, 150, 76), { t: 'pend', x: 560, y: 60, a: -90, hold: true, g: 'B' }, plank(780, 240, 200, 8), wall(962, 420, 360), plank(700, 420, 300, -6), plank(450, 450, 220), plank(250, 400, 200, 28), plank(80, 350, 150), wall(10, 300, 120)],
+      inv: { pend: 1, domino: 1, spring: 1, belt: 1 }, par: 4,
+      solution: [{ t: 'pend', x: 125, y: 70, a: -80 }, { t: 'domino', x: 160, y: 211, a: 0, d: 1 }, { t: 'spring', x: 870, y: 480, a: -10 }, { t: 'belt', x: 270, y: 390, a: 28, d: -1 }]
+    },
+    {
+      name: 'Uçan Balon Ekibi', tip: 'Kutu tahterevalliye düşünce hamster fırlar. Balon onu yakalasın, fan geri sürüklesin, iğne kuyunun üstünde patlatsın.',
+      start: { x: 429, y: 458, dir: 0 }, goal: { x: 160, y: 523 },
+      fixed: [{ t: 'seesaw', x: 520, y: 460, a: -20 }, plank(160, 560, 170), wall(82, 380, 360), wall(238, 380, 360), wall(1273, 300, 600)],
+      inv: { box: 1, balloon: 1, fan: 1, needle: 1 }, par: 4,
+      solution: [{ t: 'box', x: 580, y: 120, a: 0 }, { t: 'balloon', x: 650, y: 125 }, { t: 'fan', x: 980, y: 120, a: 180, d: 1 }, { t: 'needle', x: 130, y: 55, a: 180 }]
+    },
+    {
+      name: 'Dişli Fabrikası', tip: 'Bant yokuşu çıkarır, dişli tünele fırlatır. Ray hamsteri küçük duvarın üstünden aşırsın, yay da peynire atsın.',
+      start: { x: 80, y: 120, dir: 1 }, goal: { x: 700, y: 553 },
+      fixed: [plank(180, 160, 260, 10), plank(420, 180, 240, -22), plank(650, 430, 380), wall(962, 430, 340), plank(640, 326, 320), plank(382, 382, 196, 32), plank(205, 336, 192), wall(170, 312, 40), wall(32, 240, 200), wall(1273, 300, 600), plank(150, 590, 240), plank(650, 590, 370), wall(846, 520, 170)],
+      inv: { belt: 1, gear: 1, rail: 1, spring: 1 }, par: 4,
+      solution: [{ t: 'belt', x: 390, y: 140, a: -27, d: 1 }, { t: 'gear', x: 920, y: 440, a: 0, d: -1 }, { t: 'rail', x: 190, y: 300, a: 16 }, { t: 'spring', x: 75, y: 540, a: 58 }]
     }
   ];
   root.HM_CHAPTER2 = root.HM_LEVELS.length;
   root.HM_LEVELS = root.HM_LEVELS.concat(CH);
+  root.HM_FINAL = root.HM_LEVELS.findIndex(function (l) { return l.name === 'Büyük Final'; });
 })(typeof window !== 'undefined' ? window : global);
 </script>
 <script>
@@ -1243,7 +1272,7 @@ button:focus-visible { outline: 4px solid var(--cheese); outline-offset: 2px; }
   var changeCbs = [];
   function notifyChange() { changeCbs.forEach(function (f) { try { f(); } catch (e) {} }); }
   function saveProgress() { try { localStorage.setItem('hm-progress-v3', JSON.stringify(progress)); } catch (e) {} notifyChange(); }
-  function unlocked(i) { return i === 0 || i === window.HM_CHAPTER2 || i === LEVELS.length - 1 || (progress.stars[i - 1] || 0) > 0; }
+  function unlocked(i) { return i === 0 || i === window.HM_CHAPTER2 || i === window.HM_FINAL || (progress.stars[i - 1] || 0) > 0; }
 
   /* ---------- sound ---------- */
   var audio = null, muted = false;
