@@ -113,7 +113,7 @@
   gcam=S.gc?{x:S.gc[0],y:S.gc[1]}:null;
  }
  function guestEnd(sc){
-  state='end';const a=sc[0],b=sc[1];try{evOnline(b>a)}catch(e){}
+  state='end';const a=sc[0],b=sc[1];try{evOnline(b>a,b)}catch(e){}
   card(b>a?T('KAZANDIN!','YOU WIN!'):a>b?T('KAYBETT\u0130N','YOU LOST'):T('BERABERE','DRAW'),'<p style="font-size:22px">'+a+' \u2014 '+b+'</p><p style="opacity:.8;font-size:14px">'+T('Host yeni ma\u00e7 ba\u015flatabilir.','The host can start a rematch.')+'</p><div class="row"><button onclick="menu()">Men\u00fc</button></div>');
  }
  function guestStep(dt){
