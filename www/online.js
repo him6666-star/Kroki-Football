@@ -30,7 +30,7 @@
  auth.onAuthStateChanged(u=>{if(!u){auth.signInAnonymously().catch(()=>{KR.ready=true});return}KR.user=u;load()});
  KR.native=!!(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform());
  const faPlugin=()=>{const C=window.Capacitor;if(!C)return null;if(C.Plugins&&C.Plugins.FirebaseAuthentication)return C.Plugins.FirebaseAuthentication;if(typeof C.registerPlugin=='function')return C.registerPlugin('FirebaseAuthentication');return null};
- const afterAuth=async()=>{KR.user=auth.currentUser;KR.profile=null;await load();try{await KR.cloudSync(true)}catch(e){}if(KR.glob){KR.glob=0;if(window.NETUI)NETUI.lobby();else KR.profileUI()}else KR.profileUI()};
+ const afterAuth=async()=>{KR.user=auth.currentUser;KR.profile=null;await load();try{await KR.cloudSync(true)}catch(e){}try{if(isG()&&typeof QS!='undefined'&&QS&&!(QS.tot&&QS.tot.google)&&typeof ev=='function')ev('google')}catch(e){}if(KR.glob){KR.glob=0;if(window.NETUI)NETUI.lobby();else KR.profileUI()}else KR.profileUI()};
  KR.googleLogin=async()=>{
   const m=document.getElementById('krm'),say=t=>{if(m)m.textContent=t};
   try{
@@ -62,7 +62,7 @@
   h+='<div id="krm" style="min-height:16px;font-size:12px;opacity:.85"></div><button class="by" onclick="KR.saveName()">'+(p?T('Ad\u0131 de\u011fi\u015ftir','Rename'):T('Profil olu\u015ftur','Create profile'))+'</button></div></div>';
   if(p)h+='<div class="tile4"><div class="tl"><b>'+p.points+'</b><small>'+T('Puan','Points')+'</small></div><div class="tl"><b>'+p.matches+'</b><small>'+T('Ma\u00e7','Matches')+'</small></div><div class="tl"><b>'+p.wins+'/'+p.draws+'/'+p.losses+'</b><small>G/B/M</small></div><div class="tl"><b>'+p.goals+'</b><small>'+T('Gol','Goals')+'</small></div></div>';
   h+='<p style="margin:8px 0 4px;font-size:13px;opacity:.8">'+(gu?'\u2705 Google: '+esc(KR.user.email||''):T('Misafir hesab\u0131 (uygulama silinirse puanlar kaybolur)','Guest account (points are lost if the app is deleted)'))+'</p>';
-  h+='<div class="row">'+(gu?'<button onclick="KR.signOut()">'+T('\u00c7\u0131k\u0131\u015f yap','Sign out')+'</button>':'<button class="gbt" onclick="KR.googleLogin()"><b style="color:#4285f4">G</b>  '+T('Google ile giri\u015f yap','Sign in with Google')+'</button>')+'</div>'+back+'</div>';
+  h+='<div class="row">'+(gu?'<button onclick="KR.signOut()">'+T('\u00c7\u0131k\u0131\u015f yap','Sign out')+'</button>':'<button class="gbt" onclick="KR.googleLogin()"><b style="color:#4285f4">G</b>  '+T('Google ile giri\u015f yap','Sign in with Google')+'</button>')+'</div>'+(!gu&&typeof QS!='undefined'&&QS&&!(QS.tot&&QS.tot.google)?'<div style="margin:6px 0;font-size:13px;color:#ffd54f;text-align:center">\ud83c\udf81 '+T('Google ile giri\u015f yap, rozet ve \u00f6d\u00fcl kazan','Sign in with Google to earn a badge and reward')+'</div>':'')+back+'</div>';
   ov.style.display='flex';ov.innerHTML=h;
  };
  KR.saveName=async()=>{
