@@ -19,17 +19,28 @@ jobs:
         working-directory: hamster-web
         run: |
           sed -i 's/"site": "[^"]*"/"site": "${{ github.event.inputs.site }}"/' firebase.json
-      - name: Site yoksa olustur
+      - name: Site yoksa olustur (dolusa siradaki adi dene)
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/key.json
         working-directory: hamster-web
         run: |
-          npx -y firebase-tools@13 hosting:sites:list --project scribble-kick --json > sites.json || true
-          if grep -q '"name": *"projects/[^"]*/sites/${{ github.event.inputs.site }}"' sites.json; then echo "Site zaten var"; else
-            npx -y firebase-tools@13 hosting:sites:create "${{ github.event.inputs.site }}" --project scribble-kick --non-interactive; fi
-          rm -f sites.json
+          F="npx -y firebase-tools@13"
+          $F hosting:sites:list --project scribble-kick > sites.txt 2>&1 || true
+          CHOSEN=""
+          for S in ${{ github.event.inputs.site }} hamster-muhendis hamstermuhendis hamster-engineer; do
+            if grep -qw "$S" sites.txt; then CHOSEN=$S; echo "::notice::Site zaten projede: $S"; break; fi
+            OUT=$($F hosting:sites:create "$S" --project scribble-kick --non-interactive 2>&1) && { CHOSEN=$S; echo "::notice::Site olusturuldu: $S"; break; }
+            echo "::warning::$S alinamadi: $(echo "$OUT" | grep -iE 'error|exist|taken|denied|permission' | head -3 | tr '\n' ' ')"
+          done
+          rm -f sites.txt
+          [ -n "$CHOSEN" ] || { echo "::error::Hicbir site adi alinamadi"; exit 1; }
+          sed -i "s/\"site\": \"[^\"]*\"/\"site\": \"$CHOSEN\"/" firebase.json
       - name: Yukle
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/key.json
         working-directory: hamster-web
-        run: npx -y firebase-tools@13 deploy --only hosting --project scribble-kick --non-interactive
+        run: |
+          RC=0; OUT=$(npx -y firebase-tools@13 deploy --only hosting --project scribble-kick --non-interactive 2>&1) || RC=$?
+          echo "$OUT" | tail -20
+          echo "::notice::$(echo "$OUT" | grep -iE 'Hosting URL|error' | head -3 | tr '\n' ' ')"
+          exit $RC
