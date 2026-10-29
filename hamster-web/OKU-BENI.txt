@@ -1,3 +1,0 @@
-Hamster Mühendis'in web sürümü (asıl kaynak: him6666-star/hamster-muhendis deposu).
-Bu klasör, oyunu scribble-kick Firebase projesindeki ayrı bir Hosting sitesine yüklemek için burada.
-Yükleme: Actions > "Hamster web yukle" > Run workflow.

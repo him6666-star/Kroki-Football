@@ -115,15 +115,5 @@ service cloud.firestore {
             && request.resource.data.get('tour','').size() < 50000));
     }
 
-    // Hamster Muhendis bulut kaydi: Google ile giris yapan oyuncu, yalnizca kendi belgesi
-    match /hamster_users/{uid} {
-      allow read, delete: if request.auth != null && request.auth.uid == uid;
-      allow create, update: if request.auth != null && request.auth.uid == uid
-        && request.auth.token.firebase.sign_in_provider == 'google.com'
-        && request.resource.data.keys().hasOnly(['stars','shop','settings','t'])
-        && request.resource.data.stars is string && request.resource.data.stars.size() < 20000
-        && request.resource.data.shop is string && request.resource.data.shop.size() < 5000
-        && request.resource.data.get('settings', '') is string && request.resource.data.get('settings', '').size() < 2000;
-    }
   }
 }
