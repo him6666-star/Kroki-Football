@@ -195,7 +195,7 @@
   if(!KR.user){NETUI.lobby();return}
   close();S.on=true;const tok=++S.tok,me=KR.user.uid;
   const alive=()=>S.on&&S.tok==tok;
-  const wait=()=>card('\U0001f50e '+T('Rakip aran\u0131yor','Searching'),'<p style="opacity:.85;margin:10px 0">'+T('Rakip aran\u0131yor... Ba\u015fka bir oyuncu "Rakip bul"a bas\u0131nca otomatik e\u015fle\u015firsiniz.','Looking for an opponent... You will be matched automatically when someone else searches.')+'</p><div id="nm" style="min-height:20px;font-size:13px;opacity:.9"></div><div class="row"><button onclick="menu()">'+T('\u0130ptal','Cancel')+'</button></div>');
+  const wait=()=>{card('\U0001f50e '+T('Rakip aran\u0131yor','Searching'),'<div id="mynm" style="font-weight:800;font-size:20px;margin:6px 0 0;color:#ffd54f"></div><p style="opacity:.85;margin:10px 0">'+T('Rakip aran\u0131yor... Ba\u015fka bir oyuncu "Rakip bul"a bas\u0131nca otomatik e\u015fle\u015firsiniz.','Looking for an opponent... You will be matched automatically when someone else searches.')+'</p><div id="nm" style="min-height:20px;font-size:13px;opacity:.9"></div><div class="row"><button onclick="menu()">'+T('\u0130ptal','Cancel')+'</button></div>');try{const e=document.getElementById('mynm');if(e)e.textContent='\ud83d\udc64 '+myName()}catch(_){}};
   wait();
   const tryJoin=async list=>{for(const x of list){if(!alive())return true;if(await NETUI.join(x.code,true))return true}return false};
   try{
