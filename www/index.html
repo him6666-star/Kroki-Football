@@ -380,7 +380,7 @@ const CML=[['Yön.','Dir.'],['1×','1×'],['1.25×','1.25×'],['1.7×','1.7×'],
 function camNext(){const L=[1,1.5,1.9,2.4];zm=(zm+1)%3;if(zm>0)cam.z=L[zm-1];au();camLbl()}
 function camLbl(){const b=document.getElementById('cm');if(b)b.textContent='🎥 '+(ST.lang=='en'?CML[zm][1]:CML[zm][0])}
 function setZm(k){zm=k;const L2=[1,1.5,1.9,2.4];if(k>0)cam.z=L2[k-1];camLbl();settings()}
-function setLang(l){ST.lang=l;saveST();settings()}
+function setLang(l){ST.lang=l;try{document.documentElement.lang=l}catch(e){}saveST();settings()}
 function rebind(si,a){cap={s:si,a};settings()}
 function settingsBack(){cap=null;if(spage!='hub'){spage='hub';settings();return}inSet=false;if(sb=='pause')pauseUI();else menu()}
 loadKeys();rebuildKS();
@@ -388,7 +388,9 @@ const NP=6,HOME=[[.03,.5],[.2,.25],[.2,.75],[.32,.5],[.45,.27],[.45,.73]];
 let tour=null,mode=1,D=DIF.medium,P=[],ball,score=[0,0],time=0,ext=0,half=0,froze=0,msg='',act=[4,4],ctl=[KS,null],state='menu',shake=0,restart=null,psw=null,ko=null,hold=null,cam={x:500,y:310,z:(window.Capacitor||navigator.maxTouchPoints>0)?1.5:1},kdg=[false,false];
 let spk=[];const GS=.58;let kfx=[],gcam=null,zm=(window.Capacitor||navigator.maxTouchPoints>0)?2:1,netFx=[null,null],bars=[],bused=[0,0],kult=[0,0],swd=[],trail=[],bh=[],clock=0,fxs=[],AC=null,mute=false,msg2='',msg2t=0;
 let ST={touch:'auto',gfx:'auto',fps:false,lang:'tr',sfx:.8,mus:.12,musOn:true,shk:true};
-try{const j=JSON.parse(localStorage.getItem('kroki-set')||'null');if(j&&typeof j=='object')ST=Object.assign(ST,j)}catch(e){}
+let _hasSet=false;try{const j=JSON.parse(localStorage.getItem('kroki-set')||'null');if(j&&typeof j=='object'){_hasSet=!!j.lang;ST=Object.assign(ST,j)}}catch(e){}
+if(!_hasSet){try{ST.lang=/^tr/i.test(navigator.language||'tr')?'tr':'en'}catch(e){}}
+try{document.documentElement.lang=ST.lang}catch(e){}
 if(!ST.mv2){ST.mus=.12;ST.mv2=1;try{localStorage.setItem('kroki-set',JSON.stringify(ST))}catch(e){}}
 function saveST(){try{localStorage.setItem('kroki-set',JSON.stringify(ST))}catch(e){}}
 const L=(t,e)=>ST.lang=='en'?e:t;
