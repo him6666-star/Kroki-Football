@@ -18,7 +18,7 @@ async def main():
         print("A mm:", await A.inner_text("#mmText"))
         await B.click("#onlineBtn")
         for _ in range(60):
-            ok = [await pg.evaluate("!!(typeof state!=="undefined"&&state.online&&ON.active&&ON.g&&ON.g.status==='setup')") for pg in pages]
+            ok = [await pg.evaluate("!!(typeof state!=='undefined'&&state.online&&ON.active&&ON.g&&ON.g.status==='setup')") for pg in pages]
             if all(ok): break
             await asyncio.sleep(0.5)
         print("matched:", ok, await A.evaluate("ON.gid"), await B.evaluate("ON.gid"))
