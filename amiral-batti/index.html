@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Amiral Battı — Deniz Savaşı</title>
+<meta name="description" content="Klasik Amiral Battı oyunu: filonu yerleştir, düşman donanmasını batır! Ücretsiz, tarayıcıda oyna.">
+<meta name="theme-color" content="#04111f">
+<meta property="og:title" content="Amiral Battı — Deniz Savaşı">
+<meta property="og:description" content="Filonu yerleştir, düşman donanmasını batır! Tarayıcıda ücretsiz oyna.">
+<meta property="og:image" content="ship.png">
+<link rel="icon" type="image/png" href="boom.png">
+<link rel="apple-touch-icon" href="boom.png">
+<link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Rubik:wght@400;600;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --deep:#04111f; --foam:#d8ecff; --gold:#ffc94a; --gold2:#ff9d1c; --hit:#ff5a36; --ok:#5dff8f;
+  --cell:min(calc((100vw - 62px) / 11), 38px);
+  --boardW:calc(11 * var(--cell) + 20px + 16px + 4px);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--deep)}
+body{font-family:Rubik,system-ui,sans-serif;color:var(--foam);user-select:none;-webkit-user-select:none;touch-action:manipulation}
+button{font-family:inherit;cursor:pointer;border:0;color:inherit}
+
+/* ---------- animated sea backdrop ---------- */
+#sea{position:fixed;inset:-40px;background:url(sea_bg.jpg) center/cover;animation:drift 40s ease-in-out infinite alternate;z-index:0}
+#sea::after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(60,140,220,.28),transparent 60%),linear-gradient(180deg,rgba(4,17,31,.15),rgba(2,8,16,.7))}
+@keyframes drift{from{transform:scale(1.08) translate(-12px,-8px)}to{transform:scale(1.15) translate(14px,10px)}}
+
+#app{position:fixed;inset:0;z-index:1;display:flex;flex-direction:column;align-items:center}
+.screen{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;overflow-y:auto;overflow-x:hidden;
+  padding:max(12px,env(safe-area-inset-top)) 10px max(16px,env(safe-area-inset-bottom))}
+.screen.show{display:flex;animation:fadeIn .35s ease}
+@keyframes fadeIn{from{opacity:0;transform:scale(.98)}to{opacity:1;transform:none}}
+
+/* ---------- buttons ---------- */
+.btn{font-weight:800;font-size:17px;letter-spacing:.5px;border-radius:16px;padding:14px 22px;position:relative;
+  background:linear-gradient(180deg,#2b78bd,#17508a);box-shadow:0 5px 0 #0b2d52,0 8px 18px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.3);
+  transition:transform .08s,box-shadow .08s,filter .15s;text-shadow:0 2px 0 rgba(0,0,0,.3)}
+.btn:hover{filter:brightness(1.12)}
+.btn:active{transform:translateY(4px);box-shadow:0 1px 0 #0b2d52,0 3px 8px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.3)}
+.btn.gold{background:linear-gradient(180deg,#ffe07a,#ffb51f 55%,#f08c00);color:#4a2a00;text-shadow:0 1px 0 rgba(255,255,255,.5);
+  box-shadow:0 5px 0 #9a5600,0 10px 22px rgba(255,160,0,.35),inset 0 2px 0 rgba(255,255,255,.6)}
+.btn.gold:active{box-shadow:0 1px 0 #9a5600,inset 0 2px 0 rgba(255,255,255,.6)}
+.btn.red{background:linear-gradient(180deg,#ff7a5c,#d93a1c);box-shadow:0 5px 0 #7a1a08,0 8px 18px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.3)}
+.btn.sm{font-size:14px;padding:10px 14px;border-radius:12px}
+.btn:disabled{filter:grayscale(.8) brightness(.7);pointer-events:none}
+.icon-btn{width:44px;height:44px;border-radius:14px;font-size:20px;display:flex;align-items:center;justify-content:center;
+  background:rgba(10,40,70,.7);box-shadow:0 3px 0 rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.1)}
+.icon-btn:active{transform:translateY(2px)}
+
+/* ---------- MENU ---------- */
+#menu{justify-content:center;gap:10px}
+.logo{text-align:center;position:relative;margin-top:-20px}
+.logo h1{font-family:"Black Ops One",cursive;font-weight:400;margin:0;line-height:.9;font-size:clamp(46px,14vw,86px);letter-spacing:3px;
+  background:linear-gradient(180deg,#fff3c4 0%,#ffd45a 40%,#ff9d1c 100%);-webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 4px 0 #6b3a00) drop-shadow(0 0 30px rgba(255,180,40,.35));animation:logoIn .8s cubic-bezier(.2,1.6,.4,1)}
+.logo .tag{font-weight:900;letter-spacing:6px;font-size:13px;opacity:.75;margin-top:8px}
+@keyframes logoIn{from{transform:scale(.3) rotate(-8deg);opacity:0}to{transform:none;opacity:1}}
+.hero{position:relative;width:min(92vw,560px);height:min(30vw,170px);margin:6px 0 10px}
+.hero img.ship{position:absolute;left:50%;top:50%;width:100%;transform:translate(-50%,-50%) rotate(-4deg);
+  filter:drop-shadow(0 18px 14px rgba(0,0,0,.55));animation:bob 3.4s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translate(-50%,-50%) rotate(-4deg)}50%{transform:translate(-50%,-44%) rotate(-2deg)}}
+.hero .wake{position:absolute;left:4%;right:2%;top:58%;height:22%;border-radius:50%;
+  background:radial-gradient(ellipse at 15% 50%,rgba(255,255,255,.55),rgba(255,255,255,0) 70%);filter:blur(6px);animation:wake 1.6s ease-in-out infinite}
+@keyframes wake{50%{opacity:.5;transform:scaleX(1.05)}}
+.hero .ex{position:absolute;width:30%;aspect-ratio:1;background:url(boom.png) center/contain no-repeat;opacity:0;animation:menuBoom 4.5s infinite}
+.hero .ex.a{left:-6%;top:-20%;animation-delay:.6s}
+.hero .ex.b{right:-4%;top:-10%;width:22%;animation-delay:2.7s}
+@keyframes menuBoom{0%,100%{opacity:0;transform:scale(.2)}4%{opacity:1;transform:scale(1.1)}14%{opacity:0;transform:scale(1.4)}}
+.menu-buttons{display:flex;flex-direction:column;gap:14px;width:min(80vw,300px)}
+.menu-buttons .btn.gold{font-size:24px;padding:18px}
+.diff-row{display:flex;gap:8px;justify-content:center}
+.chip{flex:1;font-weight:800;font-size:14px;padding:10px 6px;border-radius:12px;background:rgba(10,40,70,.75);border:2px solid rgba(255,255,255,.1);transition:.15s}
+.chip.on{border-color:var(--gold);color:var(--gold);background:rgba(80,55,0,.55);box-shadow:0 0 14px rgba(255,201,74,.35)}
+.menu-foot{display:flex;gap:10px;justify-content:center}
+.best{font-size:13px;opacity:.7;text-align:center;min-height:16px}
+
+/* ---------- GAME ---------- */
+.topbar{width:100%;max-width:560px;display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.turn{flex:1;text-align:center;font-weight:900;letter-spacing:1px;font-size:15px;padding:11px 10px;border-radius:14px;
+  background:rgba(4,20,38,.75);border:2px solid rgba(255,255,255,.08);transition:.3s}
+.turn.you{border-color:var(--ok);color:var(--ok);box-shadow:0 0 18px rgba(93,255,143,.25)}
+.turn.foe{border-color:var(--hit);color:#ff8f75;box-shadow:0 0 18px rgba(255,90,54,.3)}
+.turn.setup{border-color:var(--gold);color:var(--gold)}
+.msg{min-height:22px;font-size:14px;font-weight:600;opacity:.9;text-align:center;margin-bottom:8px;max-width:560px}
+.fleets{width:100%;max-width:560px;display:flex;justify-content:space-between;gap:12px;margin-bottom:10px;font-size:11px;font-weight:800;letter-spacing:1px}
+.fleets .side{display:flex;flex-direction:column;gap:5px}
+.fleets .side.r{align-items:flex-end}
+.fleets .bars{display:flex;gap:4px;align-items:center}
+.fleets .bar{height:9px;border-radius:5px;background:linear-gradient(180deg,#c9d4de,#7d8b98);box-shadow:0 1px 0 rgba(0,0,0,.5)}
+.fleets .bar.dead{background:linear-gradient(180deg,#ff6a4a,#7a1a08);opacity:.5}
+
+#stage{position:relative;width:min(100%,560px);height:calc(var(--boardW) * 1.34 + 14px);margin-bottom:10px;flex-shrink:0;transition:height .3s}
+#stage.solo{height:var(--boardW)}
+.panel{position:absolute;top:0;left:50%;transform-origin:100% 0;transform:translateX(-50%) scale(1);
+  transition:transform .55s cubic-bezier(.5,1.3,.5,1),left .55s cubic-bezier(.5,1.3,.5,1),top .55s cubic-bezier(.5,1.3,.5,1),opacity .3s;z-index:2}
+.panel.mini{left:100%;top:calc(var(--boardW) + 14px);transform:translateX(-100%) scale(.34);z-index:6;cursor:pointer}
+.panel.hidden{opacity:0;pointer-events:none}
+.ptag{position:absolute;right:calc(100% + 40px);top:38%;font-size:40px;font-weight:900;letter-spacing:2px;white-space:nowrap;opacity:0;transition:.3s}
+.panel.mini .ptag{opacity:1}
+.board{display:grid;grid-template-columns:repeat(11,var(--cell));grid-template-rows:repeat(11,var(--cell));gap:2px;padding:8px;border-radius:18px;position:relative;
+  background:linear-gradient(rgba(8,40,72,.35),rgba(8,40,72,.35)),url(sea_bg.jpg) center/cover;
+  border:2px solid rgba(160,210,255,.25);box-shadow:0 14px 34px rgba(0,0,0,.55),inset 0 0 30px rgba(0,0,0,.45)}
+.panel.mini .board{border-width:5px;box-shadow:0 10px 40px rgba(0,0,0,.8)}
+#enemyPanel .board{border-color:rgba(255,120,90,.35)}
+.lbl{display:flex;align-items:center;justify-content:center;font-size:calc(var(--cell)*.32);opacity:.6;font-weight:800}
+.cell{position:relative;border-radius:5px;background:rgba(60,140,210,.13);box-shadow:inset 0 0 0 1px rgba(170,215,255,.13);transition:background .15s}
+#enemyPanel:not(.mini) .cell.open{cursor:crosshair}
+#enemyPanel:not(.mini) .cell.open:hover{background:rgba(255,201,74,.25);box-shadow:inset 0 0 0 2px var(--gold)}
+.cell.preview-ok{background:rgba(93,255,143,.45)!important}
+.cell.preview-bad{background:rgba(255,90,54,.5)!important}
+.cell.last{box-shadow:inset 0 0 0 2px #fff}
+.cell.sunk{background:rgba(140,25,10,.35)}
+.mark{position:absolute;pointer-events:none;z-index:3}
+.cell.miss .mark{inset:10%;background:url(splash.png) center/contain no-repeat;opacity:.75;animation:pop .35s}
+.cell.hit .mark{inset:-6%;background:url(boom.png) center/contain no-repeat;animation:burn .9s ease-in-out infinite alternate}
+.cell.sunk .mark{inset:12%;opacity:.55;filter:grayscale(.6) brightness(.7);animation:none}
+@keyframes burn{from{transform:scale(.82) rotate(-6deg);filter:brightness(1)}to{transform:scale(.95) rotate(6deg);filter:brightness(1.25)}}
+@keyframes pop{from{transform:scale(0)}70%{transform:scale(1.2)}to{transform:scale(1)}}
+.shipimg{position:relative;z-index:2;pointer-events:none}
+.shipimg img{position:absolute;left:0;top:0;height:var(--cell);width:calc(var(--len) * var(--cell) + (var(--len) - 1) * 2px);
+  filter:drop-shadow(0 4px 3px rgba(0,0,0,.6))}
+.shipimg.v img{transform-origin:0 0;transform:rotate(90deg) translateY(-100%)}
+.shipimg.sunk img{filter:brightness(.35) sepia(.7) hue-rotate(-25deg) drop-shadow(0 2px 2px rgba(0,0,0,.6))}
+.shipimg.reveal img{opacity:.55}
+.shipimg.drop img{animation:dropIn .3s ease-out}
+@keyframes dropIn{from{opacity:0;translate:0 -14px}to{opacity:1;translate:0 0}}
+
+.setup-bar{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;max-width:560px}
+.queue{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:10px;max-width:560px}
+.queue .q{font-size:12px;font-weight:800;padding:6px 10px;border-radius:10px;background:rgba(4,20,38,.75);border:2px solid transparent;opacity:.9}
+.queue .q.cur{border-color:var(--gold);color:var(--gold);animation:pulse 1s infinite}
+.queue .q.done{opacity:.3;text-decoration:line-through}
+@keyframes pulse{50%{box-shadow:0 0 14px rgba(255,201,74,.5)}}
+.hint{font-size:12px;opacity:.6;margin-top:10px;text-align:center}
+
+/* ---------- FX layers ---------- */
+#fx{position:fixed;inset:0;pointer-events:none;z-index:20}
+#flash{position:fixed;inset:0;pointer-events:none;z-index:21;opacity:0;background:radial-gradient(circle,rgba(255,230,160,.9),rgba(255,110,30,.5) 50%,transparent 80%)}
+#flash.go{animation:flash .45s ease-out}
+@keyframes flash{0%{opacity:.85}100%{opacity:0}}
+.shake{animation:shake .4s cubic-bezier(.36,.07,.19,.97)}
+.shake-big{animation:shakeBig .7s cubic-bezier(.36,.07,.19,.97)}
+@keyframes shake{10%,90%{transform:translate(-2px,1px)}20%,80%{transform:translate(4px,-2px)}30%,50%,70%{transform:translate(-6px,3px)}40%,60%{transform:translate(6px,-3px)}}
+@keyframes shakeBig{10%,90%{transform:translate(-4px,2px) rotate(-.4deg)}20%,80%{transform:translate(8px,-4px) rotate(.5deg)}30%,50%,70%{transform:translate(-11px,5px) rotate(-.6deg)}40%,60%{transform:translate(11px,-5px) rotate(.6deg)}}
+#banner{position:fixed;left:0;right:0;top:38%;z-index:22;pointer-events:none;text-align:center;display:none}
+#banner.show{display:block;animation:bannerIn 1.5s ease forwards}
+#banner .b1{font-family:"Black Ops One",cursive;font-size:clamp(44px,13vw,80px);color:#fff;
+  text-shadow:0 0 20px #ff6a00,0 4px 0 #8a2200,0 0 50px rgba(255,90,0,.8);letter-spacing:4px}
+#banner.foe .b1{color:#ffd3c9;text-shadow:0 0 20px #ff0030,0 4px 0 #5a0010}
+#banner .b2{font-weight:900;font-size:18px;letter-spacing:2px;background:rgba(0,0,0,.55);display:inline-block;padding:6px 16px;border-radius:10px;margin-top:4px}
+@keyframes bannerIn{0%{opacity:0;transform:scale(2.4)}15%{opacity:1;transform:scale(.92)}22%{transform:scale(1)}80%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(.9) translateY(-20px)}}
+
+/* ---------- modals ---------- */
+.overlay{position:fixed;inset:0;background:rgba(1,8,16,.72);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:30;padding:20px}
+.overlay.show{display:flex}
+.card{background:linear-gradient(180deg,#14466f,#0a2742);border:3px solid var(--gold);border-radius:24px;padding:26px 22px 22px;text-align:center;
+  width:min(92vw,360px);box-shadow:0 20px 60px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.2);animation:cardIn .45s cubic-bezier(.2,1.5,.4,1)}
+@keyframes cardIn{from{transform:scale(.5);opacity:0}to{transform:none;opacity:1}}
+.card h2{font-family:"Black Ops One",cursive;font-weight:400;font-size:40px;margin:0 0 6px;color:var(--gold);text-shadow:0 3px 0 #6b3a00}
+.card.lose{border-color:var(--hit)} .card.lose h2{color:#ff8a70;text-shadow:0 3px 0 #5a1000}
+.stars{font-size:46px;letter-spacing:6px;margin:4px 0 10px;min-height:56px}
+.stars span{display:inline-block;color:#2a3d52;text-shadow:0 2px 0 rgba(0,0,0,.4)}
+.stars span.on{color:var(--gold);text-shadow:0 0 16px rgba(255,201,74,.8),0 3px 0 #8a5a00;animation:starPop .5s cubic-bezier(.2,1.8,.4,1) both}
+@keyframes starPop{from{transform:scale(0) rotate(-90deg)}to{transform:none}}
+.statgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:6px 0 16px}
+.stat{background:rgba(0,0,0,.25);border-radius:12px;padding:8px 4px}
+.stat b{display:block;font-size:22px;font-weight:900}
+.stat small{font-size:11px;opacity:.7;font-weight:600}
+.card .row{display:flex;gap:10px;justify-content:center}
+.card p{opacity:.88;line-height:1.45;font-size:14px;text-align:left;margin:8px 0 16px}
+.newbest{color:var(--ok);font-weight:900;font-size:13px;letter-spacing:1px;margin-top:-8px;margin-bottom:12px;min-height:16px}
+</style>
+</head>
+<body>
+<div id="sea"></div>
+<div id="app">
+
+  <!-- ===== MAIN MENU ===== -->
+  <section class="screen show" id="menu">
+    <div class="logo">
+      <h1>AMİRAL<br>BATTI</h1>
+      <div class="tag">⚓ DENİZ SAVAŞI ⚓</div>
+    </div>
+    <div class="hero">
+      <div class="wake"></div>
+      <img class="ship" src="ship.png" alt="">
+      <div class="ex a"></div><div class="ex b"></div>
+    </div>
+    <div class="menu-buttons">
+      <button class="btn gold" id="playBtn">▶ OYNA</button>
+      <div class="diff-row" id="diffRow">
+        <button class="chip" data-d="easy">Kolay</button>
+        <button class="chip on" data-d="normal">Normal</button>
+        <button class="chip" data-d="hard">Zor</button>
+      </div>
+      <div class="menu-foot">
+        <button class="btn sm" id="howBtn">❓ Nasıl Oynanır</button>
+        <button class="btn sm" id="menuSound">🔊 Ses: Açık</button>
+      </div>
+      <div class="best" id="bestLine"></div>
+    </div>
+  </section>
+
+  <!-- ===== GAME ===== -->
+  <section class="screen" id="game">
+    <div class="topbar">
+      <button class="icon-btn" id="homeBtn" title="Ana menü">⌂</button>
+      <div class="turn setup" id="turn">FİLONU YERLEŞTİR</div>
+      <button class="icon-btn" id="soundBtn" title="Ses">🔊</button>
+    </div>
+    <div class="fleets" id="fleets" style="display:none">
+      <div class="side"><span>🛡️ FİLON</span><div class="bars" id="myBars"></div></div>
+      <div class="side r"><span>DÜŞMAN 🎯</span><div class="bars" id="foeBars"></div></div>
+    </div>
+    <div class="queue" id="queue"></div>
+    <div class="msg" id="msg"></div>
+    <div id="stage" class="solo">
+      <div class="panel" id="playerPanel"><div class="ptag">🛡️ FİLON</div><div class="board" id="player"></div></div>
+      <div class="panel hidden" id="enemyPanel"><div class="ptag">🎯 DÜŞMAN</div><div class="board" id="enemy"></div></div>
+    </div>
+    <div class="setup-bar" id="setupBar">
+      <button class="btn sm" id="rotateBtn">↻ Yatay</button>
+      <button class="btn sm" id="randomBtn">🎲 Rastgele</button>
+      <button class="btn sm red" id="clearBtn">✕ Temizle</button>
+      <button class="btn gold" id="startBtn" disabled>⚓ SAVAŞ!</button>
+    </div>
+    <div class="hint" id="hint"></div>
+  </section>
+</div>
+
+<canvas id="fx"></canvas>
+<div id="flash"></div>
+<div id="banner"><div class="b1">BATTI!</div><div class="b2" id="bannerSub"></div></div>
+
+<div class="overlay" id="howto">
+  <div class="card">
+    <h2>NASIL?</h2>
+    <p>🛳️ <b>Filonu yerleştir:</b> Tahtaya dokun, gemi oraya konur. ↻ ile yatay/dikey çevir ya da 🎲 ile rastgele diz.<br><br>
+    🎯 <b>Ateş et:</b> Düşman sularında bir kareye dokun. Vurursan <b>bir atış daha</b> hakkın olur!<br><br>
+    💥 Tüm düşman gemilerini önce sen batırırsan kazanırsın. Ne kadar az atış, o kadar çok ⭐.<br><br>
+    👀 Savaş sırasında köşedeki küçük tahtaya dokunarak kendi filona göz atabilirsin.</p>
+    <button class="btn gold" id="howClose">ANLADIM</button>
+  </div>
+</div>
+
+<div class="overlay" id="quit">
+  <div class="card">
+    <h2>ÇIKIŞ?</h2>
+    <p style="text-align:center">Savaş yarıda kalacak. Ana menüye dönmek istiyor musun?</p>
+    <div class="row"><button class="btn sm" id="quitNo">Devam Et</button><button class="btn sm red" id="quitYes">Ana Menü</button></div>
+  </div>
+</div>
+
+<div class="overlay" id="result">
+  <div class="card" id="resultCard">
+    <h2 id="resTitle">ZAFER!</h2>
+    <div class="stars" id="stars"></div>
+    <div class="newbest" id="newBest"></div>
+    <div class="statgrid">
+      <div class="stat"><b id="sShots">0</b><small>Atış</small></div>
+      <div class="stat"><b id="sAcc">0%</b><small>İsabet</small></div>
+      <div class="stat"><b id="sLeft">0</b><small>Kalan Gemi</small></div>
+    </div>
+    <div class="row"><button class="btn sm" id="resMenu">⌂ Menü</button><button class="btn gold" id="resAgain">↻ Tekrar</button></div>
+  </div>
+</div>
+
+<script>
+/* =====================================================================
+   STORAGE
+===================================================================== */
+const store={get(k,d){try{const v=localStorage.getItem("amiral_"+k);return v===null?d:JSON.parse(v);}catch(e){return d;}},
+             set(k,v){try{localStorage.setItem("amiral_"+k,JSON.stringify(v));}catch(e){}}};
+
+/* =====================================================================
+   SOUND (Web Audio synthesis — no files)
+===================================================================== */
+const Sound={
+  ctx:null, master:null, on:store.get("sound",true), amb:null,
+  init(){
+    if(this.ctx){ if(this.ctx.state==="suspended") this.ctx.resume(); return; }
+    try{
+      const C=window.AudioContext||window.webkitAudioContext; this.ctx=new C();
+      this.master=this.ctx.createGain(); this.master.gain.value=this.on?.9:0;
+      const comp=this.ctx.createDynamicsCompressor(); comp.threshold.value=-14; comp.ratio.value=6;
+      this.master.connect(comp); comp.connect(this.ctx.destination);
+      const len=this.ctx.sampleRate*2, buf=this.ctx.createBuffer(1,len,this.ctx.sampleRate), d=buf.getChannelData(0);
+      for(let i=0;i<len;i++) d[i]=Math.random()*2-1;
+      this.noiseBuf=buf;
+      // brown noise for ocean ambience
+      const bb=this.ctx.createBuffer(1,len*2,this.ctx.sampleRate), bd=bb.getChannelData(0); let last=0;
+      for(let i=0;i<bd.length;i++){ last=(last+.02*(Math.random()*2-1))/1.02; bd[i]=last*3.5; }
+      this.brownBuf=bb;
+      this.ambient();
+    }catch(e){ this.ctx=null; }
+  },
+  toggle(){
+    this.on=!this.on; store.set("sound",this.on);
+    if(this.master) this.master.gain.setTargetAtTime(this.on?.9:0,this.ctx.currentTime,.05);
+    return this.on;
+  },
+  noise({dur=.5,type="lowpass",f0=1000,f1=200,q=1,gain=.5,attack=.005,delay=0}){
+    if(!this.ctx) return; const t=this.ctx.currentTime+delay;
+    const s=this.ctx.createBufferSource(); s.buffer=this.noiseBuf;
+    const f=this.ctx.createBiquadFilter(); f.type=type; f.Q.value=q;
+    f.frequency.setValueAtTime(f0,t); f.frequency.exponentialRampToValueAtTime(Math.max(f1,20),t+dur);
+    const g=this.ctx.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(gain,t+attack); g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    s.connect(f); f.connect(g); g.connect(this.master); s.start(t, Math.random()*1.2); s.stop(t+dur+.05);
+  },
+  tone({type="sine",f0=440,f1=null,dur=.2,gain=.3,attack=.005,delay=0}){
+    if(!this.ctx) return; const t=this.ctx.currentTime+delay;
+    const o=this.ctx.createOscillator(); o.type=type; o.frequency.setValueAtTime(f0,t);
+    if(f1) o.frequency.exponentialRampToValueAtTime(f1,t+dur);
+    const g=this.ctx.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(gain,t+attack); g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    o.connect(g); g.connect(this.master); o.start(t); o.stop(t+dur+.05);
+  },
+  ambient(){
+    if(!this.ctx||this.amb) return;
+    const s=this.ctx.createBufferSource(); s.buffer=this.brownBuf; s.loop=true;
+    const f=this.ctx.createBiquadFilter(); f.type="lowpass"; f.frequency.value=420;
+    const g=this.ctx.createGain(); g.gain.value=.07;
+    const lfo=this.ctx.createOscillator(); lfo.frequency.value=.13; const lg=this.ctx.createGain(); lg.gain.value=.05;
+    lfo.connect(lg); lg.connect(g.gain); lfo.start();
+    s.connect(f); f.connect(g); g.connect(this.master); s.start(); this.amb=s;
+  },
+  click(){ this.tone({type:"triangle",f0:520,f1:880,dur:.08,gain:.18}); },
+  place(){ this.tone({f0:170,f1:70,dur:.18,gain:.5}); this.noise({dur:.12,f0:900,f1:200,gain:.25}); this.noise({dur:.35,type:"bandpass",f0:1200,f1:400,q:.7,gain:.12,delay:.03}); },
+  error(){ this.tone({type:"square",f0:180,f1:120,dur:.18,gain:.12}); },
+  shoot(v=1){ this.noise({dur:.45,f0:1800,f1:120,gain:.9*v,attack:.002}); this.tone({f0:140,f1:38,dur:.35,gain:.9*v}); },
+  whistle(dur=.5,v=1){ this.tone({f0:1500,f1:420,dur,gain:.05*v,attack:.05}); },
+  boom(v=1){
+    this.noise({dur:1.3,f0:3200,f1:60,gain:1.1*v,attack:.003});
+    this.tone({f0:110,f1:28,dur:.9,gain:1*v});
+    this.noise({dur:.6,type:"highpass",f0:3000,f1:1500,gain:.18*v,delay:.08}); // crackle
+    this.noise({dur:.9,type:"bandpass",f0:600,f1:200,q:.5,gain:.25*v,delay:.15});
+  },
+  splash(v=1){
+    this.noise({dur:.55,type:"bandpass",f0:2600,f1:700,q:.8,gain:.55*v,attack:.01});
+    this.noise({dur:.9,type:"lowpass",f0:900,f1:200,gain:.25*v,delay:.05});
+    this.tone({f0:420,f1:900,dur:.12,gain:.06*v,delay:.02});
+  },
+  sunk(){
+    this.boom(1.1); setTimeout(()=>this.boom(.8),260); setTimeout(()=>this.boom(.6),560);
+    this.tone({type:"sawtooth",f0:200,f1:45,dur:1.6,gain:.12,delay:.2});
+    this.noise({dur:2.2,type:"lowpass",f0:500,f1:60,gain:.35,delay:.4,attack:.3}); // bubbling/sinking
+  },
+  win(){ [523,659,784,1047,1319].forEach((f,i)=>{this.tone({type:"triangle",f0:f,dur:.32,gain:.22,delay:i*.12}); this.tone({type:"square",f0:f/2,dur:.25,gain:.05,delay:i*.12});});
+         [523,659,784].forEach(f=>this.tone({type:"triangle",f0:f*2,dur:1.2,gain:.12,delay:.7})); },
+  lose(){ [392,349,311,262].forEach((f,i)=>this.tone({type:"sawtooth",f0:f,f1:f*.97,dur:.45,gain:.1,delay:i*.32})); this.tone({f0:130,f1:40,dur:1.6,gain:.4,delay:1.2}); },
+  yourTurn(){ this.tone({type:"triangle",f0:660,dur:.1,gain:.15}); this.tone({type:"triangle",f0:990,dur:.15,gain:.15,delay:.1}); },
+  alarm(){ this.tone({type:"square",f0:700,f1:500,dur:.18,gain:.06}); this.tone({type:"square",f0:700,f1:500,dur:.18,gain:.06,delay:.22}); },
+};
+const vibrate=p=>{try{navigator.vibrate&&navigator.vibrate(p);}catch(e){}};
+
+/* =====================================================================
+   FX ENGINE (canvas particles)
+===================================================================== */
+const IMG={}; ["boom","splash"].forEach(k=>{IMG[k]=new Image(); IMG[k].src=k+".png";});
+const FX={
+  cv:document.getElementById("fx"), parts:[], running:false,
+  resize(){ const d=Math.min(devicePixelRatio||1,2); this.dpr=d; this.cv.width=innerWidth*d; this.cv.height=innerHeight*d;
+            this.cv.style.width=innerWidth+"px"; this.cv.style.height=innerHeight+"px"; this.ctx=this.cv.getContext("2d"); },
+  add(p){ p.t=0; this.parts.push(p); if(!this.running){ this.running=true; this.last=performance.now(); requestAnimationFrame(this.loop); } },
+  loop:(now)=>{ FX.step(now); },
+  step(now){
+    const dt=Math.min((now-this.last)/1000,.05); this.last=now;
+    const c=this.ctx; c.setTransform(this.dpr,0,0,this.dpr,0,0); c.clearRect(0,0,innerWidth,innerHeight);
+    for(const p of this.parts){
+      p.t+=dt; const k=p.t/p.life;
+      if(p.type==="shell"){
+        const e=Math.min(k,1), x=p.x0+(p.x1-p.x0)*e, y=p.y0+(p.y1-p.y0)*e - Math.sin(e*Math.PI)*p.arc, s=p.s0+(p.s1-p.s0)*e + Math.sin(e*Math.PI)*6;
+        // trail
+        p.trail.push([x,y]); if(p.trail.length>14) p.trail.shift();
+        for(let i=0;i<p.trail.length;i++){ const [tx,ty]=p.trail[i], a=i/p.trail.length;
+          c.fillStyle=`rgba(255,${150+a*80|0},60,${a*.5})`; c.beginPath(); c.arc(tx,ty,s*.55*a,0,7); c.fill(); }
+        // target shadow
+        c.fillStyle=`rgba(0,0,0,${.15+e*.35})`; c.beginPath(); c.ellipse(p.x1,p.y1,4+e*8,2+e*4,0,0,7); c.fill();
+        const g=c.createRadialGradient(x-s*.3,y-s*.3,1,x,y,s); g.addColorStop(0,"#fff4c0"); g.addColorStop(.35,"#555"); g.addColorStop(1,"#111");
+        c.fillStyle=g; c.beginPath(); c.arc(x,y,s,0,7); c.fill();
+        if(k>=1&&!p.done){ p.done=true; p.onHit&&p.onHit(); }
+        continue;
+      }
+      if(p.type==="sprite"){
+        const e=k, sc=p.s0+(p.s1-p.s0)*(1-Math.pow(1-e,3)), a=e<.15?e/.15:Math.max(0,1-(e-.15)/.85);
+        c.save(); c.globalAlpha=a*(p.alpha||1); c.translate(p.x,p.y); c.rotate(p.rot+e*p.spin);
+        const im=IMG[p.img]; if(im.complete) c.drawImage(im,-sc/2,-sc/2,sc,sc); c.restore(); continue;
+      }
+      if(p.type==="ring"){
+        const r=p.r0+(p.r1-p.r0)*(1-Math.pow(1-k,2)); c.strokeStyle=p.color.replace("A",(1-k)*p.a); c.lineWidth=p.w*(1-k)+.5;
+        c.beginPath(); c.ellipse(p.x,p.y,r,r*(p.flat||1),0,0,7); c.stroke(); continue;
+      }
+      p.vx*=1-(p.drag||0)*dt; p.vy*=1-(p.drag||0)*dt; p.vy+=(p.g||0)*dt; p.x+=p.vx*dt; p.y+=p.vy*dt;
+      const a=Math.max(0,1-k);
+      if(p.type==="spark"){
+        c.strokeStyle=`hsla(${p.h},100%,${60+a*30}%,${a})`; c.lineWidth=p.size*a+.5; c.lineCap="round";
+        c.beginPath(); c.moveTo(p.x,p.y); c.lineTo(p.x-p.vx*.04,p.y-p.vy*.04); c.stroke();
+      } else if(p.type==="smoke"){
+        const r=p.size*(1+k*1.6); c.fillStyle=`rgba(${p.col},${a*.45})`; c.beginPath(); c.arc(p.x,p.y,r,0,7); c.fill();
+      } else if(p.type==="drop"){
+        c.fillStyle=`rgba(200,235,255,${a})`; c.beginPath(); c.arc(p.x,p.y,p.size*(.6+a*.4),0,7); c.fill();
+      } else if(p.type==="debris"){
+        c.save(); c.translate(p.x,p.y); c.rotate(p.t*p.spin); c.fillStyle=`rgba(60,60,66,${a})`; c.fillRect(-p.size/2,-p.size/4,p.size,p.size/2); c.restore();
+      }
+    }
+    this.parts=this.parts.filter(p=>p.t<p.life || (p.type==="shell"&&!p.done));
+    if(this.parts.length) requestAnimationFrame(this.loop); else { this.running=false; c.clearRect(0,0,innerWidth,innerHeight); }
+  },
+  explosion(x,y,size=1){
+    const S=size*Math.max(40,cellPx()*1.6);
+    this.add({type:"sprite",img:"boom",x,y,s0:S*.3,s1:S*2.1,life:.65,rot:Math.random()*6,spin:.8});
+    this.add({type:"ring",x,y,r0:4,r1:S*1.6,life:.5,color:"rgba(255,220,150,A)",a:.9,w:6});
+    for(let i=0;i<30*size;i++){ const a=Math.random()*7,v=(120+Math.random()*380)*size;
+      this.add({type:"spark",x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-80,g:420,drag:1.5,size:2+Math.random()*2.5,h:20+Math.random()*35,life:.5+Math.random()*.6}); }
+    for(let i=0;i<12*size;i++){ const a=Math.random()*7,v=20+Math.random()*70;
+      this.add({type:"smoke",x:x+Math.cos(a)*6,y:y+Math.sin(a)*6,vx:Math.cos(a)*v,vy:Math.sin(a)*v-40,g:-30,drag:1,size:S*.12+Math.random()*S*.1,col:Math.random()<.4?"90,50,30":"40,40,46",life:1.1+Math.random()*.8}); }
+    for(let i=0;i<8*size;i++){ const a=Math.random()*7,v=150+Math.random()*250;
+      this.add({type:"debris",x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-160,g:700,size:3+Math.random()*5,spin:10*(Math.random()-.5),life:.8+Math.random()*.4}); }
+  },
+  splash(x,y){
+    const S=Math.max(34,cellPx()*1.4);
+    this.add({type:"sprite",img:"splash",x,y,s0:S*.3,s1:S*1.7,life:.6,rot:Math.random()*6,spin:.4});
+    [0,.12,.26].forEach((d,i)=>setTimeout(()=>this.add({type:"ring",x,y,r0:4,r1:S*(1+i*.4),life:.8,color:"rgba(200,235,255,A)",a:.8,w:3,flat:.75}),d*1000));
+    for(let i=0;i<22;i++){ const a=-Math.PI/2+(Math.random()-.5)*2.2,v=120+Math.random()*260;
+      this.add({type:"drop",x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,g:900,size:1.5+Math.random()*2.5,life:.6+Math.random()*.4}); }
+  },
+  shell(x0,y0,x1,y1,dur,onHit){
+    this.add({type:"shell",x0,y0,x1,y1,life:dur,arc:Math.min(220,Math.hypot(x1-x0,y1-y0)*.45),s0:9,s1:4,trail:[],onHit});
+  }
+};
+addEventListener("resize",()=>FX.resize()); FX.resize();
+function cellPx(){ const c=document.querySelector("#stage .panel:not(.mini) .cell"); return c?c.getBoundingClientRect().width:34; }
+
+function screenShake(big){ const a=document.getElementById("app"); a.classList.remove("shake","shake-big"); void a.offsetWidth; a.classList.add(big?"shake-big":"shake"); }
+function flash(){ const f=document.getElementById("flash"); f.classList.remove("go"); void f.offsetWidth; f.classList.add("go"); }
+function banner(text,sub,foe){ const b=document.getElementById("banner"); b.querySelector(".b1").textContent=text; document.getElementById("bannerSub").textContent=sub;
+  b.className=foe?"foe":""; void b.offsetWidth; b.classList.add("show"); clearTimeout(banner.t); banner.t=setTimeout(()=>b.classList.remove("show"),1500); }
+
+/* =====================================================================
+   GAME LOGIC
+===================================================================== */
+const N=10, LETTERS="ABCDEFGHIJ";
+const FLEET=[{name:"Uçak Gemisi",size:5},{name:"Zırhlı",size:4},{name:"Kruvazör",size:3},{name:"Denizaltı",size:3},{name:"Muhrip",size:2}];
+const $=id=>document.getElementById(id);
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+let state, difficulty=store.get("diff","normal");
+
+function newBoard(){ return {grid:Array.from({length:N},()=>Array(N).fill(null)),shots:Array.from({length:N},()=>Array(N).fill(0)),ships:[]}; }
+function canPlace(b,r,c,size,hor){ for(let i=0;i<size;i++){const rr=hor?r:r+i,cc=hor?c+i:c; if(rr>=N||cc>=N||b.grid[rr][cc]!==null) return false;} return true; }
+function place(b,r,c,size,hor,name){ const idx=b.ships.length,cells=[]; for(let i=0;i<size;i++){const rr=hor?r:r+i,cc=hor?c+i:c; b.grid[rr][cc]=idx; cells.push([rr,cc]);} b.ships.push({name,size,cells,hits:0,hor}); }
+function randomPlace(b){ b.grid.forEach(row=>row.fill(null)); b.ships=[];
+  for(const s of FLEET){ for(;;){ const hor=Math.random()<.5,r=Math.random()*N|0,c=Math.random()*N|0; if(canPlace(b,r,c,s.size,hor)){place(b,r,c,s.size,hor,s.name);break;} } } }
+function fire(b,r,c){ const si=b.grid[r][c]; if(si===null){b.shots[r][c]=1;return{hit:false,sunk:null};} b.shots[r][c]=2; const s=b.ships[si]; s.hits++; return{hit:true,sunk:s.hits===s.size?s:null}; }
+const allSunk=b=>b.ships.every(s=>s.hits===s.size);
+const coord=(r,c)=>LETTERS[r]+(c+1);
+
+function newGame(){
+  state={phase:"setup",horizontal:true,placeIdx:0,player:newBoard(),enemy:newBoard(),busy:false,view:"player",
+         ai:{targets:[]},shotsP:0,hitsP:0,shotsE:0,lastE:null,lastP:null,reveal:false,newShip:-1};
+  randomPlace(state.enemy);
+  $("setupBar").style.display=""; $("queue").style.display=""; $("fleets").style.display="none";
+  $("rotateBtn").textContent="↻ Yatay"; $("startBtn").disabled=true;
+  $("playerPanel").className="panel"; $("enemyPanel").className="panel hidden"; $("stage").classList.add("solo");
+  setTurn("setup","FİLONU YERLEŞTİR");
+  $("hint").textContent="İpucu: Tahtaya dokunarak gemiyi yerleştir.";
+  updateSetupMsg(); render();
+}
+
+/* ---------- board DOM ---------- */
+function buildBoard(el,who){
+  el.innerHTML="";
+  const at=(d,r,c)=>{d.style.gridRow=r+1;d.style.gridColumn=c+1;el.appendChild(d);return d;};
+  const lbl=t=>Object.assign(document.createElement("div"),{className:"lbl",textContent:t});
+  at(lbl(""),0,0);
+  for(let c=0;c<N;c++) at(lbl(c+1),0,c+1);
+  for(let r=0;r<N;r++){ at(lbl(LETTERS[r]),r+1,0);
+    for(let c=0;c<N;c++){ const d=document.createElement("div"); d.className="cell"; d.dataset.r=r; d.dataset.c=c;
+      d.appendChild(Object.assign(document.createElement("span"),{className:"mark"})); at(d,r+1,c+1); } }
+  el.addEventListener("click",e=>{ const t=e.target.closest(".cell"); if(!t) return;
+    if(e.currentTarget.closest(".panel").classList.contains("mini")) return;
+    who==="player"?onPlayerBoard(+t.dataset.r,+t.dataset.c):onEnemyBoard(+t.dataset.r,+t.dataset.c); });
+  if(who==="player"){
+    el.addEventListener("pointermove",e=>{ if(e.pointerType!=="mouse") return; const t=e.target.closest(".cell"); if(t) preview(+t.dataset.r,+t.dataset.c); });
+    el.addEventListener("pointerleave",clearPreview);
+  }
+}
+const cellEl=(id,r,c)=>$(id).querySelector(`.cell[data-r="${r}"][data-c="${c}"]`);
+function cellCenter(id,r,c){ const b=cellEl(id,r,c).getBoundingClientRect(); return [b.left+b.width/2,b.top+b.height/2]; }
+
+function render(){
+  for(const [id,b,mine] of [["player",state.player,true],["enemy",state.enemy,false]]){
+    const last=mine?state.lastE:state.lastP;
+    for(let r=0;r<N;r++) for(let c=0;c<N;c++){
+      const el=cellEl(id,r,c), si=b.grid[r][c], sh=b.shots[r][c], ship=si!==null?b.ships[si]:null, sunk=ship&&ship.hits===ship.size;
+      let cls="cell"; if(sh===1) cls+=" miss"; if(sh===2) cls+=" hit"; if(sunk) cls+=" sunk";
+      if(!mine&&state.phase==="battle"&&!sh) cls+=" open";
+      if(last&&last[0]===r&&last[1]===c) cls+=" last";
+      el.className=cls;
+    }
+    drawShips(id,b,mine||state.reveal,!mine);
+  }
+  renderBars();
+}
+function drawShips(id,b,showAll,isEnemy){
+  const el=$(id); el.querySelectorAll(".shipimg").forEach(x=>x.remove());
+  b.ships.forEach((s,i)=>{ const sunk=s.hits===s.size; if(!showAll&&!sunk) return;
+    const [r,c]=s.cells[0], d=document.createElement("div");
+    d.className="shipimg "+(s.hor?"h":"v")+(sunk?" sunk":"")+(isEnemy&&!sunk?" reveal":"")+(!isEnemy&&i===state.newShip?" drop":"");
+    d.style.gridRow=r+2; d.style.gridColumn=c+2; d.style.setProperty("--len",s.size);
+    d.innerHTML='<img src="ship.png" alt="">'; el.appendChild(d); });
+  if(!isEnemy) state.newShip=-1;
+}
+function renderBars(){
+  for(const [id,b] of [["myBars",state.player],["foeBars",state.enemy]]){
+    $(id).innerHTML=FLEET.map(f=>{ const s=b.ships.find(x=>x.name===f.name); const dead=s&&s.hits===s.size;
+      return `<span class="bar ${dead?"dead":""}" style="width:${f.size*7}px" title="${f.name}"></span>`; }).join("");
+  }
+  $("queue").innerHTML=FLEET.map((f,i)=>`<span class="q ${i<state.placeIdx?"done":""} ${i===state.placeIdx?"cur":""}">${f.name} · ${f.size}</span>`).join("");
+}
+function setTurn(kind,text){ const t=$("turn"); t.className="turn "+kind; t.textContent=text; }
+function msg(html){ $("msg").innerHTML=html; }
+
+/* ---------- setup ---------- */
+function clearPreview(){ $("player").querySelectorAll(".preview-ok,.preview-bad").forEach(e=>e.classList.remove("preview-ok","preview-bad")); }
+function preview(r,c){ clearPreview(); if(state.phase!=="setup"||state.placeIdx>=FLEET.length) return;
+  const s=FLEET[state.placeIdx], ok=canPlace(state.player,r,c,s.size,state.horizontal);
+  for(let i=0;i<s.size;i++){ const rr=state.horizontal?r:r+i,cc=state.horizontal?c+i:c; if(rr<N&&cc<N) cellEl("player",rr,cc).classList.add(ok?"preview-ok":"preview-bad"); } }
+function onPlayerBoard(r,c){
+  if(state.phase!=="setup"||state.placeIdx>=FLEET.length) return;
+  const s=FLEET[state.placeIdx];
+  if(!canPlace(state.player,r,c,s.size,state.horizontal)){
+    // try auto-shifting so the tap near an edge still works
+    let placed=false;
+    for(let k=1;k<s.size&&!placed;k++){ const rr=state.horizontal?r:r-k, cc=state.horizontal?c-k:c;
+      if(rr>=0&&cc>=0&&canPlace(state.player,rr,cc,s.size,state.horizontal)){ r=rr;c=cc;placed=true; } }
+    if(!placed){ Sound.error(); vibrate(40); const p=$("playerPanel"); p.classList.remove("shake"); void p.offsetWidth; p.classList.add("shake");
+      msg(`<span style="color:#ff8f75">Oraya sığmıyor!</span> Başka yer seç ya da döndür.`); return; }
+  }
+  place(state.player,r,c,s.size,state.horizontal,s.name); state.newShip=state.player.ships.length-1; state.placeIdx++;
+  Sound.place(); vibrate(15);
+  const [x,y]=cellCenter("player",r,c); FX.splash(x,y);
+  afterPlacement();
+}
+function updateSetupMsg(){
+  if(state.placeIdx>=FLEET.length) msg("Filo hazır! <b style='color:#ffc94a'>⚓ SAVAŞ!</b> düğmesine bas.");
+  else { const s=FLEET[state.placeIdx]; msg(`Yerleştir: <b>${s.name}</b> (${s.size} kare, ${state.horizontal?"yatay":"dikey"})`); }
+}
+function afterPlacement(){ clearPreview(); render(); $("startBtn").disabled=state.placeIdx<FLEET.length; updateSetupMsg(); }
+$("rotateBtn").onclick=()=>{ Sound.click(); state.horizontal=!state.horizontal; $("rotateBtn").textContent="↻ "+(state.horizontal?"Yatay":"Dikey"); updateSetupMsg(); };
+$("randomBtn").onclick=()=>{ Sound.place(); randomPlace(state.player); state.placeIdx=FLEET.length; afterPlacement(); };
+$("clearBtn").onclick=()=>{ Sound.click(); state.player=newBoard(); state.placeIdx=0; afterPlacement(); };
+$("startBtn").onclick=async()=>{
+  Sound.click(); Sound.alarm();
+  state.phase="battle"; state.busy=true;
+  $("setupBar").style.display="none"; $("queue").style.display="none"; $("fleets").style.display=""; $("hint").textContent="Köşedeki küçük tahtaya dokunarak filona bakabilirsin.";
+  $("enemyPanel").classList.remove("hidden"); $("stage").classList.remove("solo");
+  setView("enemy"); render();
+  banner("SAVAŞ!","Düşman filosu ufukta",false); Sound.boom(.4);
+  await sleep(900); state.busy=false; setTurn("you","🎯 SIRA SENDE"); msg("Düşman sularında bir kareye dokun ve ateş et!"); Sound.yourTurn();
+};
+
+/* ---------- view swapping ---------- */
+function setView(v){ state.view=v;
+  $("playerPanel").classList.toggle("mini",v!=="player"); $("enemyPanel").classList.toggle("mini",v!=="enemy"); }
+["playerPanel","enemyPanel"].forEach(id=>$(id).addEventListener("click",()=>{
+  if(state.phase!=="battle"||state.busy) return;
+  if($(id).classList.contains("mini")){ Sound.click(); setView(id==="playerPanel"?"player":"enemy");
+    msg(state.view==="player"?"Filonun durumu. Ateş etmek için küçük düşman tahtasına dokun.":"Düşman sularında bir kareye dokun ve ateş et!"); }
+}));
+
+/* ---------- battle ---------- */
+async function onEnemyBoard(r,c){
+  if(state.phase!=="battle"||state.busy||state.enemy.shots[r][c]) return;
+  state.busy=true;
+  const [x1,y1]=cellCenter("enemy",r,c);
+  Sound.shoot(.8); Sound.whistle(.5); vibrate(10);
+  await new Promise(res=>FX.shell(innerWidth/2,innerHeight+20,x1,y1,.5,res));
+  const res=fire(state.enemy,r,c); state.shotsP++; if(res.hit) state.hitsP++; state.lastP=[r,c];
+  render();
+  if(res.hit){
+    Sound.boom(); FX.explosion(x1,y1,res.sunk?1.3:1); screenShake(!!res.sunk); flash(); vibrate(res.sunk?[60,40,120]:50);
+    if(res.sunk){ sinkFx("enemy",res.sunk); Sound.sunk(); banner("BATTI!",res.sunk.name.toUpperCase()+" YOK EDİLDİ",false); }
+    msg(res.sunk?`💥 <b>${res.sunk.name}</b> battı! Bir atış daha!`:`🔥 <b>${coord(r,c)}</b> İSABET! Bir atış daha!`);
+    if(allSunk(state.enemy)){ await sleep(1400); return endGame(true); }
+    state.busy=false; return;
+  }
+  Sound.splash(); FX.splash(x1,y1);
+  msg(`🌊 <b>${coord(r,c)}</b> ıska...`);
+  await sleep(750);
+  enemyTurn();
+}
+function sinkFx(id,ship){
+  ship.cells.forEach(([r,c],i)=>setTimeout(()=>{ const [x,y]=cellCenter(id,r,c); FX.explosion(x,y,.7); },120+i*140));
+}
+async function enemyTurn(){
+  setTurn("foe","⚠️ DÜŞMAN ATEŞ EDİYOR"); Sound.alarm();
+  setView("player"); msg("Düşman nişan alıyor...");
+  await sleep(750);
+  for(;;){
+    const [r,c]=aiPick(), [x1,y1]=cellCenter("player",r,c);
+    Sound.shoot(.45); Sound.whistle(.55,1.3);
+    await new Promise(res=>FX.shell(innerWidth/2,-30,x1,y1,.55,res));
+    const res=fire(state.player,r,c); state.shotsE++; state.lastE=[r,c];
+    if(res.hit&&difficulty==="easy") [[1,0],[-1,0],[0,1],[0,-1]].forEach(([dr,dc])=>state.ai.targets.push([r+dr,c+dc]));
+    render();
+    if(!res.hit){ Sound.splash(); FX.splash(x1,y1); msg(`Düşman <b>${coord(r,c)}</b>'yi ıskaladı! 😮‍💨`); break; }
+    Sound.boom(); FX.explosion(x1,y1,res.sunk?1.3:1); screenShake(true); flash(); vibrate(res.sunk?[100,50,200]:80);
+    if(res.sunk){ sinkFx("player",res.sunk); Sound.sunk(); banner("BATTIN!",res.sunk.name.toUpperCase()+" KAYBEDİLDİ",true); }
+    msg(res.sunk?`☠️ <b>${res.sunk.name}</b>'ın battı!`:`💢 Düşman <b>${coord(r,c)}</b>'den vurdu!`);
+    if(allSunk(state.player)){ await sleep(1500); return endGame(false); }
+    await sleep(res.sunk?1300:850);
+  }
+  await sleep(900);
+  setView("enemy"); setTurn("you","🎯 SIRA SENDE"); Sound.yourTurn();
+  msg("Düşman sularında bir kareye dokun ve ateş et!");
+  state.busy=false;
+}
+
+/* AI: easy=random-ish, normal=parity+density, hard=full probability density */
+function aiPick(){
+  const b=state.player, ai=state.ai, open=(r,c)=>r>=0&&c>=0&&r<N&&c<N&&!b.shots[r][c];
+  if(difficulty==="easy"){
+    if(ai.targets.length&&Math.random()<.55){ while(ai.targets.length){const t=ai.targets.pop(); if(open(...t)) return t;} }
+    let r,c; do{r=Math.random()*N|0;c=Math.random()*N|0;}while(!open(r,c)); return [r,c];
+  }
+  let live=0; for(let r=0;r<N;r++)for(let c=0;c<N;c++) if(b.shots[r][c]===2){const s=b.ships[b.grid[r][c]]; if(s.hits<s.size) live++;}
+  const remaining=b.ships.filter(s=>s.hits<s.size).map(s=>s.size), score=Array.from({length:N},()=>Array(N).fill(0));
+  for(const size of remaining) for(const hor of [true,false]) for(let r=0;r<N;r++) for(let c=0;c<N;c++){
+    let ok=true,cov=0;
+    for(let i=0;i<size;i++){ const rr=hor?r:r+i,cc=hor?c+i:c; if(rr>=N||cc>=N){ok=false;break;}
+      const sh=b.shots[rr][cc]; if(sh===1){ok=false;break;}
+      if(sh===2){ const s=b.ships[b.grid[rr][cc]]; if(s.hits===s.size){ok=false;break;} cov++; } }
+    if(!ok) continue; if(live&&!cov&&difficulty==="hard") continue;
+    const w=live?(cov?1+cov*30:1):1;
+    for(let i=0;i<size;i++){ const rr=hor?r:r+i,cc=hor?c+i:c; if(!b.shots[rr][cc]) score[rr][cc]+=w; }
+  }
+  let best=null,bs=-1;
+  for(let r=0;r<N;r++)for(let c=0;c<N;c++){ if(b.shots[r][c]) continue;
+    const v=difficulty==="normal"&&!live ? score[r][c]*((r+c)%2?.3:1)*(.6+Math.random()*.8) : score[r][c]+Math.random()*.5;
+    if(v>bs){bs=v;best=[r,c];} }
+  return best;
+}
+
+/* ---------- end ---------- */
+function endGame(won){
+  state.phase="over"; state.busy=true;
+  if(!won){ state.reveal=true; setView("enemy"); }
+  render();
+  const acc=state.shotsP?Math.round(100*state.hitsP/state.shotsP):0;
+  const stars=won?(state.shotsP<=45?3:state.shotsP<=65?2:1):0;
+  won?Sound.win():Sound.lose();
+  if(won) for(let i=0;i<6;i++) setTimeout(()=>FX.explosion(innerWidth*(.15+Math.random()*.7),innerHeight*(.15+Math.random()*.4),.8),i*250);
+  setTurn(won?"you":"foe",won?"🏆 ZAFER":"💀 YENİLGİ");
+  msg(won?"Tüm düşman filosu sulara gömüldü!":"Düşman gemilerinin yerleri açıldı.");
+  const key="best_"+difficulty, best=store.get(key,null); let nb="";
+  if(won&&(best===null||state.shotsP<best)){ store.set(key,state.shotsP); nb=best===null?"İLK ZAFER! 🎉":"🎉 YENİ REKOR!"; }
+  if(won) store.set("wins",store.get("wins",0)+1);
+  setTimeout(()=>{
+    $("resultCard").className="card"+(won?"":" lose");
+    $("resTitle").textContent=won?"ZAFER!":"YENİLGİ";
+    $("stars").innerHTML=[0,1,2].map(i=>`<span class="${i<stars?"on":""}" style="animation-delay:${.25+i*.25}s">★</span>`).join("");
+    $("newBest").textContent=nb;
+    $("sShots").textContent=state.shotsP; $("sAcc").textContent=acc+"%";
+    $("sLeft").textContent=state.player.ships.filter(s=>s.hits<s.size).length;
+    $("result").classList.add("show");
+    if(won) [0,1,2].slice(0,stars).forEach(i=>setTimeout(()=>Sound.tone({type:"triangle",f0:880+i*220,dur:.2,gain:.2}),300+i*250));
+  },won?1600:2200);
+}
+
+/* =====================================================================
+   SCREENS / MENU
+===================================================================== */
+function show(id){ document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("show",s.id===id)); }
+function updateBest(){
+  const b=store.get("best_"+difficulty,null), w=store.get("wins",0);
+  $("bestLine").textContent=(w?`🏆 ${w} zafer`:"")+(b!==null?`  ·  ${({easy:"Kolay",normal:"Normal",hard:"Zor"})[difficulty]} rekoru: ${b} atış`:"");
+}
+function setSoundUI(){ $("soundBtn").textContent=Sound.on?"🔊":"🔇"; $("menuSound").textContent=Sound.on?"🔊 Ses: Açık":"🔇 Ses: Kapalı"; }
+document.querySelectorAll("#diffRow .chip").forEach(ch=>{ ch.classList.toggle("on",ch.dataset.d===difficulty);
+  ch.onclick=()=>{ Sound.init(); Sound.click(); difficulty=ch.dataset.d; store.set("diff",difficulty);
+    document.querySelectorAll("#diffRow .chip").forEach(x=>x.classList.toggle("on",x===ch)); updateBest(); }; });
+$("playBtn").onclick=()=>{ Sound.init(); Sound.click(); Sound.boom(.35); show("game"); newGame(); };
+$("howBtn").onclick=()=>{ Sound.init(); Sound.click(); $("howto").classList.add("show"); };
+$("howClose").onclick=()=>{ Sound.click(); $("howto").classList.remove("show"); };
+const toggleSound=()=>{ Sound.init(); Sound.toggle(); setSoundUI(); Sound.click(); };
+$("menuSound").onclick=toggleSound; $("soundBtn").onclick=toggleSound;
+$("homeBtn").onclick=()=>{ Sound.click(); if(state&&state.phase==="battle") $("quit").classList.add("show"); else { show("menu"); updateBest(); } };
+$("quitNo").onclick=()=>{ Sound.click(); $("quit").classList.remove("show"); };
+$("quitYes").onclick=()=>{ Sound.click(); $("quit").classList.remove("show"); state.phase="over"; show("menu"); updateBest(); };
+$("resAgain").onclick=()=>{ Sound.click(); $("result").classList.remove("show"); newGame(); };
+$("resMenu").onclick=()=>{ Sound.click(); $("result").classList.remove("show"); show("menu"); updateBest(); };
+document.addEventListener("pointerdown",()=>Sound.init(),{once:true});
+
+buildBoard($("player"),"player"); buildBoard($("enemy"),"enemy");
+setSoundUI(); updateBest();
+</script>
+</body>
+</html>

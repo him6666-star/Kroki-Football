@@ -1,0 +1,39 @@
+name: Amiral Batti web yayini
+on:
+  push:
+    branches: [main]
+    paths: ["amiral-batti/**", ".github/workflows/amiral-batti-web.yml"]
+  workflow_dispatch:
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Anahtari yaz
+        run: echo '${{ secrets.FIREBASE_KEY }}' > "$RUNNER_TEMP/key.json"
+      - name: Siteyi bul / olustur
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/key.json
+        run: |
+          FB="npx -y firebase-tools@13"
+          $FB hosting:sites:list --project scribble-kick --json > sites.json || true
+          SITE=""
+          for name in amiral-batti amiral-batti-oyun amiralbatti-tr amiral-batti-deniz; do
+            if grep -q "sites/$name\"" sites.json; then SITE=$name; echo "Mevcut site: $name"; break; fi
+            if $FB hosting:sites:create "$name" --project scribble-kick --non-interactive; then SITE=$name; echo "Yeni site: $name"; break; fi
+            echo "$name alinamadi, sonrakini deniyorum"
+          done
+          if [ -z "$SITE" ]; then echo "HATA: site olusturulamadi"; exit 1; fi
+          echo "SITE=$SITE" >> "$GITHUB_ENV"
+      - name: Yukle
+        working-directory: amiral-batti
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/key.json
+        run: |
+          sed -i "s/SITE_ADI/$SITE/" firebase.json
+          npx -y firebase-tools@13 deploy --project scribble-kick --only hosting --non-interactive
+          echo "### Yayinda: https://$SITE.web.app" >> "$GITHUB_STEP_SUMMARY"
+          echo "ADRES: https://$SITE.web.app"
