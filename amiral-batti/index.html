@@ -70,7 +70,7 @@ button{font-family:inherit;cursor:pointer;border:0;color:inherit}
 .hero .ex.b{right:-4%;top:-10%;width:22%;animation-delay:2.7s}
 @keyframes menuBoom{0%,100%{opacity:0;transform:scale(.2)}4%{opacity:1;transform:scale(1.1)}14%{opacity:0;transform:scale(1.4)}}
 .menu-buttons{display:flex;flex-direction:column;gap:14px;width:min(80vw,300px)}
-.menu-buttons .btn.gold{font-size:24px;padding:18px}
+.menu-buttons .btn.gold,.menu-buttons .btn.green{font-size:20px;padding:16px}
 .diff-row{display:flex;gap:8px;justify-content:center}
 .chip{flex:1;font-weight:800;font-size:14px;padding:10px 6px;border-radius:12px;background:rgba(10,40,70,.75);border:2px solid rgba(255,255,255,.1);transition:.15s}
 .chip.on{border-color:var(--gold);color:var(--gold);background:rgba(80,55,0,.55);box-shadow:0 0 14px rgba(255,201,74,.35)}
@@ -153,6 +153,19 @@ button{font-family:inherit;cursor:pointer;border:0;color:inherit}
 #banner .b2{font-weight:900;font-size:18px;letter-spacing:2px;background:rgba(0,0,0,.55);display:inline-block;padding:6px 16px;border-radius:10px;margin-top:4px}
 @keyframes bannerIn{0%{opacity:0;transform:scale(2.4)}15%{opacity:1;transform:scale(.92)}22%{transform:scale(1)}80%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(.9) translateY(-20px)}}
 
+/* ---------- online ---------- */
+.btn.green{background:linear-gradient(180deg,#5ee08a,#1fa85a);color:#033016;text-shadow:0 1px 0 rgba(255,255,255,.4);
+  box-shadow:0 5px 0 #0c5a2c,0 10px 22px rgba(40,200,110,.3),inset 0 2px 0 rgba(255,255,255,.5)}
+.btn.green:active{box-shadow:0 1px 0 #0c5a2c,inset 0 2px 0 rgba(255,255,255,.5)}
+.radar{width:150px;height:150px;border-radius:50%;margin:6px auto 16px;position:relative;overflow:hidden;
+  background:radial-gradient(circle,rgba(93,255,143,.15) 0 2px,transparent 3px),repeating-radial-gradient(circle,transparent 0 24px,rgba(93,255,143,.35) 25px 26px),#03231a;
+  border:3px solid rgba(93,255,143,.6);box-shadow:0 0 30px rgba(93,255,143,.3),inset 0 0 30px rgba(0,0,0,.6)}
+.radar::before{content:"";position:absolute;inset:0;background:conic-gradient(from 0deg,rgba(93,255,143,.55),transparent 25%);animation:sweep 1.6s linear infinite}
+.radar::after{content:"";position:absolute;width:8px;height:8px;border-radius:50%;background:#ff6a4a;left:68%;top:30%;box-shadow:0 0 10px #ff6a4a;animation:blip 1.6s infinite}
+@keyframes sweep{to{transform:rotate(360deg)}}
+@keyframes blip{0%,60%{opacity:0}70%{opacity:1}100%{opacity:0}}
+.mmsub{font-size:12px;opacity:.7;min-height:30px;margin:6px 0 14px}
+
 /* ---------- modals ---------- */
 .overlay{position:fixed;inset:0;background:rgba(1,8,16,.72);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:30;padding:20px}
 .overlay.show{display:flex}
@@ -190,7 +203,8 @@ button{font-family:inherit;cursor:pointer;border:0;color:inherit}
       <div class="ex a"></div><div class="ex b"></div>
     </div>
     <div class="menu-buttons">
-      <button class="btn gold" id="playBtn">▶ OYNA</button>
+      <button class="btn gold" id="playBtn">▶ BİLGİSAYARA KARŞI</button>
+      <button class="btn green" id="onlineBtn">🌐 ONLINE RAKİP BUL</button>
       <div class="diff-row" id="diffRow">
         <button class="chip" data-d="easy">Kolay</button>
         <button class="chip on" data-d="normal">Normal</button>
@@ -254,6 +268,16 @@ button{font-family:inherit;cursor:pointer;border:0;color:inherit}
   </div>
 </div>
 
+<div class="overlay" id="mm">
+  <div class="card" style="border-color:#5dff8f">
+    <h2 style="color:#7dffa6;text-shadow:0 3px 0 #0c5a2c;font-size:30px">ONLINE</h2>
+    <div class="radar" id="mmRadar"></div>
+    <div style="font-weight:800;font-size:17px" id="mmText">Rakip aranıyor...</div>
+    <div class="mmsub" id="mmSub"></div>
+    <button class="btn sm red" id="mmCancel">✕ Vazgeç</button>
+  </div>
+</div>
+
 <div class="overlay" id="result">
   <div class="card" id="resultCard">
     <h2 id="resTitle">ZAFER!</h2>
@@ -268,6 +292,7 @@ button{font-family:inherit;cursor:pointer;border:0;color:inherit}
   </div>
 </div>
 
+<script src="firebase-app-compat.js"></script><script src="firebase-auth-compat.js"></script><script src="firebase-firestore-compat.js"></script>
 <script>
 /* =====================================================================
    STORAGE
@@ -456,16 +481,19 @@ function fire(b,r,c){ const si=b.grid[r][c]; if(si===null){b.shots[r][c]=1;retur
 const allSunk=b=>b.ships.every(s=>s.hits===s.size);
 const coord=(r,c)=>LETTERS[r]+(c+1);
 
-function newGame(){
-  state={phase:"setup",horizontal:true,placeIdx:0,player:newBoard(),enemy:newBoard(),busy:false,view:"player",
+function newGame(online){
+  online=!!online;
+  state={online,phase:"setup",horizontal:true,placeIdx:0,player:newBoard(),enemy:newBoard(),busy:false,view:"player",
          ai:{targets:[]},shotsP:0,hitsP:0,shotsE:0,lastE:null,lastP:null,reveal:false,newShip:-1};
-  randomPlace(state.enemy);
+  if(!online) randomPlace(state.enemy);
+  $("startBtn").textContent=online?"✔ HAZIRIM":"⚓ SAVAŞ!";
   $("setupBar").style.display=""; $("queue").style.display=""; $("fleets").style.display="none";
   $("rotateBtn").textContent="↻ Yatay"; $("startBtn").disabled=true;
   $("playerPanel").className="panel"; $("enemyPanel").className="panel hidden"; $("stage").classList.add("solo");
   setTurn("setup","FİLONU YERLEŞTİR");
   $("hint").textContent="İpucu: Tahtaya dokunarak gemiyi yerleştir.";
   updateSetupMsg(); render();
+  if(online){ setTurn("setup","🌐 FİLONU YERLEŞTİR"); startSetupTimer(); }
 }
 
 /* ---------- board DOM ---------- */
@@ -552,6 +580,7 @@ $("rotateBtn").onclick=()=>{ Sound.click(); state.horizontal=!state.horizontal; 
 $("randomBtn").onclick=()=>{ Sound.place(); randomPlace(state.player); state.placeIdx=FLEET.length; afterPlacement(); };
 $("clearBtn").onclick=()=>{ Sound.click(); state.player=newBoard(); state.placeIdx=0; afterPlacement(); };
 $("startBtn").onclick=async()=>{
+  if(state.online) return onlineReady();
   Sound.click(); Sound.alarm();
   state.phase="battle"; state.busy=true;
   $("setupBar").style.display="none"; $("queue").style.display="none"; $("fleets").style.display=""; $("hint").textContent="Köşedeki küçük tahtaya dokunarak filona bakabilirsin.";
@@ -572,6 +601,7 @@ function setView(v){ state.view=v;
 
 /* ---------- battle ---------- */
 async function onEnemyBoard(r,c){
+  if(state.online) return onlineFire(r,c);
   if(state.phase!=="battle"||state.busy||state.enemy.shots[r][c]) return;
   state.busy=true;
   const [x1,y1]=cellCenter("enemy",r,c);
@@ -644,19 +674,26 @@ function aiPick(){
 }
 
 /* ---------- end ---------- */
-function endGame(won){
+function endGame(won,opt){
+  opt=opt||{};
   state.phase="over"; state.busy=true;
   if(!won){ state.reveal=true; setView("enemy"); }
   render();
   const acc=state.shotsP?Math.round(100*state.hitsP/state.shotsP):0;
-  const stars=won?(state.shotsP<=45?3:state.shotsP<=65?2:1):0;
+  let stars=won&&opt.online&&opt.why==="left"?1:won?(state.shotsP<=45?3:state.shotsP<=65?2:1):0;
   won?Sound.win():Sound.lose();
   if(won) for(let i=0;i<6;i++) setTimeout(()=>FX.explosion(innerWidth*(.15+Math.random()*.7),innerHeight*(.15+Math.random()*.4),.8),i*250);
   setTurn(won?"you":"foe",won?"🏆 ZAFER":"💀 YENİLGİ");
-  msg(won?"Tüm düşman filosu sulara gömüldü!":"Düşman gemilerinin yerleri açıldı.");
-  const key="best_"+difficulty, best=store.get(key,null); let nb="";
-  if(won&&(best===null||state.shotsP<best)){ store.set(key,state.shotsP); nb=best===null?"İLK ZAFER! 🎉":"🎉 YENİ REKOR!"; }
-  if(won) store.set("wins",store.get("wins",0)+1);
+  const left=opt.why==="left";
+  msg(left?(won?"Rakip oyundan ayrıldı — kazandın!":"Oyundan ayrıldın."):won?"Tüm düşman filosu sulara gömüldü!":"Düşman gemilerinin yerleri açıldı.");
+  let nb="";
+  if(opt.online){ if(won){ store.set("onwins",store.get("onwins",0)+1); nb=left?"RAKİP AYRILDI":"ONLINE ZAFER! 🌐"; } }
+  else{
+    const key="best_"+difficulty, best=store.get(key,null);
+    if(won&&(best===null||state.shotsP<best)){ store.set(key,state.shotsP); nb=best===null?"İLK ZAFER! 🎉":"🎉 YENİ REKOR!"; }
+    if(won) store.set("wins",store.get("wins",0)+1);
+  }
+  $("resAgain").textContent=opt.online?"🌐 Yeni Rakip":"↻ Tekrar";
   setTimeout(()=>{
     $("resultCard").className="card"+(won?"":" lose");
     $("resTitle").textContent=won?"ZAFER!":"YENİLGİ";
@@ -670,12 +707,274 @@ function endGame(won){
 }
 
 /* =====================================================================
+   ONLINE (Firebase: anonim giriş + Firestore)
+===================================================================== */
+const AB_CFG={apiKey:"AIzaSyDST7X8QXynA2YJ6ZJZ1fWp1Ow2eJLylnQ",authDomain:"scribble-kick.firebaseapp.com",projectId:"scribble-kick",
+  storageBucket:"scribble-kick.firebasestorage.app",messagingSenderId:"307843857448",appId:"1:307843857448:web:d35c242ae347a2ed72891d"};
+const TURN_SEC=30, SETUP_SEC=60, LOBBY_FRESH=30000, OPP_TIMEOUT=70000;
+const ON={db:null,auth:null,FV:null,uid:null,gid:null,ref:null,opp:null,g:null,unsub:null,seen:0,resolving:-1,my:null,anim:0,
+  lastTurn:null,active:false,searching:false,timers:{},revealed:false,deadline:0};
+function fbInit(){ if(ON.db) return true; if(!window.firebase) return false;
+  firebase.initializeApp(AB_CFG); ON.auth=firebase.auth(); ON.db=firebase.firestore(); ON.FV=firebase.firestore.FieldValue; return true; }
+async function fbUser(){ if(ON.auth.currentUser) return ON.auth.currentUser.uid; const c=await ON.auth.signInAnonymously(); return c.user.uid; }
+const myName=()=>{ let n=store.get("name",null); if(!n){ n="Kaptan "+(1000+Math.random()*9000|0); store.set("name",n); } return n; };
+const tset=(k,fn,ms,rep)=>{ tclr(k); ON.timers[k]=rep?setInterval(fn,ms):setTimeout(fn,ms); };
+const tclr=k=>{ if(ON.timers[k]){ clearInterval(ON.timers[k]); clearTimeout(ON.timers[k]); delete ON.timers[k]; } };
+const packShip=s=>({name:s.name,size:s.size,hor:!!s.hor,cells:s.cells.map(([r,c])=>r*10+c).join(",")});
+const unpackCells=str=>str.split(",").map(Number).map(v=>[v/10|0,v%10]);
+
+/* ---------- matchmaking UI ---------- */
+function showMM(t){ $("mmText").textContent=t; $("mmSub").textContent=""; $("mmRadar").style.display=""; $("mm").classList.add("show");
+  const t0=Date.now(); tset("mmclock",()=>{ if(ON.searching) $("mmSub").textContent=`⏱️ ${Math.round((Date.now()-t0)/1000)} sn · Arkadaşına linki atarsan anında eşleşirsiniz`; },1000,true); }
+function setMM(t,err){ $("mmText").textContent=t; if(err){ $("mmRadar").style.display="none"; $("mmSub").textContent=""; tclr("mmclock"); } }
+function hideMM(){ $("mm").classList.remove("show"); tclr("mmclock"); }
+
+async function findMatch(){
+  Sound.init(); Sound.click();
+  showMM("Bağlanıyor...");
+  try{
+    if(!fbInit()) throw new Error("no firebase");
+    ON.uid=await fbUser();
+    ON.searching=true; setMM("Rakip aranıyor...");
+    await joinLobby();
+  }catch(e){ console.warn(e); ON.searching=false; setMM("Bağlantı kurulamadı. İnternetini kontrol edip tekrar dene.",true); }
+}
+async function joinLobby(){
+  const db=ON.db, FV=ON.FV, lob=db.collection("ab_lobby").doc("main");
+  const r=await db.runTransaction(async tx=>{
+    const d=await tx.get(lob), L=d.exists?d.data():null;
+    const fresh=L&&L.uid&&L.uid!==ON.uid&&L.gid&&L.t&&(Date.now()-L.t.toMillis())<LOBBY_FRESH;
+    if(fresh){
+      tx.set(lob,{uid:null,gid:null,t:null});
+      tx.update(db.collection("ab_games").doc(L.gid),{p2:ON.uid,status:"setup",["names."+ON.uid]:myName(),["hb."+ON.uid]:FV.serverTimestamp()});
+      return {gid:L.gid,opp:L.uid};
+    }
+    const g=db.collection("ab_games").doc();
+    tx.set(g,{p1:ON.uid,p2:null,status:"wait",created:FV.serverTimestamp(),names:{[ON.uid]:myName()},ready:{},res:[],turn:null,pending:null,
+              hb:{[ON.uid]:FV.serverTimestamp()},fleet:{},winner:null,why:null});
+    tx.set(lob,{uid:ON.uid,gid:g.id,t:FV.serverTimestamp()});
+    return {gid:g.id,opp:null};
+  });
+  if(!ON.searching) return;
+  ON.gid=r.gid; ON.ref=db.collection("ab_games").doc(r.gid);
+  if(r.opp){ ON.opp=r.opp; return startOnline(); }
+  // bekle: lobi kaydını taze tut, biri gelince başla
+  tset("lobby",async()=>{
+    try{ let lost=false;
+      await db.runTransaction(async tx=>{ const d=await tx.get(lob); const L=d.exists?d.data():null;
+        if(L&&L.uid===ON.uid) tx.update(lob,{t:FV.serverTimestamp()}); else lost=true; });
+      if(lost&&ON.searching&&!ON.opp){ // lobiden düştük (rakip gelmediyse yeniden sıraya gir)
+        const s=await ON.ref.get(); if(s.exists&&!s.data().p2){ tclr("lobby"); if(ON.unsub){ON.unsub();ON.unsub=null;} ON.ref.delete().catch(()=>{}); joinLobby().catch(()=>{}); }
+      }
+    }catch(e){}
+  },8000,true);
+  ON.unsub=ON.ref.onSnapshot(s=>{ const g=s.data(); if(g&&g.p2&&ON.searching&&!ON.opp){ ON.opp=g.p2; tclr("lobby"); ON.unsub(); ON.unsub=null; startOnline(); } },()=>{});
+}
+async function cancelMatch(){
+  Sound.click(); ON.searching=false; tclr("lobby"); hideMM();
+  if(ON.unsub){ ON.unsub(); ON.unsub=null; }
+  if(ON.db&&ON.ref&&!ON.opp){
+    const lob=ON.db.collection("ab_lobby").doc("main"), ref=ON.ref;
+    try{ await ON.db.runTransaction(async tx=>{ const d=await tx.get(lob); if(d.exists&&d.data().uid===ON.uid) tx.set(lob,{uid:null,gid:null,t:null}); }); }catch(e){}
+    ref.delete().catch(()=>{});
+  }
+  ON.ref=null; ON.gid=null;
+}
+
+/* ---------- game session ---------- */
+function startOnline(){
+  ON.searching=false; hideMM();
+  ON.active=true; ON.seen=0; ON.resolving=-1; ON.my=null; ON.anim=0; ON.lastTurn=null; ON.revealed=false; ON.g=null;
+  show("game"); newGame(true);
+  Sound.alarm(); vibrate([40,40,40]);
+  ON.unsub=ON.ref.onSnapshot(s=>onGame(s),()=>{});
+  hb(); tset("hb",hb,12000,true); tset("chk",checkOpp,5000,true);
+  setTimeout(()=>{ const n=ON.g&&ON.g.names&&ON.g.names[ON.opp]; banner("RAKİP BULUNDU!",(n||"Rakip")+" ile karşılaşıyorsun",false); },150);
+}
+function hb(){ if(ON.ref&&ON.active) ON.ref.update({["hb."+ON.uid]:ON.FV.serverTimestamp()}).catch(()=>{}); }
+document.addEventListener("visibilitychange",()=>{ if(!document.hidden) hb(); });
+function checkOpp(){
+  const g=ON.g; if(!g||!ON.active||g.status==="over") return;
+  const h=g.hb||{}, mine=h[ON.uid], opp=h[ON.opp];
+  if(mine&&opp&&mine.toMillis&&opp.toMillis&&mine.toMillis()-opp.toMillis()>OPP_TIMEOUT)
+    ON.ref.update({status:"over",winner:ON.uid,why:"left"}).catch(()=>{});
+}
+function leaveOnline(forfeit){
+  if(ON.active&&forfeit&&ON.ref&&ON.g&&ON.g.status!=="over") ON.ref.update({status:"over",winner:ON.opp,why:"left"}).catch(()=>{});
+  Object.keys(ON.timers).forEach(tclr);
+  if(ON.unsub){ ON.unsub(); ON.unsub=null; }
+  ON.active=false; ON.searching=false; ON.ref=null; ON.opp=null; ON.g=null;
+}
+addEventListener("pagehide",()=>{ if(ON.active) leaveOnline(true); });
+
+function onGame(s){
+  if(!ON.active) return;
+  if(!s.exists){ if(state.phase!=="over") onlineOver({winner:ON.uid,why:"left"}); return; }
+  const g=s.data({serverTimestamps:"estimate"}); ON.g=g;
+  if(g.status==="over"){
+    if(g.fleet&&g.fleet[ON.opp]&&!ON.revealed&&state.phase==="over") revealFleet(g.fleet[ON.opp]);
+    if(state.phase!=="over"&&!ON.anim) onlineOver(g);
+    return;
+  }
+  if(state.phase==="ready"&&g.status==="battle") return beginOnlineBattle();
+  if(state.phase==="setup"||state.phase==="ready"){
+    if(g.ready&&g.ready[ON.opp]&&state.phase==="setup") $("hint").textContent=`✅ Rakip hazır! ⏱️ ${Math.max(0,Math.ceil((ON.deadline-Date.now())/1000))} sn`;
+    return;
+  }
+  const res=g.res||[];
+  while(ON.seen<res.length){ const e=res[ON.seen++]; if(e.by===ON.uid) myResult(e); }
+  if(g.pending&&g.pending.by===ON.opp&&ON.resolving!==g.pending.n){ ON.resolving=g.pending.n; resolveIncoming(g.pending); }
+  syncTurn(g);
+}
+
+/* setup */
+function startSetupTimer(){
+  ON.deadline=Date.now()+SETUP_SEC*1000;
+  tset("setup",()=>{ const left=Math.ceil((ON.deadline-Date.now())/1000);
+    if(state.phase!=="setup"){ tclr("setup"); return; }
+    const oppReady=ON.g&&ON.g.ready&&ON.g.ready[ON.opp];
+    $("hint").textContent=(oppReady?"✅ Rakip hazır! ":"Rakip de filosunu yerleştiriyor · ")+`⏱️ ${Math.max(0,left)} sn`;
+    if(left<=0){ tclr("setup"); onlineReady(); }
+  },250,true);
+}
+async function onlineReady(){
+  if(state.phase!=="setup") return;
+  tclr("setup");
+  if(state.placeIdx<FLEET.length){ randomPlace(state.player); state.placeIdx=FLEET.length; afterPlacement(); }
+  Sound.click(); state.phase="ready";
+  $("setupBar").style.display="none"; $("queue").style.display="none"; $("hint").textContent="";
+  setTurn("setup","⏳ RAKİP BEKLENİYOR"); msg("Filon hazır! Rakibin yerleştirmesi bekleniyor...");
+  try{ await ON.db.runTransaction(async tx=>{ const d=await tx.get(ON.ref); const g=d.data(); if(!g||g.status!=="setup") return;
+    const upd={["ready."+ON.uid]:true};
+    if(g.ready&&g.ready[ON.opp]){ upd.status="battle"; upd.turn=Math.random()<.5?ON.uid:ON.opp; }
+    tx.update(ON.ref,upd); }); }catch(e){ console.warn(e); }
+}
+async function beginOnlineBattle(){
+  state.phase="battle"; state.busy=true; ON.anim++;
+  $("fleets").style.display=""; $("hint").textContent="Köşedeki küçük tahtaya dokunarak öbür tahtaya bakabilirsin.";
+  $("enemyPanel").classList.remove("hidden"); $("stage").classList.remove("solo");
+  render(); banner("SAVAŞ!",ON.g.turn===ON.uid?"İlk atış senin!":"İlk atış rakibin",false); Sound.boom(.4);
+  await sleep(1100); ON.anim--; ON.lastTurn=null; onGameRefresh();
+}
+function onGameRefresh(){ const g=ON.g; if(!g) return; if(g.status==="over") return onlineOver(g);
+  const res=g.res||[]; while(ON.seen<res.length){ const e=res[ON.seen++]; if(e.by===ON.uid) myResult(e); }
+  if(g.pending&&g.pending.by===ON.opp&&ON.resolving!==g.pending.n){ ON.resolving=g.pending.n; resolveIncoming(g.pending); }
+  syncTurn(g); }
+
+/* turns */
+function syncTurn(g){
+  if(ON.anim||state.phase!=="battle"||!g||g.status!=="battle") return;
+  if(g.turn===ON.lastTurn) return; ON.lastTurn=g.turn;
+  if(g.turn===ON.uid){
+    setView("enemy"); Sound.yourTurn(); state.busy=false;
+    const last=(g.res||[]).slice(-1)[0];
+    msg(last&&last.by===ON.uid&&last.hit?"🔥 Bir atış daha!":"Düşman sularında bir kareye dokun ve ateş et!");
+    startTurnTimer();
+  } else {
+    tclr("turn"); state.busy=true; setView("player");
+    setTurn("foe","⚠️ RAKİP NİŞAN ALIYOR"); msg("Rakip hedef seçiyor...");
+  }
+}
+function startTurnTimer(){
+  ON.turnEnd=Date.now()+TURN_SEC*1000;
+  const tick=()=>{ const left=Math.ceil((ON.turnEnd-Date.now())/1000);
+    setTurn("you",`🎯 SIRA SENDE · ${Math.max(0,left)}`);
+    if(left<=5&&left>0&&left!==ON.lastBeep){ ON.lastBeep=left; Sound.tone({type:"square",f0:900,dur:.06,gain:.06}); }
+    if(left<=0){ tclr("turn"); const open=[]; for(let r=0;r<N;r++)for(let c=0;c<N;c++) if(!state.enemy.shots[r][c]) open.push([r,c]);
+      const p=open[Math.random()*open.length|0]; msg("⏱️ Süre doldu, rastgele ateş edildi!"); if(p) onlineFire(p[0],p[1],true); } };
+  tick(); tset("turn",tick,250,true);
+}
+
+/* my shot */
+async function onlineFire(r,c,auto){
+  const g=ON.g; if(!g||g.status!=="battle"||g.turn!==ON.uid||g.pending||state.enemy.shots[r][c]) return;
+  if(state.busy&&!auto) return;
+  state.busy=true; tclr("turn"); ON.anim++;
+  const n=(g.res||[]).length;
+  state.enemy.shots[r][c]=3; render();
+  ON.my={r,c,n,landed:false,entry:null};
+  ON.ref.update({pending:{by:ON.uid,r,c,n}}).catch(e=>{ console.warn(e); state.enemy.shots[r][c]=0; ON.my=null; ON.anim=Math.max(0,ON.anim-1); state.busy=false; render(); msg("Bağlantı sorunu, tekrar dene."); startTurnTimer(); });
+  setTurn("you","💥 ATEŞ!");
+  const [x1,y1]=cellCenter("enemy",r,c); Sound.shoot(.8); Sound.whistle(.5); vibrate(10);
+  await new Promise(res=>FX.shell(innerWidth/2,innerHeight+20,x1,y1,.5,res));
+  if(!ON.my) return;
+  ON.my.landed=true; ON.anim--;
+  if(ON.my.entry) applyMy(); else msg("Sonuç bekleniyor...");
+}
+function myResult(e){
+  if(ON.my&&ON.my.n===e.n){ ON.my.entry=e; if(ON.my.landed) applyMy(); return; }
+  // (yeniden bağlanma vb.) animasyonsuz uygula
+  state.enemy.shots[e.r][e.c]=e.hit?2:1; if(e.sunk) addEnemyShip(e.sunk,true); render();
+}
+function addEnemyShip(p,sunk){
+  const b=state.enemy; if(b.ships.some(s=>s.name===p.name)) return b.ships.find(s=>s.name===p.name);
+  const cells=unpackCells(p.cells), idx=b.ships.length;
+  cells.forEach(([r,c])=>b.grid[r][c]=idx);
+  const s={name:p.name,size:p.size,hor:p.hor,cells,hits:sunk?p.size:cells.filter(([r,c])=>b.shots[r][c]===2).length};
+  b.ships.push(s); return s;
+}
+function applyMy(){
+  const {r,c,entry:e}=ON.my; ON.my=null; ON.anim++;
+  state.shotsP++; state.lastP=[r,c];
+  const [x1,y1]=cellCenter("enemy",r,c);
+  if(e.hit){
+    state.hitsP++; state.enemy.shots[r][c]=2; const ship=e.sunk?addEnemyShip(e.sunk,true):null; render();
+    Sound.boom(); FX.explosion(x1,y1,ship?1.3:1); screenShake(!!ship); flash(); vibrate(ship?[60,40,120]:50);
+    if(ship){ sinkFx("enemy",ship); Sound.sunk(); banner("BATTI!",ship.name.toUpperCase()+" YOK EDİLDİ",false); }
+    msg(ship?`💥 <b>${ship.name}</b> battı! Bir atış daha!`:`🔥 <b>${coord(r,c)}</b> İSABET! Bir atış daha!`);
+  } else {
+    state.enemy.shots[r][c]=1; render(); Sound.splash(); FX.splash(x1,y1); msg(`🌊 <b>${coord(r,c)}</b> ıska...`);
+  }
+  setTimeout(()=>{ ON.anim--; afterAnim(); }, e.hit?(e.sunk?1400:450):900);
+}
+function afterAnim(){ const g=ON.g; if(!g||ON.anim) return;
+  if(g.status==="over") return onlineOver(g);
+  ON.lastTurn=null; onGameRefresh(); }
+
+/* opponent's shot on me */
+async function resolveIncoming(p){
+  ON.anim++; tclr("turn");
+  if(state.view!=="player"){ setView("player"); await sleep(550); }
+  setTurn("foe","⚠️ RAKİP ATEŞ ETTİ");
+  const {r,c}=p, [x1,y1]=cellCenter("player",r,c);
+  Sound.shoot(.45); Sound.whistle(.55,1.3);
+  await new Promise(res=>FX.shell(innerWidth/2,-30,x1,y1,.55,res));
+  const res=state.player.shots[r][c]?{hit:state.player.shots[r][c]===2,sunk:null}:fire(state.player,r,c);
+  state.shotsE++; state.lastE=[r,c]; render();
+  const lost=allSunk(state.player);
+  const entry={by:ON.opp,r,c,n:p.n,hit:res.hit,sunk:res.sunk?packShip(res.sunk):null};
+  const upd={pending:null,res:ON.FV.arrayUnion(entry),turn:res.hit?ON.opp:ON.uid};
+  if(lost){ upd.status="over"; upd.winner=ON.opp; upd.why="sunk"; upd["fleet."+ON.uid]=state.player.ships.map(packShip); }
+  ON.ref.update(upd).catch(e=>console.warn(e));
+  if(res.hit){
+    Sound.boom(); FX.explosion(x1,y1,res.sunk?1.3:1); screenShake(true); flash(); vibrate(res.sunk?[100,50,200]:80);
+    if(res.sunk){ sinkFx("player",res.sunk); Sound.sunk(); banner("BATTIN!",res.sunk.name.toUpperCase()+" KAYBEDİLDİ",true); }
+    msg(res.sunk?`☠️ <b>${res.sunk.name}</b>'ın battı!`:`💢 Rakip <b>${coord(r,c)}</b>'den vurdu!`);
+  } else { Sound.splash(); FX.splash(x1,y1); msg(`Rakip <b>${coord(r,c)}</b>'yi ıskaladı! 😮‍💨`); }
+  await sleep(res.hit?(res.sunk?1400:850):1000);
+  ON.anim--; afterAnim();
+}
+
+/* end */
+function revealFleet(list){
+  ON.revealed=true; list.forEach(p=>addEnemyShip(p,false)); state.reveal=true; render();
+}
+function onlineOver(g){
+  if(state.phase==="over") return;
+  const won=g.winner===ON.uid;
+  ["turn","setup","hb","chk"].forEach(tclr);
+  if(won&&ON.ref&&!(g.fleet&&g.fleet[ON.uid])) ON.ref.update({["fleet."+ON.uid]:state.player.ships.map(packShip)}).catch(()=>{});
+  endGame(won,{online:true,why:g.why});
+  if(!won&&g.fleet&&g.fleet[ON.opp]) revealFleet(g.fleet[ON.opp]);
+}
+
+/* =====================================================================
    SCREENS / MENU
 ===================================================================== */
 function show(id){ document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("show",s.id===id)); }
 function updateBest(){
-  const b=store.get("best_"+difficulty,null), w=store.get("wins",0);
-  $("bestLine").textContent=(w?`🏆 ${w} zafer`:"")+(b!==null?`  ·  ${({easy:"Kolay",normal:"Normal",hard:"Zor"})[difficulty]} rekoru: ${b} atış`:"");
+  const b=store.get("best_"+difficulty,null), w=store.get("wins",0), ow=store.get("onwins",0);
+  $("bestLine").textContent=(w?`🏆 ${w} zafer`:"")+(ow?`  ·  🌐 ${ow} online zafer`:"")+(b!==null?`  ·  ${({easy:"Kolay",normal:"Normal",hard:"Zor"})[difficulty]} rekoru: ${b} atış`:"");
 }
 function setSoundUI(){ $("soundBtn").textContent=Sound.on?"🔊":"🔇"; $("menuSound").textContent=Sound.on?"🔊 Ses: Açık":"🔇 Ses: Kapalı"; }
 document.querySelectorAll("#diffRow .chip").forEach(ch=>{ ch.classList.toggle("on",ch.dataset.d===difficulty);
@@ -686,11 +985,13 @@ $("howBtn").onclick=()=>{ Sound.init(); Sound.click(); $("howto").classList.add(
 $("howClose").onclick=()=>{ Sound.click(); $("howto").classList.remove("show"); };
 const toggleSound=()=>{ Sound.init(); Sound.toggle(); setSoundUI(); Sound.click(); };
 $("menuSound").onclick=toggleSound; $("soundBtn").onclick=toggleSound;
-$("homeBtn").onclick=()=>{ Sound.click(); if(state&&state.phase==="battle") $("quit").classList.add("show"); else { show("menu"); updateBest(); } };
+$("homeBtn").onclick=()=>{ Sound.click(); if(state&&(state.phase==="battle"||(state.online&&state.phase!=="over"))) $("quit").classList.add("show"); else { show("menu"); updateBest(); } };
 $("quitNo").onclick=()=>{ Sound.click(); $("quit").classList.remove("show"); };
-$("quitYes").onclick=()=>{ Sound.click(); $("quit").classList.remove("show"); state.phase="over"; show("menu"); updateBest(); };
-$("resAgain").onclick=()=>{ Sound.click(); $("result").classList.remove("show"); newGame(); };
-$("resMenu").onclick=()=>{ Sound.click(); $("result").classList.remove("show"); show("menu"); updateBest(); };
+$("quitYes").onclick=()=>{ Sound.click(); $("quit").classList.remove("show"); if(state.online) leaveOnline(true); state.phase="over"; show("menu"); updateBest(); };
+$("resAgain").onclick=()=>{ Sound.click(); $("result").classList.remove("show"); if(state.online){ leaveOnline(false); findMatch(); } else newGame(); };
+$("resMenu").onclick=()=>{ Sound.click(); $("result").classList.remove("show"); if(state.online) leaveOnline(false); show("menu"); updateBest(); };
+$("onlineBtn").onclick=()=>findMatch();
+$("mmCancel").onclick=()=>cancelMatch();
 document.addEventListener("pointerdown",()=>Sound.init(),{once:true});
 
 buildBoard($("player"),"player"); buildBoard($("enemy"),"enemy");

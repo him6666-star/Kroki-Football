@@ -115,5 +115,23 @@ service cloud.firestore {
             && request.resource.data.get('tour','').size() < 50000));
     }
 
+    // ===== Amiral Batti (amiral-batti.web.app) =====
+    // tek belgelik bekleme odasi: "Rakip bul"a basan ilk kisi bekler, ikinci gelen eslesir
+    match /ab_lobby/{id} {
+      allow read, write: if request.auth != null;
+    }
+    // mac belgesi: yalnizca iki oyuncu okur/yazar; bos koltuga ikinci oyuncu oturabilir
+    match /ab_games/{gid} {
+      allow read: if request.auth != null && (resource == null
+        || request.auth.uid == resource.data.p1 || request.auth.uid == resource.data.p2 || resource.data.p2 == null);
+      allow create: if request.auth != null
+        && request.resource.data.p1 == request.auth.uid && request.resource.data.p2 == null;
+      allow update: if request.auth != null && (
+        request.auth.uid == resource.data.p1 || request.auth.uid == resource.data.p2
+        || (resource.data.p2 == null && request.resource.data.p2 == request.auth.uid
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['p2','status','names','hb'])));
+      allow delete: if request.auth != null && request.auth.uid == resource.data.p1;
+    }
+
   }
 }
