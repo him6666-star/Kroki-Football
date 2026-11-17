@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="tr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Scribble Kick – Google Play'de</title>
+<meta name="description" content="Scribble Kick: çizgi film tarzı 6'ya 6 mini futbol. Artık Google Play'de.">
+<meta property="og:title" content="Scribble Kick"><meta property="og:description" content="Çizgi film tarzı 6'ya 6 mini futbol – Google Play'de ücretsiz."><meta property="og:image" content="img/hero.jpg">
+<link rel="icon" type="image/png" href="img/icon.png"><link rel="apple-touch-icon" href="img/icon.png">
+<style>
+:root{--bg:#0d2b3a;--bg2:#123f55;--ink:#f4fbff;--mut:#a8c6d6;--gold:#ffc83a;--gold2:#f29a1b}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:radial-gradient(1200px 600px at 50% -10%,#1d6a86 0,var(--bg) 60%) fixed;color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.5;overflow-x:hidden}
+.wrap{max-width:980px;margin:0 auto;padding:0 16px}
+header{display:flex;align-items:center;justify-content:space-between;padding:14px 0}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px}
+.brand img{width:40px;height:40px;border-radius:10px}
+.lang button{background:#ffffff1a;color:var(--ink);border:1px solid #ffffff33;border-radius:999px;padding:6px 12px;font-weight:700;cursor:pointer}
+.hero{display:grid;grid-template-columns:1.1fr .9fr;gap:24px;align-items:center;padding:20px 0 28px}
+h1{font-size:clamp(30px,6vw,52px);line-height:1.05;margin:0 0 12px;font-weight:900}
+h1 span{color:var(--gold)}
+.sub{color:var(--mut);font-size:clamp(16px,2.4vw,19px);margin:0 0 20px}
+.cta{display:inline-flex;align-items:center;gap:12px;background:linear-gradient(var(--gold),var(--gold2));color:#2a1700;text-decoration:none;font-weight:900;font-size:18px;padding:14px 24px;border-radius:16px;box-shadow:0 5px 0 #8a5300,0 10px 24px #0006}
+.cta:active{transform:translateY(3px);box-shadow:0 2px 0 #8a5300}
+.cta svg{width:26px;height:26px}
+.note{color:var(--mut);font-size:13px;margin-top:12px}
+.hero img.h{width:100%;border-radius:20px;border:3px solid #ffffff30;box-shadow:0 14px 40px #0008}
+.feat{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:8px 0 28px}
+.f{background:#ffffff12;border:1px solid #ffffff22;border-radius:16px;padding:14px}
+.f b{display:block;font-size:26px}.f span{font-size:14px;color:var(--mut)}
+h2{font-size:24px;margin:8px 0 12px}
+.shots{display:flex;gap:12px;overflow-x:auto;padding:4px 2px 16px;scroll-snap-type:x mandatory}
+.shots img{height:min(300px,52vw);border-radius:14px;border:2px solid #ffffff30;scroll-snap-align:start;flex:0 0 auto}
+.bottom{text-align:center;margin:20px 0 10px}
+footer{color:var(--mut);font-size:13px;text-align:center;padding:24px 0 32px}
+footer a{color:var(--mut)}
+@media(max-width:760px){.hero{grid-template-columns:1fr}.feat{grid-template-columns:1fr 1fr}}
+</style></head><body>
+<div class="wrap">
+<header><div class="brand"><img src="img/icon.png" alt=""><span>Scribble Kick</span></div><div class="lang"><button id="lg" type="button">EN</button></div></header>
+<section class="hero">
+<div>
+<h1 data-k="h1"></h1>
+<p class="sub" data-k="sub"></p>
+<a class="cta" id="go" href="https://play.google.com/store/apps/details?id=com.scribblekick.game"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 2.5v19l10-9.5L4 2.5zm11.2 8.4L5.8 2l12 6.9-2.6 2zm0 2.2 2.6 2-12 6.9 9.4-8.9zM19 9.6l2.6 1.5c.6.4.6 1.2 0 1.6L19 14.2l-2.9-2.3L19 9.6z"/></svg><span data-k="cta"></span></a>
+<div class="note" data-k="note"></div>
+</div>
+<img class="h" src="img/hero.jpg" alt="Scribble Kick">
+</section>
+<section class="feat">
+<div class="f"><b>⚽</b><span data-k="f1"></span></div>
+<div class="f"><b>🔥</b><span data-k="f2"></span></div>
+<div class="f"><b>🏆</b><span data-k="f3"></span></div>
+<div class="f"><b>👥</b><span data-k="f4"></span></div>
+</section>
+<h2 data-k="sh"></h2>
+<div class="shots"><img src="img/2-match.jpg" alt="" loading="lazy"><img src="img/3-shot.jpg" alt="" loading="lazy"><img src="img/1-menu.jpg" alt="" loading="lazy"><img src="img/4-shop.jpg" alt="" loading="lazy"><img src="img/5-rewards.jpg" alt="" loading="lazy"></div>
+<div class="bottom"><a class="cta" id="go2" href="https://play.google.com/store/apps/details?id=com.scribblekick.game"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 2.5v19l10-9.5L4 2.5zm11.2 8.4L5.8 2l12 6.9-2.6 2zm0 2.2 2.6 2-12 6.9 9.4-8.9zM19 9.6l2.6 1.5c.6.4.6 1.2 0 1.6L19 14.2l-2.9-2.3L19 9.6z"/></svg><span data-k="cta"></span></a></div>
+<footer><a href="privacy.html" data-k="pv"></a> · <a href="delete-account.html" data-k="dl"></a></footer>
+</div>
+<script>
+const T={tr:{h1:'Kroki futbolu <span>artık cebinde</span>',sub:'Çizgi film tarzı 6\'ya 6 mini futbol. Hızlı maçlar, çılgın yetenekler, kariyer ve arkadaşlarınla çevrimiçi karşılaşmalar.',cta:'Google Play\'den indir',note:'Ücretsiz • Android • Web sürümü kapandı, oyun artık uygulamada.',f1:'3 dakikalık hızlı maçlar',f2:'UFO, buz, alevli şut ve daha fazlası',f3:'Kariyer, turnuva ve rozetler',f4:'Çevrimiçi eşleşme ve bulut kayıt',sh:'Oyundan kareler',pv:'Gizlilik politikası',dl:'Hesabı sil'},
+en:{h1:'Doodle football <span>now in your pocket</span>',sub:'Cartoon-style 6-a-side mini football. Quick matches, wild abilities, a career mode and online games with friends.',cta:'Get it on Google Play',note:'Free • Android • The web version is closed, the game now lives in the app.',f1:'3-minute quick matches',f2:'UFO, ice, fire shot and more',f3:'Career, tournament and badges',f4:'Online matches and cloud save',sh:'Screenshots',pv:'Privacy policy',dl:'Delete account'}};
+let lang=/^tr/i.test(navigator.language||'tr')?'tr':'en';
+function ap(){document.documentElement.lang=lang;document.querySelectorAll('[data-k]').forEach(e=>{e.innerHTML=T[lang][e.dataset.k]});document.getElementById('lg').textContent=lang=='tr'?'EN':'TR'}
+document.getElementById('lg').onclick=()=>{lang=lang=='tr'?'en':'tr';ap()};ap();
+</script></body></html>
