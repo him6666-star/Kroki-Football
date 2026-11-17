@@ -814,6 +814,7 @@ function onGame(s){
   if(state.phase==="battle"){ const res=g.res||[]; while(ON.seen<res.length){ const e=res[ON.seen++]; if(e.by===ON.uid) myResult(e); } }
   if(g.status==="over"){
     if(g.fleet&&g.fleet[ON.opp]&&!ON.revealed&&state.phase==="over") revealFleet(g.fleet[ON.opp]);
+    if(ON.my&&ON.my.landed&&!ON.my.entry) ON.my=null;
     if(state.phase!=="over"&&!ON.anim&&!ON.my) onlineOver(g);
     return;
   }
@@ -900,7 +901,9 @@ async function onlineFire(r,c,auto){
   await new Promise(res=>FX.shell(innerWidth/2,innerHeight+20,x1,y1,.5,res));
   if(!ON.my) return;
   ON.my.landed=true; ON.anim--;
-  if(ON.my.entry) applyMy(); else msg("Sonuç bekleniyor...");
+  if(ON.my.entry) applyMy();
+  else if(ON.g&&ON.g.status==="over"){ ON.my=null; onlineOver(ON.g); }
+  else msg("Sonuç bekleniyor...");
 }
 function myResult(e){
   if(ON.my&&ON.my.n===e.n){ ON.my.entry=e; if(ON.my.landed) applyMy(); return; }
