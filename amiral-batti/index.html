@@ -811,9 +811,10 @@ function onGame(s){
   if(!ON.active) return;
   if(!s.exists){ if(state.phase!=="over") onlineOver({winner:ON.uid,why:"left"}); return; }
   const g=s.data({serverTimestamps:"estimate"}); ON.g=g;
+  if(state.phase==="battle"){ const res=g.res||[]; while(ON.seen<res.length){ const e=res[ON.seen++]; if(e.by===ON.uid) myResult(e); } }
   if(g.status==="over"){
     if(g.fleet&&g.fleet[ON.opp]&&!ON.revealed&&state.phase==="over") revealFleet(g.fleet[ON.opp]);
-    if(state.phase!=="over"&&!ON.anim) onlineOver(g);
+    if(state.phase!=="over"&&!ON.anim&&!ON.my) onlineOver(g);
     return;
   }
   if(state.phase==="ready"&&g.status==="battle") return beginOnlineBattle();
