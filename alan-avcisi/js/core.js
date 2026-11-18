@@ -237,6 +237,7 @@ const DIRS={U:[0,-1],D:[0,1],L:[-1,0],R:[1,0]};
 // Kenardayken yön seçimi: parmak açıkça içeriyi göstermiyorsa kenarda kal (köşe dönüşleri kolay),
 // içeriyi net gösteriyorsa beklemeden çık.
 const LEAVE_DOT=.94; // ~20 derece
+const LEAVE_DELAY=.12; // kenardan çıkmadan önce bekleme (sn)
 function pickDir(dir){
   const p=player,v=(typeof joyVec!=='undefined'&&joyVec&&joyDir===dir)?joyVec:{x:DIRS[dir][0],y:DIRS[dir][1]};
   if(p.drawing||!border[idx(p.x,p.y)])return DIRS[dir];
@@ -436,8 +437,16 @@ function update(dt){
   // oyuncu
   const dir=joyDir||keyDir;
   const step=effects.speed>0?.018:.028;
-  if(dir){player.acc+=dt;let guard=0;while(player.acc>=step&&guard++<8){player.acc-=step;if(!tryMove(pickDir(dir))){player.acc=0;break}if(state!=='play')return}}
+  // kenardan içeri çıkmadan önce kısa bir duraklama (kazara çıkışı önler)
+  let holdOff=false;
+  if(dir&&!player.drawing){const d=pickDir(dir);
+    if(d){const nx=player.x+d[0],ny=player.y+d[1];
+      if(nx>=0&&ny>=0&&nx<W&&ny<H&&grid[idx(nx,ny)]===0){player.hold=(player.hold||0)+dt;if(player.hold<LEAVE_DELAY)holdOff=true}else player.hold=0}
+    else player.hold=0}
+  else if(!dir)player.hold=0;
+  if(dir&&!holdOff){player.acc+=dt;let guard=0;while(player.acc>=step&&guard++<8){player.acc-=step;if(!tryMove(pickDir(dir))){player.acc=0;break}if(state!=='play')return}}
   else player.acc=0;
+  if(player.drawing)player.hold=0;
 
   clock+=dt;
   const def=boss.def,frozen=effects.freeze>0;
@@ -677,6 +686,7 @@ function draw(tm){
     if(!p.drawing){const ph=(tm/900)%1;ctx.globalAlpha=1-ph;ctx.strokeStyle=col;ctx.lineWidth=Math.max(1.5,cs*.45);
       ctx.beginPath();ctx.arc(x,y,cs*(3.9+ph*4),0,7);ctx.stroke();ctx.globalAlpha=1}
     ctx.strokeStyle='#fff';ctx.lineWidth=Math.max(1.5,cs*.4);ctx.beginPath();ctx.arc(x,y,cs*3.7,0,7);ctx.stroke();
+    if(!p.drawing&&p.hold>0){ctx.strokeStyle='#ffd640';ctx.lineWidth=Math.max(2,cs*.7);ctx.beginPath();ctx.arc(x,y,cs*3.7,-Math.PI/2,-Math.PI/2+Math.min(1,p.hold/LEAVE_DELAY)*6.283);ctx.stroke()}
     ctx.strokeStyle=col;ctx.lineWidth=Math.max(1,cs*.25);ctx.beginPath();ctx.arc(x,y,cs*4.2,0,7);ctx.stroke();
     if(ASSET.ui.ship){
       glowUnder(x,y,cs*5,p.drawing?'rgba(255,214,64,.9)':'rgba(255,95,162,.9)',.55);
