@@ -33,13 +33,23 @@ async def main():
             await asyncio.sleep(0.5)
         print("battle:", st)
         ships = [await pg.evaluate("state.player.ships.flatMap(s=>s.cells)") for pg in pages]
-        misses_left = {0: 3, 1: 3}
-        frozen = False
+        my_shots = {0: 0, 1: 0}
+        frozen = False; cut = False; last_progress = time.time(); last_state = None
         t0 = time.time(); shots = 0
         while time.time() - t0 < 600:
             ph = [await pg.evaluate("state.phase") for pg in pages]
             if "over" in ph:
                 await asyncio.sleep(4)
+                break
+            if not cut and shots >= 14:
+                # B'nin canli sunucu baglantisi sessizce kopsun (yalnizca yedek kontrol calissin)
+                await B.evaluate("window.subscribe=()=>{}; if(ON.unsub){ON.unsub();ON.unsub=null;}")
+                cut = True; print("B canli baglanti kesildi, shots", shots)
+            cur = await A.evaluate("ON.g&&((ON.g.res||[]).length+'/'+!!ON.g.pending)")
+            if cur != last_state: last_state = cur; last_progress = time.time()
+            elif time.time() - last_progress > 30:
+                print("TAKILDI!", cur)
+                for i2, pg2 in enumerate(pages): print("LOG", "AB"[i2], "\n".join((await pg2.evaluate("LOG.slice(-25)"))))
                 break
             if not frozen and shots >= 6:
                 # B'nin sayfasi animasyon calistiramaz hale gelsin (arka plana atilmis gibi)
@@ -49,10 +59,12 @@ async def main():
                 can = await pg.evaluate("ON.g&&ON.g.turn===ON.uid&&!ON.g.pending&&!state.busy&&state.view==='enemy'")
                 if not can: continue
                 target = ships[1 - i]
+                # isabet ve iska sirayla: iki taraf da gemi batirsin, sira sik sik degissin
+                want_miss = (my_shots[i] % 2 == 1)
                 cell = await pg.evaluate("(arg)=>{const [t,miss]=arg; const sh=state.enemy.shots;"
-                    "if(miss){for(let r=0;r<10;r++)for(let c=0;c<10;c++){ if(!sh[r][c]&&!t.some(x=>x[0]==r&&x[1]==c)) return [r,c]; }}"
-                    "for(const [r,c] of t) if(!sh[r][c]) return [r,c]; return null;}", [target, misses_left[i] > 0])
-                if misses_left[i] > 0: misses_left[i] -= 1
+                    "if(miss){for(let r=9;r>=0;r--)for(let c=9;c>=0;c--){ if(!sh[r][c]&&!t.some(x=>x[0]==r&&x[1]==c)) return [r,c]; }}"
+                    "for(const [r,c] of t) if(!sh[r][c]) return [r,c]; return null;}", [target, want_miss])
+                my_shots[i] += 1
                 if cell:
                     await pg.click(f'#enemy .cell[data-r="{cell[0]}"][data-c="{cell[1]}"]'); shots += 1
             await asyncio.sleep(0.4)
