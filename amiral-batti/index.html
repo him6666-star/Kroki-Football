@@ -456,6 +456,8 @@ const FX={
   }
 };
 addEventListener("resize",()=>FX.resize()); FX.resize();
+function shellP(x0,y0,x1,y1,dur){ return new Promise(res=>{ let d=false; const f=()=>{ if(!d){ d=true; res(); } };
+  if(document.hidden){ f(); return; } FX.shell(x0,y0,x1,y1,dur,f); setTimeout(f,dur*1000+350); }); }
 function cellPx(){ const c=document.querySelector("#stage .panel:not(.mini) .cell"); return c?c.getBoundingClientRect().width:34; }
 
 function screenShake(big){ const a=document.getElementById("app"); a.classList.remove("shake","shake-big"); void a.offsetWidth; a.classList.add(big?"shake-big":"shake"); }
@@ -606,7 +608,7 @@ async function onEnemyBoard(r,c){
   state.busy=true;
   const [x1,y1]=cellCenter("enemy",r,c);
   Sound.shoot(.8); Sound.whistle(.5); vibrate(10);
-  await new Promise(res=>FX.shell(innerWidth/2,innerHeight+20,x1,y1,.5,res));
+  await shellP(innerWidth/2,innerHeight+20,x1,y1,.5);
   const res=fire(state.enemy,r,c); state.shotsP++; if(res.hit) state.hitsP++; state.lastP=[r,c];
   render();
   if(res.hit){
@@ -631,7 +633,7 @@ async function enemyTurn(){
   for(;;){
     const [r,c]=aiPick(), [x1,y1]=cellCenter("player",r,c);
     Sound.shoot(.45); Sound.whistle(.55,1.3);
-    await new Promise(res=>FX.shell(innerWidth/2,-30,x1,y1,.55,res));
+    await shellP(innerWidth/2,-30,x1,y1,.55);
     const res=fire(state.player,r,c); state.shotsE++; state.lastE=[r,c];
     if(res.hit&&difficulty==="easy") [[1,0],[-1,0],[0,1],[0,-1]].forEach(([dr,dc])=>state.ai.targets.push([r+dr,c+dc]));
     render();
@@ -711,6 +713,7 @@ function endGame(won,opt){
 ===================================================================== */
 const AB_CFG={apiKey:"AIzaSyDST7X8QXynA2YJ6ZJZ1fWp1Ow2eJLylnQ",authDomain:"scribble-kick.firebaseapp.com",projectId:"scribble-kick",
   storageBucket:"scribble-kick.firebasestorage.app",messagingSenderId:"307843857448",appId:"1:307843857448:web:d35c242ae347a2ed72891d"};
+const LOBBY_ID=(()=>{ try{ const v=new URLSearchParams(location.search).get("lobby"); return v&&/^[a-z0-9]{1,20}$/.test(v)?v:"main"; }catch(e){ return "main"; } })();
 const TURN_SEC=30, SETUP_SEC=60, LOBBY_FRESH=30000, OPP_TIMEOUT=70000;
 const ON={db:null,auth:null,FV:null,uid:null,gid:null,ref:null,opp:null,g:null,unsub:null,seen:0,resolving:-1,my:null,anim:0,
   lastTurn:null,active:false,searching:false,timers:{},revealed:false,deadline:0};
@@ -740,7 +743,7 @@ async function findMatch(){
   }catch(e){ console.warn(e); ON.searching=false; setMM("Bağlantı kurulamadı. İnternetini kontrol edip tekrar dene.",true); }
 }
 async function joinLobby(){
-  const db=ON.db, FV=ON.FV, lob=db.collection("ab_lobby").doc("main");
+  const db=ON.db, FV=ON.FV, lob=db.collection("ab_lobby").doc(LOBBY_ID);
   const r=await db.runTransaction(async tx=>{
     const d=await tx.get(lob), L=d.exists?d.data():null;
     const fresh=L&&L.uid&&L.uid!==ON.uid&&L.gid&&L.t&&(Date.now()-L.t.toMillis())<LOBBY_FRESH;
@@ -774,7 +777,7 @@ async function cancelMatch(){
   Sound.click(); ON.searching=false; tclr("lobby"); hideMM();
   if(ON.unsub){ ON.unsub(); ON.unsub=null; }
   if(ON.db&&ON.ref&&!ON.opp){
-    const lob=ON.db.collection("ab_lobby").doc("main"), ref=ON.ref;
+    const lob=ON.db.collection("ab_lobby").doc(LOBBY_ID), ref=ON.ref;
     try{ await ON.db.runTransaction(async tx=>{ const d=await tx.get(lob); if(d.exists&&d.data().uid===ON.uid) tx.set(lob,{uid:null,gid:null,t:null}); }); }catch(e){}
     ref.delete().catch(()=>{});
   }
@@ -785,19 +788,51 @@ async function cancelMatch(){
 function startOnline(){
   ON.searching=false; hideMM();
   ON.active=true; ON.seen=0; ON.resolving=-1; ON.my=null; ON.anim=0; ON.lastTurn=null; ON.revealed=false; ON.g=null;
+  ON.done=null; ON.shotAt=0; ON.oppTurnAt=0; ON.setupAt=0; ON.readyBusy=false;
   show("game"); newGame(true);
   Sound.alarm(); vibrate([40,40,40]);
-  ON.unsub=ON.ref.onSnapshot(s=>onGame(s),()=>{});
-  hb(); tset("hb",hb,12000,true); tset("chk",checkOpp,5000,true);
+  subscribe();
+  hb(); tset("hb",hb,12000,true); tset("chk",checkOpp,1000,true);
   setTimeout(()=>{ const n=ON.g&&ON.g.names&&ON.g.names[ON.opp]; banner("RAKİP BULUNDU!",(n||"Rakip")+" ile karşılaşıyorsun",false); },150);
 }
+function subscribe(){
+  if(ON.unsub){ ON.unsub(); ON.unsub=null; }
+  if(!ON.ref||!ON.active) return;
+  ON.unsub=ON.ref.onSnapshot(s=>{ try{ onGame(s); }catch(e){ console.error(e); } },
+    e=>{ console.warn("dinleme hatası",e); ON.unsub=null; setTimeout(()=>{ if(ON.active) subscribe(); },2000); });
+}
 function hb(){ if(ON.ref&&ON.active) ON.ref.update({["hb."+ON.uid]:ON.FV.serverTimestamp()}).catch(()=>{}); }
-document.addEventListener("visibilitychange",()=>{ if(!document.hidden) hb(); });
+document.addEventListener("visibilitychange",()=>{
+  if(document.hidden||!ON.active) return;
+  hb();
+  // geri dönünce sunucudaki son durumu tekrar çek ve kaldığın yerden devam et
+  if(ON.ref) ON.ref.get().then(s=>{ try{ onGame(s); }catch(e){ console.error(e); } }).catch(()=>{});
+  if(ON.oppTurnAt) ON.oppTurnAt=Date.now();
+});
+const WAIT_SHOT=45000, WAIT_TURN=(TURN_SEC+35)*1000, WAIT_READY=(SETUP_SEC+40)*1000;
+function oppGone(){ if(ON.ref&&ON.g&&ON.g.status!=="over") ON.ref.update({status:"over",winner:ON.uid,why:"left"}).catch(()=>{}); }
 function checkOpp(){
-  const g=ON.g; if(!g||!ON.active||g.status==="over") return;
-  const h=g.hb||{}, mine=h[ON.uid], opp=h[ON.opp];
-  if(mine&&opp&&mine.toMillis&&opp.toMillis&&mine.toMillis()-opp.toMillis()>OPP_TIMEOUT)
-    ON.ref.update({status:"over",winner:ON.uid,why:"left"}).catch(()=>{});
+  const g=ON.g; if(!g||!ON.active||g.status==="over"||document.hidden) return;
+  const h=g.hb||{}, mine=h[ON.uid], opp=h[ON.opp], now=Date.now();
+  if(mine&&opp&&mine.toMillis&&opp.toMillis&&mine.toMillis()-opp.toMillis()>OPP_TIMEOUT) return oppGone();
+  // atışım cevapsız kaldıysa (rakip uygulamadan çıktı / ekranı kilitledi)
+  if(g.status==="battle"&&g.pending&&g.pending.by===ON.uid&&ON.shotAt){
+    const age=now-ON.shotAt;
+    if(age>WAIT_SHOT) return oppGone();
+    if(age>8000) msg(`📶 Rakip yanıt vermiyor (uygulamadan çıkmış olabilir)… ${Math.ceil((WAIT_SHOT-age)/1000)} sn sonra galip sayılacaksın`);
+  }
+  // rakibin sırası ama hiç ateş etmiyor
+  if(g.status==="battle"&&g.turn===ON.opp&&!g.pending&&ON.oppTurnAt&&!ON.anim){
+    const age=now-ON.oppTurnAt;
+    if(age>WAIT_TURN) return oppGone();
+    if(age>(TURN_SEC+6)*1000) msg(`📶 Rakip ateş etmiyor… ${Math.ceil((WAIT_TURN-age)/1000)} sn sonra galip sayılacaksın`);
+  }
+  // ben hazırım, rakip hâlâ yerleştirmiyor
+  if(g.status==="setup"&&state.phase==="ready"&&ON.setupAt){
+    const age=now-ON.setupAt;
+    if(age>WAIT_READY) return oppGone();
+    if(age>(SETUP_SEC+8)*1000) msg(`📶 Rakip hazırlanmıyor… ${Math.ceil((WAIT_READY-age)/1000)} sn`);
+  }
 }
 function leaveOnline(forfeit){
   if(ON.active&&forfeit&&ON.ref&&ON.g&&ON.g.status!=="over") ON.ref.update({status:"over",winner:ON.opp,why:"left"}).catch(()=>{});
@@ -819,6 +854,7 @@ function onGame(s){
     return;
   }
   if(state.phase==="ready"&&g.status==="battle") return beginOnlineBattle();
+  if(state.phase==="ready"&&g.status==="setup"&&!(g.ready&&g.ready[ON.uid])) sendReady();
   if(state.phase==="setup"||state.phase==="ready"){
     if(g.ready&&g.ready[ON.opp]&&state.phase==="setup") $("hint").textContent=`✅ Rakip hazır! ⏱️ ${Math.max(0,Math.ceil((ON.deadline-Date.now())/1000))} sn`;
     return;
@@ -831,7 +867,7 @@ function onGame(s){
 
 /* setup */
 function startSetupTimer(){
-  ON.deadline=Date.now()+SETUP_SEC*1000;
+  ON.deadline=Date.now()+SETUP_SEC*1000; ON.setupAt=Date.now();
   tset("setup",()=>{ const left=Math.ceil((ON.deadline-Date.now())/1000);
     if(state.phase!=="setup"){ tclr("setup"); return; }
     const oppReady=ON.g&&ON.g.ready&&ON.g.ready[ON.opp];
@@ -846,10 +882,18 @@ async function onlineReady(){
   Sound.click(); state.phase="ready";
   $("setupBar").style.display="none"; $("queue").style.display="none"; $("hint").textContent="";
   setTurn("setup","⏳ RAKİP BEKLENİYOR"); msg("Filon hazır! Rakibin yerleştirmesi bekleniyor...");
-  try{ await ON.db.runTransaction(async tx=>{ const d=await tx.get(ON.ref); const g=d.data(); if(!g||g.status!=="setup") return;
-    const upd={["ready."+ON.uid]:true};
-    if(g.ready&&g.ready[ON.opp]){ upd.status="battle"; upd.turn=Math.random()<.5?ON.uid:ON.opp; }
-    tx.update(ON.ref,upd); }); }catch(e){ console.warn(e); }
+  sendReady();
+}
+async function sendReady(){
+  if(ON.readyBusy) return; ON.readyBusy=true;
+  for(let k=0;k<6;k++){
+    try{ await ON.db.runTransaction(async tx=>{ const d=await tx.get(ON.ref); const g=d.data(); if(!g||g.status!=="setup") return;
+      const upd={["ready."+ON.uid]:true};
+      if(g.ready&&g.ready[ON.opp]){ upd.status="battle"; upd.turn=Math.random()<.5?ON.uid:ON.opp; }
+      tx.update(ON.ref,upd); }); break; }
+    catch(e){ console.warn(e); await sleep(800+k*700); }
+  }
+  ON.readyBusy=false;
 }
 async function beginOnlineBattle(){
   state.phase="battle"; state.busy=true; ON.anim++;
@@ -873,7 +917,7 @@ function syncTurn(g){
     msg(last&&last.by===ON.uid&&last.hit?"🔥 Bir atış daha!":"Düşman sularında bir kareye dokun ve ateş et!");
     startTurnTimer();
   } else {
-    tclr("turn"); state.busy=true; setView("player");
+    tclr("turn"); state.busy=true; setView("player"); ON.oppTurnAt=Date.now();
     setTurn("foe","⚠️ RAKİP NİŞAN ALIYOR"); msg("Rakip hedef seçiyor...");
   }
 }
@@ -894,11 +938,11 @@ async function onlineFire(r,c,auto){
   state.busy=true; tclr("turn"); ON.anim++;
   const n=(g.res||[]).length;
   state.enemy.shots[r][c]=3; render();
-  ON.my={r,c,n,landed:false,entry:null};
+  ON.my={r,c,n,landed:false,entry:null}; ON.shotAt=Date.now();
   ON.ref.update({pending:{by:ON.uid,r,c,n}}).catch(e=>{ console.warn(e); state.enemy.shots[r][c]=0; ON.my=null; ON.anim=Math.max(0,ON.anim-1); state.busy=false; render(); msg("Bağlantı sorunu, tekrar dene."); startTurnTimer(); });
   setTurn("you","💥 ATEŞ!");
   const [x1,y1]=cellCenter("enemy",r,c); Sound.shoot(.8); Sound.whistle(.5); vibrate(10);
-  await new Promise(res=>FX.shell(innerWidth/2,innerHeight+20,x1,y1,.5,res));
+  await shellP(innerWidth/2,innerHeight+20,x1,y1,.5);
   if(!ON.my) return;
   ON.my.landed=true; ON.anim--;
   if(ON.my.entry) applyMy();
@@ -936,27 +980,39 @@ function afterAnim(){ const g=ON.g; if(!g||ON.anim) return;
   ON.lastTurn=null; onGameRefresh(); }
 
 /* opponent's shot on me */
-async function resolveIncoming(p){
+function resolveIncoming(p){
+  const {r,c,n}=p;
+  // sonucu animasyonu beklemeden hesapla ve hemen gönder (sayfa arka plandaysa da çalışır)
+  let done=ON.done&&ON.done.n===n?ON.done:null, fresh=!done;
+  if(!done){
+    const res=state.player.shots[r][c]?{hit:state.player.shots[r][c]===2,sunk:null}:fire(state.player,r,c);
+    state.shotsE++; state.lastE=[r,c];
+    const lost=allSunk(state.player);
+    const entry={by:ON.opp,r,c,n,hit:res.hit,sunk:res.sunk?packShip(res.sunk):null};
+    const upd={pending:null,res:ON.FV.arrayUnion(entry),turn:res.hit?ON.opp:ON.uid};
+    if(lost){ upd.status="over"; upd.winner=ON.opp; upd.why="sunk"; upd["fleet."+ON.uid]=state.player.ships.map(packShip); }
+    done=ON.done={n,r,c,res,upd};
+  }
+  ON.ref.update(done.upd).catch(e=>{ console.warn(e); ON.resolving=-1; });   // hata olursa bir sonraki güncellemede tekrar dener
+  ON.oppTurnAt=Date.now();
+  if(fresh) playIncoming(r,c,done.res);
+}
+async function playIncoming(r,c,res){
   ON.anim++; tclr("turn");
+  if(document.hidden){ render(); ON.anim--; afterAnim(); return; }
   if(state.view!=="player"){ setView("player"); await sleep(550); }
   setTurn("foe","⚠️ RAKİP ATEŞ ETTİ");
-  const {r,c}=p, [x1,y1]=cellCenter("player",r,c);
+  const [x1,y1]=cellCenter("player",r,c);
   Sound.shoot(.45); Sound.whistle(.55,1.3);
-  await new Promise(res=>FX.shell(innerWidth/2,-30,x1,y1,.55,res));
-  const res=state.player.shots[r][c]?{hit:state.player.shots[r][c]===2,sunk:null}:fire(state.player,r,c);
-  state.shotsE++; state.lastE=[r,c]; render();
-  const lost=allSunk(state.player);
-  const entry={by:ON.opp,r,c,n:p.n,hit:res.hit,sunk:res.sunk?packShip(res.sunk):null};
-  const upd={pending:null,res:ON.FV.arrayUnion(entry),turn:res.hit?ON.opp:ON.uid};
-  if(lost){ upd.status="over"; upd.winner=ON.opp; upd.why="sunk"; upd["fleet."+ON.uid]=state.player.ships.map(packShip); }
-  ON.ref.update(upd).catch(e=>console.warn(e));
+  await shellP(innerWidth/2,-30,x1,y1,.55);
+  render();
   if(res.hit){
     Sound.boom(); FX.explosion(x1,y1,res.sunk?1.3:1); screenShake(true); flash(); vibrate(res.sunk?[100,50,200]:80);
     if(res.sunk){ sinkFx("player",res.sunk); Sound.sunk(); banner("BATTIN!",res.sunk.name.toUpperCase()+" KAYBEDİLDİ",true); }
     msg(res.sunk?`☠️ <b>${res.sunk.name}</b>'ın battı!`:`💢 Rakip <b>${coord(r,c)}</b>'den vurdu!`);
   } else { Sound.splash(); FX.splash(x1,y1); msg(`Rakip <b>${coord(r,c)}</b>'yi ıskaladı! 😮‍💨`); }
   await sleep(res.hit?(res.sunk?1400:850):1000);
-  ON.anim--; afterAnim();
+  ON.anim--; ON.oppTurnAt=Date.now(); afterAnim();
 }
 
 /* end */

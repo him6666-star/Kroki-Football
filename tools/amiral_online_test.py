@@ -11,7 +11,7 @@ async def main():
             pg = await ctx.new_page()
             pg.on("pageerror", lambda e, i=i: errs[i].append("PAGEERROR " + str(e)))
             pg.on("console", lambda m, i=i: m.type in ("error", "warning") and errs[i].append(m.type + " " + m.text))
-            await pg.goto(URL + "?t=" + str(time.time())); await pg.wait_for_timeout(1500)
+            await pg.goto(URL + "?lobby=test&t=" + str(time.time())); await pg.wait_for_timeout(1500)
             pages.append(pg)
         A, B = pages
         await A.click("#onlineBtn"); await A.wait_for_timeout(3000)
@@ -34,12 +34,17 @@ async def main():
         print("battle:", st)
         ships = [await pg.evaluate("state.player.ships.flatMap(s=>s.cells)") for pg in pages]
         misses_left = {0: 3, 1: 3}
+        frozen = False
         t0 = time.time(); shots = 0
         while time.time() - t0 < 600:
             ph = [await pg.evaluate("state.phase") for pg in pages]
             if "over" in ph:
                 await asyncio.sleep(4)
                 break
+            if not frozen and shots >= 6:
+                # B'nin sayfasi animasyon calistiramaz hale gelsin (arka plana atilmis gibi)
+                await B.evaluate("window.requestAnimationFrame=()=>0")
+                frozen = True; print("B animasyonlari donduruldu, shots", shots)
             for i, pg in enumerate(pages):
                 can = await pg.evaluate("ON.g&&ON.g.turn===ON.uid&&!ON.g.pending&&!state.busy&&state.view==='enemy'")
                 if not can: continue
@@ -65,8 +70,21 @@ async def main():
             if all(ok): break
             await asyncio.sleep(0.5)
         print("rematch:", ok)
-        await B.click("#homeBtn"); await B.wait_for_timeout(300); await B.click("#quitYes")
-        await A.wait_for_timeout(4000)
-        print("after B quit, A:", await A.evaluate("({phase:state.phase,title:resTitle.textContent,msg:document.getElementById('msg').textContent})"))
+        await A.click("#randomBtn"); await A.click("#startBtn"); await B.click("#randomBtn"); await B.click("#startBtn")
+        for _ in range(40):
+            st = [await pg.evaluate("state.phase") for pg in pages]
+            if st == ["battle", "battle"]: break
+            await asyncio.sleep(0.5)
+        print("rematch battle:", st)
+        await asyncio.sleep(2)
+        # B aniden kaybolur (sayfa kapandi / telefon kilitlendi)
+        await B.context.close()
+        t1 = time.time(); fired = False
+        while time.time() - t1 < 120:
+            if await A.evaluate("state.phase") == "over": break
+            if not fired and await A.evaluate("ON.g&&ON.g.turn===ON.uid&&!ON.g.pending&&!state.busy"):
+                await A.click('#enemy .cell[data-r="0"][data-c="0"]'); fired = True; print("A ates etti (cevap gelmeyecek)")
+            await asyncio.sleep(1)
+        print("B kayboldu, A:", round(time.time() - t1), "sn sonra", await A.evaluate("({phase:state.phase,title:resTitle.textContent,msg:document.getElementById('msg').textContent})"))
         await b.close()
 asyncio.run(main())
