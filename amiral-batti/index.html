@@ -835,7 +835,9 @@ function pollServer(why){
   }).catch(e=>{ ON.polling=false; L("sunucu sorgu hatası",e&&e.code); });
 }
 function checkOpp(){
-  const g=ON.g; if(!g||!ON.active||g.status==="over"||document.hidden) return;
+  const g=ON.g; if(!ON.active||document.hidden) return;
+  if(!g){ ON.pollTick=(ON.pollTick||0)+1; if(ON.pollTick%3===0) pollServer(); return; }
+  if(g.status==="over") return;
   // bekleme sırasında birkaç saniyede bir sunucuya doğrudan sor (canlı bağlantı takılsa bile oyun ilerlesin)
   const waiting=(g.status==="battle"&&(g.turn===ON.opp||(g.pending&&g.pending.by===ON.uid)||ON.my))||(g.status==="setup"&&state.phase==="ready");
   ON.pollTick=(ON.pollTick||0)+1;
