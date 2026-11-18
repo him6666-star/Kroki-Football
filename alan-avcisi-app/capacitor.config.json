@@ -1,0 +1,7 @@
+{
+  "appId": "com.fairridegames.alanavcisi",
+  "appName": "Alan Avcısı",
+  "webDir": "www",
+  "backgroundColor": "#0f1338",
+  "android": { "backgroundColor": "#0f1338" }
+}
