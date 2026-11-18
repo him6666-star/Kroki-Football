@@ -1,0 +1,9 @@
+{
+  "appId": "com.amiralbatti.game",
+  "appName": "Amiral Battı",
+  "webDir": "www",
+  "backgroundColor": "#04111f",
+  "android": {
+    "backgroundColor": "#04111f"
+  }
+}

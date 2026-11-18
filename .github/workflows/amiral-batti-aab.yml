@@ -1,0 +1,89 @@
+name: Amiral Batti AAB
+# Amiral Battı Android: test APK + imzali AAB. Oyun amiral-batti/ klasorunden (web surumu) alinir.
+# Play kapali teste yukleme: elle calistirirken "play" isaretlenirse ya da commit mesajinda [play] varsa.
+on:
+  push:
+    branches: [main]
+    paths: ['amiral-batti-android/**', '.github/workflows/amiral-batti-aab.yml']
+  workflow_dispatch:
+    inputs:
+      play:
+        description: "Play kapali teste (Alpha) yuklensin mi?"
+        type: boolean
+        default: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: amiral-batti-android
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Oyunu www klasorune koy (+ Android geri tusu)
+        run: |
+          rm -rf www && mkdir www
+          cp -r ../amiral-batti/. www/ && rm -f www/firebase.json
+          cp uygulama/uygulama.js www/
+          python3 - <<'PY'
+          p='www/index.html'; s=open(p,encoding='utf-8').read()
+          s=s.replace('</body>','<script src="uygulama.js"></script>\n</body>',1)
+          open(p,'w',encoding='utf-8').write(s)
+          PY
+          ls www
+      - name: Yukleme anahtarini hazirla
+        env:
+          KS_B64: ${{ secrets.UPLOAD_KEYSTORE_B64 }}
+        run: |
+          if [ -z "$KS_B64" ]; then echo "HATA: UPLOAD_KEYSTORE_B64 yok"; exit 1; fi
+          echo "$KS_B64" | tr -d ' \r\n' | base64 -d > "$RUNNER_TEMP/upload.jks"
+      - name: Android projesini olustur
+        env:
+          UPLOAD_KS: ${{ runner.temp }}/upload.jks
+          VERSION_CODE: ${{ github.run_number }}
+        run: |
+          npm install
+          npx cap add android
+          python3 patch_android.py
+          npx cap sync android
+      - name: Test APK + AAB derle
+        working-directory: amiral-batti-android/android
+        env:
+          UPLOAD_KS_PASS: ${{ secrets.UPLOAD_KS_PASS }}
+          UPLOAD_KEY_ALIAS: ${{ secrets.UPLOAD_KEY_ALIAS }}
+          UPLOAD_KEY_PASS: ${{ secrets.UPLOAD_KEY_PASS }}
+        run: |
+          ./gradlew assembleDebug bundleRelease --no-daemon
+          test -f app/build/outputs/bundle/release/app-release.aab
+          keytool -printcert -jarfile app/build/outputs/bundle/release/app-release.aab | grep -E "SHA1|SHA256" | head -2 || true
+      - name: AAB'yi indirilebilir yap
+        uses: actions/upload-artifact@v4
+        with:
+          name: amiral-batti-aab-1.0.${{ github.run_number }}
+          path: amiral-batti-android/android/app/build/outputs/bundle/release/app-release.aab
+      - name: Test APK'yi indirilebilir yap
+        uses: actions/upload-artifact@v4
+        with:
+          name: amiral-batti-apk-1.0.${{ github.run_number }}
+          path: amiral-batti-android/android/app/build/outputs/apk/debug/app-debug.apk
+      - name: Play'e yuklenecek mi
+        env:
+          MSG: ${{ github.event.head_commit.message }}
+        run: |
+          if [ "${{ github.event.inputs.play }}" = "true" ] || [[ "$MSG" == *"[play]"* ]]; then echo "DO_PLAY=1" >> "$GITHUB_ENV"; else echo "Play yuklemesi istenmedi"; fi
+      - name: Play kapali teste yukle
+        if: env.DO_PLAY == '1'
+        uses: r0adkll/upload-google-play@v1.1.3
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: com.amiralbatti.game
+          releaseFiles: amiral-batti-android/android/app/build/outputs/bundle/release/app-release.aab
+          track: alpha
+          status: completed
+          whatsNewDirectory: amiral-batti-android/distribution/whatsnew
