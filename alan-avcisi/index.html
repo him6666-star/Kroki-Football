@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Alan Avcısı</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body class="inmenu">
+<div id="app">
+  <div id="hud">
+    <div class="pill lvPill"><span class="pk" data-i18n="hud.level"></span><b id="lv">1</b></div>
+    <div class="bar"><div id="fill"></div><div class="goal"><i></i></div><span id="pct">0%</span></div>
+    <div class="pill heart"><svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-10-9.3C.4 8.4 2.3 4.5 6 4.1c2.1-.2 3.6.9 4.6 2.3 1-1.4 2.5-2.5 4.6-2.3 3.7.4 5.6 4.3 4 7.6C19.5 16.4 12 21 12 21z"/></svg><b id="lives">10</b></div>
+    <div class="pill scPill"><span class="pk" data-i18n="hud.score"></span><b id="sc">0</b></div>
+    <button class="rbtn" id="pauseBtn" aria-label="Pause"><svg viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1.5"/><rect x="14" y="5" width="4" height="14" rx="1.5"/></svg></button>
+  </div>
+  <div id="bossRow"><span id="bossName"></span><div class="bb"><div id="bossFill"></div></div><span id="bossHint"></span></div>
+  <div id="fx"></div>
+  <div id="stage"><canvas id="cv"></canvas></div>
+  <div id="hint" data-i18n="hint"></div>
+</div>
+
+<!-- ANA MENÜ -->
+<div class="screen" id="scrMenu">
+  <div class="menuWrap">
+    <div class="logoBox">
+      <div class="logo" data-i18n="game.title"></div>
+      <div class="sub" data-i18n="menu.subtitle"></div>
+    </div>
+    <div class="mbtns">
+      <button class="gbtn primary big" id="bPlay"><span class="ic"><svg viewBox="0 0 24 24"><path d="M8 4.5v15l12-7.5z"/></svg></span><span class="lbl"></span></button>
+      <button class="gbtn" id="bLevels"><span class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg></span><span class="lbl" data-i18n="menu.levels"></span></button>
+      <div class="row2">
+        <button class="gbtn" id="bSettings"><span class="ic"><svg viewBox="0 0 24 24"><path d="M19.4 13a7.6 7.6 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.4 7.4 0 0 0-1.7-1l-.4-2.6h-4l-.4 2.6a7.4 7.4 0 0 0-1.7 1l-2.5-1-2 3.5L4.6 11a7.6 7.6 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1a7.4 7.4 0 0 0 1.7 1l.4 2.6h4l.4-2.6a7.4 7.4 0 0 0 1.7-1l2.5 1 2-3.5zM12 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z"/></svg></span><span class="lbl" data-i18n="menu.settings"></span></button>
+        <button class="gbtn" id="bHelp"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 16h-2v-2h2zm2.1-7.7-.9.9c-.8.8-1.2 1.4-1.2 2.8h-2v-.5c0-1.1.4-2.1 1.2-2.8l1.2-1.3a1.9 1.9 0 0 0 .6-1.4 2 2 0 1 0-4 0H8a4 4 0 1 1 8 0c0 .9-.4 1.7-.9 2.3z"/></svg></span><span class="lbl" data-i18n="menu.help"></span></button>
+      </div>
+    </div>
+    <div class="mstat" id="mStat"></div>
+  </div>
+</div>
+
+<!-- BÖLÜMLER -->
+<div class="screen hidden" id="scrLevels">
+  <div class="card wide">
+    <div class="cardHead"><h2 data-i18n="levels.title"></h2><div class="legend" data-i18n="levels.legend"></div></div>
+    <div id="lvGrid"></div>
+    <p class="small" data-i18n="levels.endless"></p>
+    <button class="gbtn ghost" data-back><span class="ic"><svg viewBox="0 0 24 24"><path d="M15.5 4.5 8 12l7.5 7.5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="lbl" data-i18n="common.back"></span></button>
+  </div>
+</div>
+
+<!-- AYARLAR -->
+<div class="screen hidden" id="scrSettings">
+  <div class="card">
+    <div class="cardHead"><h2 data-i18n="settings.title"></h2></div>
+    <div class="row"><label data-i18n="settings.sfx"></label><input type="range" id="sSfx" min="0" max="100"></div>
+    <div class="row"><label data-i18n="settings.music"></label><button class="switch" id="sMusic"><i></i></button></div>
+    <div class="row"><label data-i18n="settings.musicVol"></label><input type="range" id="sMusVol" min="0" max="100"></div>
+    <div class="row"><label data-i18n="settings.diff"></label><div class="seg" id="sDiff"></div></div>
+    <div class="row"><label data-i18n="settings.lang"></label><div class="seg" id="sLang"></div></div>
+    <div class="row col">
+      <button class="linkbtn" id="sReset" data-i18n="settings.reset"></button>
+      <div id="resetBox" class="hidden"><p class="small" data-i18n="settings.resetQ"></p>
+        <div class="row2"><button class="gbtn danger sm" id="sResetYes"><span class="lbl" data-i18n="settings.yes"></span></button>
+        <button class="gbtn ghost sm" id="sResetNo"><span class="lbl" data-i18n="settings.no"></span></button></div></div>
+      <p class="small ok hidden" id="resetDone" data-i18n="settings.done"></p>
+    </div>
+    <button class="gbtn ghost" id="sBack"><span class="ic"><svg viewBox="0 0 24 24"><path d="M15.5 4.5 8 12l7.5 7.5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="lbl" data-i18n="common.back"></span></button>
+  </div>
+</div>
+
+<!-- NASIL OYNANIR -->
+<div class="screen hidden" id="scrHelp">
+  <div class="card tut">
+    <div class="cardHead"><h2 data-i18n="help.title"></h2></div>
+    <div id="helpBody" class="tutBox"></div>
+    <div class="tutNav"><button id="tPrev" class="gbtn ghost sm"><span class="lbl">‹</span></button><div id="tDots"></div><button id="tNext" class="gbtn primary sm"><span class="lbl"></span></button></div>
+    <button class="gbtn ghost sm tutSkip" data-back><span class="ic"><svg viewBox="0 0 24 24"><path d="M15.5 4.5 8 12l7.5 7.5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="lbl" data-i18n="common.back"></span></button>
+  </div>
+</div>
+
+<!-- MESAJ (giriş / bölüm sonu / duraklat / oyun bitti) -->
+<div class="screen hidden" id="scrMsg">
+  <div class="card msgCard">
+    <div class="bossCard" id="msgIcon"></div>
+    <h2 id="msgT"></h2>
+    <div id="msgP" class="msgp"></div>
+    <div id="msgBtns" class="btns"></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+<div class="joy" id="joyB"></div>
+<div class="joy" id="joyK"></div>
+
+<script src="js/i18n.js"></script>
+<script src="js/save.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/themes.js"></script>
+<script src="js/core.js"></script>
+<script src="js/bosses.js"></script>
+<script src="js/minions.js"></script><script src="js/attacks.js"></script><script src="js/bosses2.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/tutorial.js"></script>
+</body>
+</html>

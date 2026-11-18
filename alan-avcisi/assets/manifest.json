@@ -1,0 +1,228 @@
+{
+ "bg": [
+  {
+   "level": 1,
+   "file": "bg/01.jpg"
+  },
+  {
+   "level": 2,
+   "file": "bg/02.jpg"
+  },
+  {
+   "level": 3,
+   "file": "bg/03.jpg"
+  },
+  {
+   "level": 4,
+   "file": "bg/04.jpg"
+  },
+  {
+   "level": 5,
+   "file": "bg/05.jpg"
+  },
+  {
+   "level": 6,
+   "file": "bg/06.jpg"
+  },
+  {
+   "level": 7,
+   "file": "bg/07.jpg"
+  },
+  {
+   "level": 8,
+   "file": "bg/08.jpg"
+  },
+  {
+   "level": 9,
+   "file": "bg/09.jpg"
+  },
+  {
+   "level": 10,
+   "file": "bg/10.jpg"
+  },
+  {
+   "level": 11,
+   "file": "bg/11.jpg"
+  },
+  {
+   "level": 12,
+   "file": "bg/12.jpg"
+  },
+  {
+   "level": 13,
+   "file": "bg/13.jpg"
+  },
+  {
+   "level": 14,
+   "file": "bg/14.jpg"
+  },
+  {
+   "level": 15,
+   "file": "bg/15.jpg"
+  },
+  {
+   "level": 16,
+   "file": "bg/16.jpg"
+  },
+  {
+   "level": 17,
+   "file": "bg/17.jpg"
+  },
+  {
+   "level": 18,
+   "file": "bg/18.jpg"
+  }
+ ],
+ "boss": [
+  {
+   "id": "ayna",
+   "file": "boss/ayna.png"
+  },
+  {
+   "id": "balcik",
+   "file": "boss/balcik.png"
+  },
+  {
+   "id": "bomba",
+   "file": "boss/bomba.png"
+  },
+  {
+   "id": "bukalemun",
+   "file": "boss/bukalemun.png"
+  },
+  {
+   "id": "dev",
+   "file": "boss/dev.png"
+  },
+  {
+   "id": "ejder",
+   "file": "boss/ejder.png"
+  },
+  {
+   "id": "golem",
+   "file": "boss/golem.png"
+  },
+  {
+   "id": "goz",
+   "file": "boss/goz.png"
+  },
+  {
+   "id": "hayalet",
+   "file": "boss/hayalet.png"
+  },
+  {
+   "id": "hortum",
+   "file": "boss/hortum.png"
+  },
+  {
+   "id": "ikizA",
+   "file": "boss/ikizA.png"
+  },
+  {
+   "id": "ikizB",
+   "file": "boss/ikizB.png"
+  },
+  {
+   "id": "isin",
+   "file": "boss/isin.png"
+  },
+  {
+   "id": "kartopu",
+   "file": "boss/kartopu.png"
+  },
+  {
+   "id": "kovan",
+   "file": "boss/kovan.png"
+  },
+  {
+   "id": "orumcek",
+   "file": "boss/orumcek.png"
+  },
+  {
+   "id": "yilan",
+   "file": "boss/yilan.png"
+  },
+  {
+   "id": "yildiz",
+   "file": "boss/yildiz.png"
+  },
+  {
+   "id": "zirh",
+   "file": "boss/zirh.png"
+  },
+  {
+   "id": "m_ayna",
+   "file": "boss/m_ayna.png"
+  },
+  {
+   "id": "m_bomba",
+   "file": "boss/m_bomba.png"
+  },
+  {
+   "id": "m_bukalemun",
+   "file": "boss/m_bukalemun.png"
+  },
+  {
+   "id": "m_dev",
+   "file": "boss/m_dev.png"
+  },
+  {
+   "id": "m_ejder",
+   "file": "boss/m_ejder.png"
+  },
+  {
+   "id": "m_golem",
+   "file": "boss/m_golem.png"
+  },
+  {
+   "id": "m_goz",
+   "file": "boss/m_goz.png"
+  },
+  {
+   "id": "m_hayalet",
+   "file": "boss/m_hayalet.png"
+  },
+  {
+   "id": "m_hortum",
+   "file": "boss/m_hortum.png"
+  },
+  {
+   "id": "m_ikiz",
+   "file": "boss/m_ikiz.png"
+  },
+  {
+   "id": "m_isin",
+   "file": "boss/m_isin.png"
+  },
+  {
+   "id": "m_kartopu",
+   "file": "boss/m_kartopu.png"
+  },
+  {
+   "id": "m_orumcek",
+   "file": "boss/m_orumcek.png"
+  },
+  {
+   "id": "m_yilan",
+   "file": "boss/m_yilan.png"
+  },
+  {
+   "id": "m_yildiz",
+   "file": "boss/m_yildiz.png"
+  },
+  {
+   "id": "m_zirh",
+   "file": "boss/m_zirh.png"
+  }
+ ],
+ "ui": [
+  {
+   "id": "ship",
+   "file": "ui/ship.png"
+  },
+  {
+   "id": "menu",
+   "file": "ui/menu.jpg"
+  }
+ ]
+}
