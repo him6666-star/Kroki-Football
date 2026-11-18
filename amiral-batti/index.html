@@ -149,10 +149,17 @@ button{font-family:inherit;cursor:pointer;border:0;color:inherit}
 @keyframes dropIn{from{opacity:0;translate:0 -14px}to{opacity:1;translate:0 0}}
 
 .setup-bar{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;max-width:560px}
-.queue{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:10px;max-width:560px}
-.queue .q{font-size:12px;font-weight:800;padding:6px 10px;border-radius:10px;background:rgba(4,20,38,.75);border:2px solid transparent;opacity:.9}
+.queue{display:flex;gap:4px;flex-wrap:wrap;justify-content:center;margin-bottom:10px;max-width:560px;touch-action:none}
+.queue .q{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:min(9.5px, 2.5vw);font-weight:800;padding:5px 4px 4px;border-radius:11px;
+  background:rgba(4,20,38,.8);border:2px solid rgba(255,255,255,.08);cursor:grab;transition:transform .12s,opacity .2s}
+.queue .q img{height:15px;width:calc(var(--n) * min(15px, 3.4vw));object-fit:fill;pointer-events:none;filter:drop-shadow(0 2px 2px rgba(0,0,0,.6))}
+.queue .q span{pointer-events:none;white-space:nowrap}
+.queue .q:active{transform:scale(.95)}
 .queue .q.cur{border-color:var(--gold);color:var(--gold);box-shadow:0 0 12px rgba(255,201,74,.45)}
-.queue .q.done{opacity:.3;text-decoration:line-through}
+.queue .q.done{opacity:.35;cursor:default}
+#trayGhost{position:fixed;z-index:25;pointer-events:none;opacity:.85;transform:scale(1.08);transition:transform .1s}
+#trayGhost img{width:100%;height:100%;filter:drop-shadow(0 8px 10px rgba(0,0,0,.6))}
+#trayGhost.over{transform:scale(1);opacity:.6}
 @keyframes pulse{50%{box-shadow:0 0 14px rgba(255,201,74,.5)}}
 .hint{font-size:12px;opacity:.6;margin-top:10px;text-align:center}
 
@@ -544,7 +551,7 @@ const coord=(r,c)=>LETTERS[r]+(c+1);
 
 function newGame(online){
   online=!!online;
-  state={online,phase:"setup",horizontal:true,placeIdx:0,player:newBoard(),enemy:newBoard(),busy:false,view:"player",
+  state={online,phase:"setup",horizontal:true,placeIdx:0,sel:0,player:newBoard(),enemy:newBoard(),busy:false,view:"player",
          ai:{targets:[]},shotsP:0,hitsP:0,shotsE:0,lastE:null,lastP:null,reveal:false,newShip:-1};
   if(!online) randomPlace(state.enemy);
   $("startBtn").textContent=online?"✔ HAZIRIM":"⚓ SAVAŞ!";
@@ -615,16 +622,19 @@ function renderBars(){
     $(id).innerHTML=FLEET.map(f=>{ const s=b.ships.find(x=>x.name===f.name); const dead=s&&s.hits===s.size;
       return `<span class="bar ${dead?"dead":""}" style="width:${f.size*7}px" title="${f.name}"></span>`; }).join("");
   }
-  $("queue").innerHTML=FLEET.map((f,i)=>`<span class="q ${i<state.placeIdx?"done":""} ${i===state.placeIdx?"cur":""}">${f.name} · ${f.size}</span>`).join("");
+  if(state.phase==="setup"&&!TRAY) { const cur=curShip();
+    $("queue").innerHTML=FLEET.map((f,i)=>{ const done=isPlaced(i);
+      return `<div class="q ${done?"done":""} ${i===cur&&!done?"cur":""}" data-fi="${i}">
+        <img src="${SHIP_IMG[f.name]||"ship.png"}" alt="" style="--n:${f.size}" draggable="false"><span>${done?"✓ ":""}${f.name}</span></div>`; }).join(""); }
 }
 function setTurn(kind,text){ const t=$("turn"); t.className="turn "+kind; t.textContent=text; }
 function msg(html){ $("msg").innerHTML=html; }
 
 /* ---------- setup ---------- */
 function clearPreview(){ $("player").querySelectorAll(".preview-ok,.preview-bad").forEach(e=>e.classList.remove("preview-ok","preview-bad")); }
-function preview(r,c){ clearPreview(); if(state.phase!=="setup"||state.placeIdx>=FLEET.length) return;
-  const s=FLEET[state.placeIdx]; let pos=null;
-  for(const h of [true,false]){ for(let k=0;k<s.size&&!pos;k++){ const rr=h?r:r-k, cc=h?c-k:c; if(rr>=0&&cc>=0&&canPlace(state.player,rr,cc,s.size,h)) pos=[rr,cc,h]; } if(pos) break; }
+function preview(r,c,fi,center){ clearPreview(); if(state.phase!=="setup") return;
+  if(fi==null) fi=curShip(); if(fi<0) return;
+  const s=FLEET[fi], pos=findPos(s.size,r,c,center);
   if(!pos){ cellEl("player",r,c).classList.add("preview-bad"); return; }
   shipCellsAt(pos[0],pos[1],s.size,pos[2]).forEach(([rr,cc])=>cellEl("player",rr,cc).classList.add("preview-ok")); }
 /* --- yerleştirilmiş gemiyi dokununca döndür, sürükleyince taşı --- */
@@ -684,31 +694,69 @@ function rotatePlaced(i,[pr,pc]){
   const p=$("playerPanel"); p.classList.remove("shake"); void p.offsetWidth; p.classList.add("shake");
   msg(`<span style="color:#ff8f75">Burada dönemiyor,</span> önce boş bir yere sürükle.`);
 }
+/* --- gemi tepsisi: resme dokun = seç, resmi tahtaya sürükle = bırakınca konsun --- */
+let TRAY=null;
+function trayGhost(fi){ const g=document.createElement("div"); g.id="trayGhost"; const s=FLEET[fi], cs=cellPx();
+  g.style.width=(s.size*cs+(s.size-1)*2)+"px"; g.style.height=cs+"px"; g.innerHTML=`<img src="${SHIP_IMG[s.name]||"ship.png"}" alt="">`; document.body.appendChild(g); return g; }
+function trayDown(e){
+  if(state.phase!=="setup"||TRAY) return;
+  const q=e.target.closest(".q"); if(!q) return; const fi=+q.dataset.fi;
+  TRAY={fi,pid:e.pointerId,x:e.clientX,y:e.clientY,moved:false,ghost:null,cell:null};
+  try{ $("queue").setPointerCapture(e.pointerId); }catch(_){}
+  e.preventDefault();
+}
+function trayMove(e){
+  if(!TRAY||e.pointerId!==TRAY.pid) return;
+  if(!TRAY.moved){ if(Math.hypot(e.clientX-TRAY.x,e.clientY-TRAY.y)<8) return;
+    if(isPlaced(TRAY.fi)){ return; }
+    TRAY.moved=true; TRAY.ghost=trayGhost(TRAY.fi); Sound.click(); vibrate(8); }
+  const g=TRAY.ghost; g.style.left=(e.clientX-g.offsetWidth/2)+"px"; g.style.top=(e.clientY-g.offsetHeight/2)+"px";
+  const p=cellUnder(e.clientX,e.clientY);
+  if(p&&state.player.grid[p[0]][p[1]]===null){ TRAY.cell=p; preview(p[0],p[1],TRAY.fi,true); g.classList.add("over"); }
+  else { TRAY.cell=null; clearPreview(); g.classList.remove("over"); }
+}
+function trayUp(e){
+  if(!TRAY||e.pointerId!==TRAY.pid) return;
+  const t=TRAY; TRAY=null; if(t.ghost) t.ghost.remove(); clearPreview();
+  if(!t.moved){   // dokunma: seç
+    if(isPlaced(t.fi)){ Sound.error(); msg(`<b>${FLEET[t.fi].name}</b> zaten tahtada. Taşımak için tahtadaki gemiyi sürükle.`); return; }
+    state.sel=t.fi; Sound.click(); renderBars(); updateSetupMsg(); return; }
+  if(t.cell){ state.sel=t.fi; placeShipAt(t.fi,t.cell[0],t.cell[1],true); }
+  else { renderBars(); msg("Gemiyi tahtadaki boş bir kareye bırak."); }
+}
+["pointerdown","pointermove","pointerup","pointercancel"].forEach((ev,k)=>$("queue").addEventListener(ev,[trayDown,trayMove,trayUp,trayUp][k]));
+const isPlaced=fi=>state.player.ships.some(s=>s.name===FLEET[fi].name);
+function curShip(){ if(state.sel!=null&&state.sel>=0&&!isPlaced(state.sel)) return state.sel; const i=FLEET.findIndex((_,k)=>!isPlaced(k)); state.sel=i; return i; }
+function syncPlaced(){ state.placeIdx=state.player.ships.length; curShip(); }
+// dokunulan/bırakılan kareye göre geminin konacağı yeri bul: önce yatay, sığmazsa dikey; center=true ise gemi parmağın ortasında
+function findPos(size,r,c,center){
+  const ks=center?[Math.floor(size/2),...Array.from({length:size},(_,k)=>k).filter(k=>k!==Math.floor(size/2))]:Array.from({length:size},(_,k)=>k);
+  for(const h of [true,false]) for(const k of ks){ const rr=h?r:r-k, cc=h?c-k:c; if(rr>=0&&cc>=0&&canPlace(state.player,rr,cc,size,h)) return [rr,cc,h]; }
+  return null;
+}
+function placeShipAt(fi,r,c,center){
+  const s=FLEET[fi], pos=findPos(s.size,r,c,center);
+  if(!pos){ Sound.error(); vibrate(40); const p=$("playerPanel"); p.classList.remove("shake"); void p.offsetWidth; p.classList.add("shake");
+    msg(`<span style="color:#ff8f75">Oraya sığmıyor!</span> Başka bir boş kareye dokun.`); return false; }
+  place(state.player,pos[0],pos[1],s.size,pos[2],s.name); state.newShip=state.player.ships.length-1; state.tipShip=state.newShip;
+  syncPlaced(); Sound.place(); vibrate(15);
+  const [x,y]=cellCenter("player",pos[0],pos[1]); FX.splash(x,y);
+  afterPlacement(); return true;
+}
 function onPlayerBoard(r,c){
-  if(state.phase!=="setup"||state.placeIdx>=FLEET.length) return;
-  if(state.player.grid[r][c]!==null) return;   // gemiye dokunma: döndür/taşı (yukarıda)
-  const s=FLEET[state.placeIdx];
-  // önce yatay, sığmazsa dikey; kenardaysa dokunulan kareyi içerecek şekilde kaydır
-  let hor=true, placed=false;
-  for(const h of [true,false]){ for(let k=0;k<s.size&&!placed;k++){ const rr=h?r:r-k, cc=h?c-k:c;
-      if(rr>=0&&cc>=0&&canPlace(state.player,rr,cc,s.size,h)){ r=rr;c=cc;hor=h;placed=true; } } if(placed) break; }
-  {
-    if(!placed){ Sound.error(); vibrate(40); const p=$("playerPanel"); p.classList.remove("shake"); void p.offsetWidth; p.classList.add("shake");
-      msg(`<span style="color:#ff8f75">Oraya sığmıyor!</span> Başka bir boş kareye dokun.`); return; }
-  }
-  place(state.player,r,c,s.size,hor,s.name); state.newShip=state.player.ships.length-1; state.tipShip=state.newShip; state.placeIdx++;
-  Sound.place(); vibrate(15);
-  const [x,y]=cellCenter("player",r,c); FX.splash(x,y);
-  afterPlacement();
+  if(state.phase!=="setup") return;
+  if(state.player.grid[r][c]!==null) return;   // gemiye dokunma: döndür/taşı
+  const fi=curShip(); if(fi<0) return;
+  placeShipAt(fi,r,c,false);
 }
 function updateSetupMsg(){
   if(state.placeIdx>=FLEET.length) msg("Filo hazır! <b style='color:#ffc94a'>⚓ SAVAŞ!</b> düğmesine bas.");
-  else { const s=FLEET[state.placeIdx]; msg(`Boş bir kareye dokun: <b>${s.name}</b> (${s.size} kare)`); }
+  else { const s=FLEET[curShip()]; msg(`<b>${s.name}</b> seçili: tahtada boş bir kareye dokun ya da resmini tahtaya sürükle.`); }
 }
 function afterPlacement(){
-  if(state.placeIdx>0&&state.placeIdx<FLEET.length&&!store.get("rotTip",0)) setTimeout(()=>{ if(state.phase==="setup") msg(`İstersen az önce koyduğun gemiye dokunup <b>döndür</b>. Sıradaki: <b>${FLEET[state.placeIdx].name}</b> (${FLEET[state.placeIdx].size} kare)`); },0); clearPreview(); $("player").classList.toggle("setup",state.phase==="setup"); render(); $("startBtn").disabled=state.placeIdx<FLEET.length; updateSetupMsg(); }
-$("randomBtn").onclick=()=>{ Sound.place(); randomPlace(state.player); state.placeIdx=FLEET.length; afterPlacement(); };
-$("clearBtn").onclick=()=>{ Sound.click(); state.player=newBoard(); state.placeIdx=0; afterPlacement(); };
+  if(state.placeIdx>0&&state.placeIdx<FLEET.length&&!store.get("rotTip",0)) setTimeout(()=>{ if(state.phase==="setup") msg(`İstersen az önce koyduğun gemiye dokunup <b>döndür</b>. Sıradaki: <b>${FLEET[curShip()].name}</b>`); },0); clearPreview(); $("player").classList.toggle("setup",state.phase==="setup"); render(); $("startBtn").disabled=state.placeIdx<FLEET.length; updateSetupMsg(); }
+$("randomBtn").onclick=()=>{ Sound.place(); randomPlace(state.player); syncPlaced(); afterPlacement(); };
+$("clearBtn").onclick=()=>{ Sound.click(); state.player=newBoard(); state.sel=0; syncPlaced(); afterPlacement(); };
 $("startBtn").onclick=async()=>{
   if(state.online) return onlineReady();
   Sound.click(); Sound.alarm();
@@ -1041,7 +1089,7 @@ function startSetupTimer(){
 async function onlineReady(){
   if(state.phase!=="setup") return;
   tclr("setup");
-  if(state.placeIdx<FLEET.length){ randomPlace(state.player); state.placeIdx=FLEET.length; afterPlacement(); }
+  if(state.placeIdx<FLEET.length){ randomPlace(state.player); syncPlaced(); afterPlacement(); }
   Sound.click(); state.phase="ready"; $("player").classList.remove("setup"); $("setupHelp").style.display="none";
   $("setupBar").style.display="none"; $("queue").style.display="none"; $("hint").textContent="";
   setTurn("setup","⏳ RAKİP BEKLENİYOR"); msg("Filon hazır! Rakibin yerleştirmesi bekleniyor...");
