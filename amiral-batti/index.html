@@ -112,18 +112,38 @@ button{font-family:inherit;cursor:pointer;border:0;color:inherit}
 .cell.preview-ok{background:rgba(93,255,143,.45)!important}
 .cell.preview-bad{background:rgba(255,90,54,.5)!important}
 .cell.last{box-shadow:inset 0 0 0 2px #fff}
-.cell.sunk{background:rgba(140,25,10,.35)}
+.cell.sunk{background:radial-gradient(circle at 50% 55%,rgba(10,8,6,.55),rgba(60,20,10,.35) 60%,rgba(140,25,10,.25))}
 .mark{position:absolute;pointer-events:none;z-index:3}
 .cell.miss .mark{inset:10%;background:url(splash.png) center/contain no-repeat;opacity:.75;animation:pop .35s}
-.cell.hit .mark{inset:-6%;background:url(boom.png) center/contain no-repeat;animation:burn .9s ease-in-out infinite alternate}
+.cell.hit .mark{inset:-6%;background:url(boom.png) center/contain no-repeat;animation:burn .9s ease-in-out infinite alternate;will-change:transform}
 .cell.sunk .mark{inset:12%;opacity:.55;filter:grayscale(.6) brightness(.7);animation:none}
-@keyframes burn{from{transform:scale(.82) rotate(-6deg);filter:brightness(1)}to{transform:scale(.95) rotate(6deg);filter:brightness(1.25)}}
+@keyframes burn{from{transform:scale(.82) rotate(-6deg)}to{transform:scale(.95) rotate(6deg)}}
 @keyframes pop{from{transform:scale(0)}70%{transform:scale(1.2)}to{transform:scale(1)}}
 .shipimg{position:relative;z-index:2;pointer-events:none}
 .shipimg img{position:absolute;left:0;top:0;height:var(--cell);width:calc(var(--len) * var(--cell) + (var(--len) - 1) * 2px);
   filter:drop-shadow(0 4px 3px rgba(0,0,0,.6))}
 .shipimg.v img{transform-origin:0 0;transform:rotate(90deg) translateY(-100%)}
-.shipimg.sunk img{filter:brightness(.35) sepia(.7) hue-rotate(-25deg) drop-shadow(0 2px 2px rgba(0,0,0,.6))}
+.shipimg.sunk img{filter:brightness(.35) sepia(.7) hue-rotate(-25deg) drop-shadow(0 2px 2px rgba(0,0,0,.6));opacity:.9}
+.shipimg.sinking img{animation:sinkShip 1.8s ease-in forwards}
+@keyframes sinkShip{0%{filter:brightness(1) drop-shadow(0 0 10px rgba(255,120,40,.9));opacity:1;rotate:0deg}
+  25%{filter:brightness(1.3) sepia(.3) drop-shadow(0 0 14px rgba(255,90,20,.9));rotate:-2.5deg}
+  60%{rotate:2deg;opacity:.95}100%{filter:brightness(.35) sepia(.7) hue-rotate(-25deg) drop-shadow(0 2px 2px rgba(0,0,0,.6));opacity:.9;rotate:0deg}}
+.shipimg.ghost img{opacity:.8;filter:drop-shadow(0 0 8px rgba(93,255,143,.9))}
+.shipimg.ghost.bad img{opacity:.6;filter:drop-shadow(0 0 8px rgba(255,60,40,.95)) saturate(.4)}
+.shipimg.sel img{filter:drop-shadow(0 0 6px rgba(255,201,74,.95)) drop-shadow(0 4px 3px rgba(0,0,0,.6))}
+#player.setup{touch-action:none}
+.rtip{position:absolute;z-index:4;pointer-events:none;white-space:nowrap;font-weight:900;font-size:12px;color:#3a2700;
+  background:linear-gradient(180deg,#ffe07a,#ffb51f);border-radius:999px;padding:4px 9px;box-shadow:0 3px 8px rgba(0,0,0,.5);
+  transform:translate(-50%,-50%);animation:tipPulse 1.1s ease-in-out infinite}
+.shipimg.h .rtip{left:calc((var(--len) * var(--cell) + (var(--len) - 1) * 2px) / 2);top:calc(var(--cell) / 2)}
+.shipimg.v .rtip{left:calc(var(--cell) / 2);top:calc((var(--len) * var(--cell) + (var(--len) - 1) * 2px) / 2)}
+@keyframes tipPulse{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.15)}}
+.howto-pill{font-size:13px;font-weight:600;background:rgba(4,20,38,.75);border:1px solid rgba(255,201,74,.35);border-radius:999px;padding:7px 14px;margin:-2px 0 10px;text-align:center}
+.howto-pill b{color:var(--gold)}
+#player.setup .cell{cursor:pointer}
+#stage.punch{animation:punch .32s ease-out}
+@keyframes punch{0%{transform:scale(1)}30%{transform:scale(1.025)}100%{transform:scale(1)}}
+
 .shipimg.reveal img{opacity:.55}
 .shipimg.drop img{animation:dropIn .3s ease-out}
 @keyframes dropIn{from{opacity:0;translate:0 -14px}to{opacity:1;translate:0 0}}
@@ -131,7 +151,7 @@ button{font-family:inherit;cursor:pointer;border:0;color:inherit}
 .setup-bar{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;max-width:560px}
 .queue{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:10px;max-width:560px}
 .queue .q{font-size:12px;font-weight:800;padding:6px 10px;border-radius:10px;background:rgba(4,20,38,.75);border:2px solid transparent;opacity:.9}
-.queue .q.cur{border-color:var(--gold);color:var(--gold);animation:pulse 1s infinite}
+.queue .q.cur{border-color:var(--gold);color:var(--gold);box-shadow:0 0 12px rgba(255,201,74,.45)}
 .queue .q.done{opacity:.3;text-decoration:line-through}
 @keyframes pulse{50%{box-shadow:0 0 14px rgba(255,201,74,.5)}}
 .hint{font-size:12px;opacity:.6;margin-top:10px;text-align:center}
@@ -231,12 +251,12 @@ button{font-family:inherit;cursor:pointer;border:0;color:inherit}
     </div>
     <div class="queue" id="queue"></div>
     <div class="msg" id="msg"></div>
+    <div class="howto-pill" id="setupHelp">👆 Gemiye dokun: <b>döner</b> &nbsp;·&nbsp; ✋ Basılı tutup sürükle: <b>taşınır</b></div>
     <div id="stage" class="solo">
       <div class="panel" id="playerPanel"><div class="ptag">🛡️ FİLON</div><div class="board" id="player"></div></div>
       <div class="panel hidden" id="enemyPanel"><div class="ptag">🎯 DÜŞMAN</div><div class="board" id="enemy"></div></div>
     </div>
     <div class="setup-bar" id="setupBar">
-      <button class="btn sm" id="rotateBtn">↻ Yatay</button>
       <button class="btn sm" id="randomBtn">🎲 Rastgele</button>
       <button class="btn sm red" id="clearBtn">✕ Temizle</button>
       <button class="btn gold" id="startBtn" disabled>⚓ SAVAŞ!</button>
@@ -384,9 +404,12 @@ const vibrate=p=>{try{navigator.vibrate&&navigator.vibrate(p);}catch(e){}};
    FX ENGINE (canvas particles)
 ===================================================================== */
 const IMG={}; ["boom","splash"].forEach(k=>{IMG[k]=new Image(); IMG[k].src=k+".png";});
+const SPR={};
+function sprite(key,stops){ if(SPR[key]) return SPR[key]; const cv=document.createElement("canvas"); cv.width=cv.height=64; const x=cv.getContext("2d");
+  const g=x.createRadialGradient(32,32,0,32,32,32); stops.forEach(([o,col])=>g.addColorStop(o,col)); x.fillStyle=g; x.fillRect(0,0,64,64); return SPR[key]=cv; }
 const FX={
-  cv:document.getElementById("fx"), parts:[], running:false,
-  resize(){ const d=Math.min(devicePixelRatio||1,2); this.dpr=d; this.cv.width=innerWidth*d; this.cv.height=innerHeight*d;
+  cv:document.getElementById("fx"), parts:[], spawn:[], running:false,
+  resize(){ const d=Math.min(devicePixelRatio||1,1.5); this.dpr=d; this.cv.width=innerWidth*d; this.cv.height=innerHeight*d;
             this.cv.style.width=innerWidth+"px"; this.cv.style.height=innerHeight+"px"; this.ctx=this.cv.getContext("2d"); },
   add(p){ p.t=0; this.parts.push(p); if(!this.running){ this.running=true; this.last=performance.now(); requestAnimationFrame(this.loop); } },
   loop:(now)=>{ FX.step(now); },
@@ -399,6 +422,7 @@ const FX={
         const e=Math.min(k,1), x=p.x0+(p.x1-p.x0)*e, y=p.y0+(p.y1-p.y0)*e - Math.sin(e*Math.PI)*p.arc, s=p.s0+(p.s1-p.s0)*e + Math.sin(e*Math.PI)*6;
         // trail
         p.trail.push([x,y]); if(p.trail.length>14) p.trail.shift();
+        if(Math.random()<.6) this.spawn.push({type:"smoke",x,y,vx:(Math.random()-.5)*20,vy:(Math.random()-.5)*20,drag:2,size:2+Math.random()*2,col:"200,200,210",life:.45});
         for(let i=0;i<p.trail.length;i++){ const [tx,ty]=p.trail[i], a=i/p.trail.length;
           c.fillStyle=`rgba(255,${150+a*80|0},60,${a*.5})`; c.beginPath(); c.arc(tx,ty,s*.55*a,0,7); c.fill(); }
         // target shadow
@@ -413,6 +437,11 @@ const FX={
         c.save(); c.globalAlpha=a*(p.alpha||1); c.translate(p.x,p.y); c.rotate(p.rot+e*p.spin);
         const im=IMG[p.img]; if(im.complete) c.drawImage(im,-sc/2,-sc/2,sc,sc); c.restore(); continue;
       }
+      if(p.type==="glow"){
+        const r=p.r0+(p.r1-p.r0)*(1-Math.pow(1-Math.min(k,1),2)), a=Math.max(0,1-k);
+        const im=sprite("g"+p.col,[[0,`rgba(${p.col},1)`],[.4,`rgba(${p.col},.45)`],[1,`rgba(${p.col},0)`]]);
+        c.globalCompositeOperation="lighter"; c.globalAlpha=a*p.a; c.drawImage(im,p.x-r,p.y-r,r*2,r*2); c.globalAlpha=1; c.globalCompositeOperation="source-over"; continue;
+      }
       if(p.type==="ring"){
         const r=p.r0+(p.r1-p.r0)*(1-Math.pow(1-k,2)); c.strokeStyle=p.color.replace("A",(1-k)*p.a); c.lineWidth=p.w*(1-k)+.5;
         c.beginPath(); c.ellipse(p.x,p.y,r,r*(p.flat||1),0,0,7); c.stroke(); continue;
@@ -420,8 +449,16 @@ const FX={
       p.vx*=1-(p.drag||0)*dt; p.vy*=1-(p.drag||0)*dt; p.vy+=(p.g||0)*dt; p.x+=p.vx*dt; p.y+=p.vy*dt;
       const a=Math.max(0,1-k);
       if(p.type==="spark"){
+        c.globalCompositeOperation="lighter";
         c.strokeStyle=`hsla(${p.h},100%,${60+a*30}%,${a})`; c.lineWidth=p.size*a+.5; c.lineCap="round";
-        c.beginPath(); c.moveTo(p.x,p.y); c.lineTo(p.x-p.vx*.04,p.y-p.vy*.04); c.stroke();
+        c.beginPath(); c.moveTo(p.x,p.y); c.lineTo(p.x-p.vx*.05,p.y-p.vy*.05); c.stroke(); c.globalCompositeOperation="source-over";
+      } else if(p.type==="flame"){
+        const r=Math.max(.5,p.size*(1-k*.7)), im=sprite("flame",[[0,"rgba(255,240,180,.9)"],[.45,"rgba(255,140,30,.6)"],[1,"rgba(255,60,0,0)"]]);
+        c.globalCompositeOperation="lighter"; c.globalAlpha=a; c.drawImage(im,p.x-r,p.y-r,r*2,r*2); c.globalAlpha=1; c.globalCompositeOperation="source-over";
+      } else if(p.type==="bubble"){
+        p.x+=Math.sin(p.t*9+p.ph)*.4;
+        c.strokeStyle=`rgba(210,240,255,${a*.85})`; c.lineWidth=1.2; c.beginPath(); c.arc(p.x,p.y,p.size,0,7); c.stroke();
+        c.fillStyle=`rgba(255,255,255,${a*.5})`; c.beginPath(); c.arc(p.x-p.size*.35,p.y-p.size*.35,p.size*.3,0,7); c.fill();
       } else if(p.type==="smoke"){
         const r=p.size*(1+k*1.6); c.fillStyle=`rgba(${p.col},${a*.45})`; c.beginPath(); c.arc(p.x,p.y,r,0,7); c.fill();
       } else if(p.type==="drop"){
@@ -430,12 +467,17 @@ const FX={
         c.save(); c.translate(p.x,p.y); c.rotate(p.t*p.spin); c.fillStyle=`rgba(60,60,66,${a})`; c.fillRect(-p.size/2,-p.size/4,p.size,p.size/2); c.restore();
       }
     }
+    if(this.spawn.length){ this.spawn.forEach(q=>{ q.t=0; this.parts.push(q); }); this.spawn.length=0; }
     this.parts=this.parts.filter(p=>p.t<p.life || (p.type==="shell"&&!p.done));
     if(this.parts.length) requestAnimationFrame(this.loop); else { this.running=false; c.clearRect(0,0,innerWidth,innerHeight); }
   },
   explosion(x,y,size=1){
     const S=size*Math.max(40,cellPx()*1.6);
+    this.add({type:"glow",x,y,r0:S*.4,r1:S*2.6,life:.55,col:"255,170,60",a:.9});
+    this.add({type:"glow",x,y,r0:S*.2,r1:S*.9,life:.25,col:"255,250,220",a:1});
     this.add({type:"sprite",img:"boom",x,y,s0:S*.3,s1:S*2.1,life:.65,rot:Math.random()*6,spin:.8});
+    for(let i=0;i<5*size;i++){ const a=Math.random()*7,v=60+Math.random()*120;
+      this.add({type:"flame",x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-30,drag:3,g:-60,size:S*.18+Math.random()*S*.15,life:.4+Math.random()*.35}); }
     this.add({type:"ring",x,y,r0:4,r1:S*1.6,life:.5,color:"rgba(255,220,150,A)",a:.9,w:6});
     for(let i=0;i<30*size;i++){ const a=Math.random()*7,v=(120+Math.random()*380)*size;
       this.add({type:"spark",x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-80,g:420,drag:1.5,size:2+Math.random()*2.5,h:20+Math.random()*35,life:.5+Math.random()*.6}); }
@@ -446,21 +488,35 @@ const FX={
   },
   splash(x,y){
     const S=Math.max(34,cellPx()*1.4);
+    this.add({type:"glow",x,y,r0:S*.3,r1:S*1.6,life:.45,col:"150,210,255",a:.45});
     this.add({type:"sprite",img:"splash",x,y,s0:S*.3,s1:S*1.7,life:.6,rot:Math.random()*6,spin:.4});
+    for(let i=0;i<6;i++){ const a=Math.random()*7,v=15+Math.random()*30;
+      this.add({type:"smoke",x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-10,drag:1.5,size:S*.12+Math.random()*S*.08,col:"225,240,255",life:.7+Math.random()*.4}); }
     [0,.12,.26].forEach((d,i)=>setTimeout(()=>this.add({type:"ring",x,y,r0:4,r1:S*(1+i*.4),life:.8,color:"rgba(200,235,255,A)",a:.8,w:3,flat:.75}),d*1000));
     for(let i=0;i<22;i++){ const a=-Math.PI/2+(Math.random()-.5)*2.2,v=120+Math.random()*260;
       this.add({type:"drop",x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,g:900,size:1.5+Math.random()*2.5,life:.6+Math.random()*.4}); }
   },
+  bubbles(x,y,n){ for(let i=0;i<n;i++) this.add({type:"bubble",x:x+(Math.random()-.5)*14,y:y+(Math.random()-.5)*10,vx:0,vy:-(20+Math.random()*40),drag:.5,size:1.5+Math.random()*3,ph:Math.random()*6,life:.8+Math.random()*1}); },
+  burn(x,y,cs){ this.add({type:"flame",x:x+(Math.random()-.5)*cs*.35,y:y+(Math.random()-.5)*cs*.2,vx:(Math.random()-.5)*8,vy:-(18+Math.random()*22),g:-20,size:cs*(.16+Math.random()*.12),life:.35+Math.random()*.3});
+    if(Math.random()<.5) this.add({type:"smoke",x:x+(Math.random()-.5)*cs*.3,y:y-cs*.15,vx:(Math.random()-.5)*6+6,vy:-(14+Math.random()*16),g:-10,drag:.6,size:cs*(.08+Math.random()*.08),col:"45,45,52",life:1.1+Math.random()*.7}); },
   shell(x0,y0,x1,y1,dur,onHit){
     this.add({type:"shell",x0,y0,x1,y1,life:dur,arc:Math.min(220,Math.hypot(x1-x0,y1-y0)*.45),s0:9,s1:4,trail:[],onHit});
   }
 };
 addEventListener("resize",()=>FX.resize()); FX.resize();
+setInterval(()=>{ if(document.hidden||typeof state==="undefined"||!state||(state.phase!=="battle"&&state.phase!=="over")) return;
+  const big=document.querySelector("#stage .panel:not(.mini):not(.hidden) .board"); if(!big) return;
+  const cells=big.querySelectorAll(".cell.hit:not(.sunk)"); let n=0;
+  for(const el of cells){ if(n++>10) break; const b=el.getBoundingClientRect(); FX.burn(b.left+b.width/2,b.top+b.height/2,b.width); }
+  // batık gemilerden ara ara kabarcık ve ince duman
+  const sunk=big.querySelectorAll(".cell.sunk"); if(sunk.length&&Math.random()<.35){ const el=sunk[Math.random()*sunk.length|0], b=el.getBoundingClientRect(); FX.bubbles(b.left+b.width/2,b.top+b.height/2,1); }
+},220);
+function stagePunch(){ const st=document.getElementById("stage"); st.classList.remove("punch"); void st.offsetWidth; st.classList.add("punch"); }
 function shellP(x0,y0,x1,y1,dur){ return new Promise(res=>{ let d=false; const f=()=>{ if(!d){ d=true; res(); } };
   if(document.hidden){ f(); return; } FX.shell(x0,y0,x1,y1,dur,f); setTimeout(f,dur*1000+350); }); }
 function cellPx(){ const c=document.querySelector("#stage .panel:not(.mini) .cell"); return c?c.getBoundingClientRect().width:34; }
 
-function screenShake(big){ const a=document.getElementById("app"); a.classList.remove("shake","shake-big"); void a.offsetWidth; a.classList.add(big?"shake-big":"shake"); }
+function screenShake(big){ stagePunch(); const a=document.getElementById("app"); a.classList.remove("shake","shake-big"); void a.offsetWidth; a.classList.add(big?"shake-big":"shake"); }
 function flash(){ const f=document.getElementById("flash"); f.classList.remove("go"); void f.offsetWidth; f.classList.add("go"); }
 function banner(text,sub,foe){ const b=document.getElementById("banner"); b.querySelector(".b1").textContent=text; document.getElementById("bannerSub").textContent=sub;
   b.className=foe?"foe":""; void b.offsetWidth; b.classList.add("show"); clearTimeout(banner.t); banner.t=setTimeout(()=>b.classList.remove("show"),1500); }
@@ -469,6 +525,9 @@ function banner(text,sub,foe){ const b=document.getElementById("banner"); b.quer
    GAME LOGIC
 ===================================================================== */
 const N=10, LETTERS="ABCDEFGHIJ";
+const SHIP_FILES={"Uçak Gemisi":"ship5.png","Zırhlı":"ship4.png","Kruvazör":"ship3.png","Denizaltı":"sub3.png","Muhrip":"ship2.png"};
+const SHIP_IMG={};   // yalnızca gerçekten yüklenebilen gemi görselleri (yoksa ortak ship.png)
+Object.entries(SHIP_FILES).forEach(([n,f])=>{ const im=new Image(); im.onload=()=>{ SHIP_IMG[n]=f; if(typeof state!=="undefined"&&state) render(); }; im.src=f; });
 const FLEET=[{name:"Uçak Gemisi",size:5},{name:"Zırhlı",size:4},{name:"Kruvazör",size:3},{name:"Denizaltı",size:3},{name:"Muhrip",size:2}];
 const $=id=>document.getElementById(id);
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
@@ -490,10 +549,11 @@ function newGame(online){
   if(!online) randomPlace(state.enemy);
   $("startBtn").textContent=online?"✔ HAZIRIM":"⚓ SAVAŞ!";
   $("setupBar").style.display=""; $("queue").style.display=""; $("fleets").style.display="none";
-  $("rotateBtn").textContent="↻ Yatay"; $("startBtn").disabled=true;
+  $("startBtn").disabled=true;
   $("playerPanel").className="panel"; $("enemyPanel").className="panel hidden"; $("stage").classList.add("solo");
   setTurn("setup","FİLONU YERLEŞTİR");
-  $("hint").textContent="İpucu: Tahtaya dokunarak gemiyi yerleştir.";
+  $("hint").textContent=""; $("setupHelp").style.display=""; state.tipShip=-1;
+  $("player").classList.add("setup");
   updateSetupMsg(); render();
   if(online){ setTurn("setup","🌐 FİLONU YERLEŞTİR"); startSetupTimer(); }
 }
@@ -509,11 +569,17 @@ function buildBoard(el,who){
     for(let c=0;c<N;c++){ const d=document.createElement("div"); d.className="cell"; d.dataset.r=r; d.dataset.c=c;
       d.appendChild(Object.assign(document.createElement("span"),{className:"mark"})); at(d,r+1,c+1); } }
   el.addEventListener("click",e=>{ const t=e.target.closest(".cell"); if(!t) return;
+    if(who==="player"&&performance.now()<suppressClickUntil){ suppressClickUntil=0; return; }
     if(e.currentTarget.closest(".panel").classList.contains("mini")) return;
     who==="player"?onPlayerBoard(+t.dataset.r,+t.dataset.c):onEnemyBoard(+t.dataset.r,+t.dataset.c); });
   if(who==="player"){
-    el.addEventListener("pointermove",e=>{ if(e.pointerType!=="mouse") return; const t=e.target.closest(".cell"); if(t) preview(+t.dataset.r,+t.dataset.c); });
-    el.addEventListener("pointerleave",clearPreview);
+    el.addEventListener("pointermove",e=>{ if(DRAG||e.pointerType!=="mouse") return; const t=e.target.closest(".cell"); if(!t) return;
+      if(state.player.grid[+t.dataset.r][+t.dataset.c]!==null){ clearPreview(); return; } preview(+t.dataset.r,+t.dataset.c); });
+    el.addEventListener("pointerleave",()=>{ if(!DRAG) clearPreview(); });
+    el.addEventListener("pointerdown",dragStart);
+    el.addEventListener("pointermove",dragMove);
+    el.addEventListener("pointerup",dragEnd);
+    el.addEventListener("pointercancel",dragCancel);
   }
 }
 const cellEl=(id,r,c)=>$(id).querySelector(`.cell[data-r="${r}"][data-c="${c}"]`);
@@ -539,7 +605,9 @@ function drawShips(id,b,showAll,isEnemy){
     const [r,c]=s.cells[0], d=document.createElement("div");
     d.className="shipimg "+(s.hor?"h":"v")+(sunk?" sunk":"")+(isEnemy&&!sunk?" reveal":"")+(!isEnemy&&i===state.newShip?" drop":"");
     d.style.gridRow=r+2; d.style.gridColumn=c+2; d.style.setProperty("--len",s.size);
-    d.innerHTML='<img src="ship.png" alt="">'; el.appendChild(d); });
+    if(s.ghost) d.className+=" ghost "+s.ghost; if(s.sinking) d.className+=" sinking";
+    const tip=!isEnemy&&state.phase==="setup"&&i===state.tipShip&&!s.ghost&&!store.get("rotTip",0);
+    d.innerHTML=`<img src="${SHIP_IMG[s.name]||"ship.png"}" alt="">`+(tip?`<span class="rtip">↻ Dokun</span>`:""); el.appendChild(d); });
   if(!isEnemy) state.newShip=-1;
 }
 function renderBars(){
@@ -555,36 +623,96 @@ function msg(html){ $("msg").innerHTML=html; }
 /* ---------- setup ---------- */
 function clearPreview(){ $("player").querySelectorAll(".preview-ok,.preview-bad").forEach(e=>e.classList.remove("preview-ok","preview-bad")); }
 function preview(r,c){ clearPreview(); if(state.phase!=="setup"||state.placeIdx>=FLEET.length) return;
-  const s=FLEET[state.placeIdx], ok=canPlace(state.player,r,c,s.size,state.horizontal);
-  for(let i=0;i<s.size;i++){ const rr=state.horizontal?r:r+i,cc=state.horizontal?c+i:c; if(rr<N&&cc<N) cellEl("player",rr,cc).classList.add(ok?"preview-ok":"preview-bad"); } }
+  const s=FLEET[state.placeIdx]; let pos=null;
+  for(const h of [true,false]){ for(let k=0;k<s.size&&!pos;k++){ const rr=h?r:r-k, cc=h?c-k:c; if(rr>=0&&cc>=0&&canPlace(state.player,rr,cc,s.size,h)) pos=[rr,cc,h]; } if(pos) break; }
+  if(!pos){ cellEl("player",r,c).classList.add("preview-bad"); return; }
+  shipCellsAt(pos[0],pos[1],s.size,pos[2]).forEach(([rr,cc])=>cellEl("player",rr,cc).classList.add("preview-ok")); }
+/* --- yerleştirilmiş gemiyi dokununca döndür, sürükleyince taşı --- */
+let DRAG=null, suppressClickUntil=0;
+const shipCellsAt=(r,c,size,hor)=>Array.from({length:size},(_,i)=>hor?[r,c+i]:[r+i,c]);
+function liftShip(b,i){ b.ships[i].cells.forEach(([r,c])=>{ if(b.grid[r][c]===i) b.grid[r][c]=null; }); }
+function putShip(b,i,r,c,hor){ const s=b.ships[i]; s.hor=hor; s.cells=shipCellsAt(r,c,s.size,hor); s.cells.forEach(([rr,cc])=>b.grid[rr][cc]=i); }
+function cellUnder(x,y){ const el=document.elementFromPoint(x,y), t=el&&el.closest&&el.closest("#player .cell"); return t?[+t.dataset.r,+t.dataset.c]:null; }
+function dragStart(e){
+  if(state.phase!=="setup"||DRAG) return;
+  const t=e.target.closest(".cell"); if(!t) return;
+  const r=+t.dataset.r,c=+t.dataset.c,b=state.player,i=b.grid[r][c]; if(i===null) return;
+  const s=b.ships[i];
+  DRAG={i,pid:e.pointerId,x:e.clientX,y:e.clientY,start:[r,c],off:s.cells.findIndex(([rr,cc])=>rr===r&&cc===c),moved:false,ok:true,orig:s.cells.map(x=>x.slice()),hor:s.hor};
+  try{ e.currentTarget.setPointerCapture(e.pointerId); }catch(_){}
+  e.preventDefault();
+}
+function dragMove(e){
+  if(!DRAG||e.pointerId!==DRAG.pid) return;
+  if(!DRAG.moved&&Math.hypot(e.clientX-DRAG.x,e.clientY-DRAG.y)<9) return;
+  const p=cellUnder(e.clientX,e.clientY); if(!p) return;
+  const b=state.player,s=b.ships[DRAG.i];
+  if(!DRAG.moved){ DRAG.moved=true; liftShip(b,DRAG.i); Sound.click(); vibrate(8); }
+  let r=s.hor?p[0]:p[0]-DRAG.off, c=s.hor?p[1]-DRAG.off:p[1];
+  r=Math.max(0,Math.min(N-(s.hor?1:s.size),r)); c=Math.max(0,Math.min(N-(s.hor?s.size:1),c));
+  if(s.cells[0][0]===r&&s.cells[0][1]===c&&s.ghost) return;
+  s.cells=shipCellsAt(r,c,s.size,s.hor); DRAG.ok=canPlace(b,r,c,s.size,s.hor); s.ghost=DRAG.ok?"ok":"bad";
+  render(); clearPreview(); s.cells.forEach(([rr,cc])=>cellEl("player",rr,cc).classList.add(DRAG.ok?"preview-ok":"preview-bad"));
+}
+function dragEnd(e){
+  if(!DRAG||e.pointerId!==DRAG.pid) return;
+  const b=state.player,i=DRAG.i,s=b.ships[i],d=DRAG; DRAG=null; suppressClickUntil=performance.now()+300;
+  if(d.moved){
+    delete s.ghost;
+    if(d.ok){ const [r,c]=s.cells[0]; putShip(b,i,r,c,s.hor); Sound.place(); vibrate(15); const [x,y]=cellCenter("player",r,c); FX.splash(x,y); state.newShip=i; msg(`<b>${s.name}</b> taşındı.`); }
+    else { s.cells=d.orig; s.hor=d.hor; s.cells.forEach(([r,c])=>b.grid[r][c]=i); Sound.error(); msg(`<span style="color:#ff8f75">Oraya sığmıyor,</span> gemi eski yerine döndü.`); }
+    clearPreview(); render(); $("startBtn").disabled=state.placeIdx<FLEET.length;
+  } else rotatePlaced(i,d.start);
+}
+function dragCancel(e){
+  if(!DRAG||e.pointerId!==DRAG.pid) return;
+  const b=state.player,i=DRAG.i,s=b.ships[i];
+  if(DRAG.moved){ delete s.ghost; s.cells=DRAG.orig; s.hor=DRAG.hor; s.cells.forEach(([r,c])=>b.grid[r][c]=i); }
+  DRAG=null; clearPreview(); render();
+}
+function rotatePlaced(i,[pr,pc]){
+  const b=state.player,s=b.ships[i],hor=!s.hor,off=s.cells.findIndex(([r,c])=>r===pr&&c===pc);
+  liftShip(b,i);
+  const cands=[], [r0,c0]=s.cells[0];
+  cands.push(hor?[pr,pc-off]:[pr-off,pc]);                       // dokunulan kare yerinde kalsın
+  for(let k=0;k<s.size;k++) cands.push(hor?[pr,pc-k]:[pr-k,pc]);   // dokunulan kareden geçen diğer konumlar
+  cands.push([r0,c0]); for(let k=1;k<s.size;k++) cands.push(hor?[r0,c0-k]:[r0-k,c0]);
+  for(const [r,c] of cands) if(r>=0&&c>=0&&canPlace(b,r,c,s.size,hor)){
+    putShip(b,i,r,c,hor); Sound.place(); vibrate(12); state.newShip=i; if(!store.get("rotTip",0)) store.set("rotTip",1); state.tipShip=-1; clearPreview(); render();
+    msg(`<b>${s.name}</b> ${hor?"yatay":"dikey"} çevrildi. Sürükleyerek taşıyabilirsin.`); return; }
+  s.cells.forEach(([r,c])=>b.grid[r][c]=i); Sound.error(); vibrate(40);
+  const p=$("playerPanel"); p.classList.remove("shake"); void p.offsetWidth; p.classList.add("shake");
+  msg(`<span style="color:#ff8f75">Burada dönemiyor,</span> önce boş bir yere sürükle.`);
+}
 function onPlayerBoard(r,c){
   if(state.phase!=="setup"||state.placeIdx>=FLEET.length) return;
+  if(state.player.grid[r][c]!==null) return;   // gemiye dokunma: döndür/taşı (yukarıda)
   const s=FLEET[state.placeIdx];
-  if(!canPlace(state.player,r,c,s.size,state.horizontal)){
-    // try auto-shifting so the tap near an edge still works
-    let placed=false;
-    for(let k=1;k<s.size&&!placed;k++){ const rr=state.horizontal?r:r-k, cc=state.horizontal?c-k:c;
-      if(rr>=0&&cc>=0&&canPlace(state.player,rr,cc,s.size,state.horizontal)){ r=rr;c=cc;placed=true; } }
+  // önce yatay, sığmazsa dikey; kenardaysa dokunulan kareyi içerecek şekilde kaydır
+  let hor=true, placed=false;
+  for(const h of [true,false]){ for(let k=0;k<s.size&&!placed;k++){ const rr=h?r:r-k, cc=h?c-k:c;
+      if(rr>=0&&cc>=0&&canPlace(state.player,rr,cc,s.size,h)){ r=rr;c=cc;hor=h;placed=true; } } if(placed) break; }
+  {
     if(!placed){ Sound.error(); vibrate(40); const p=$("playerPanel"); p.classList.remove("shake"); void p.offsetWidth; p.classList.add("shake");
-      msg(`<span style="color:#ff8f75">Oraya sığmıyor!</span> Başka yer seç ya da döndür.`); return; }
+      msg(`<span style="color:#ff8f75">Oraya sığmıyor!</span> Başka bir boş kareye dokun.`); return; }
   }
-  place(state.player,r,c,s.size,state.horizontal,s.name); state.newShip=state.player.ships.length-1; state.placeIdx++;
+  place(state.player,r,c,s.size,hor,s.name); state.newShip=state.player.ships.length-1; state.tipShip=state.newShip; state.placeIdx++;
   Sound.place(); vibrate(15);
   const [x,y]=cellCenter("player",r,c); FX.splash(x,y);
   afterPlacement();
 }
 function updateSetupMsg(){
   if(state.placeIdx>=FLEET.length) msg("Filo hazır! <b style='color:#ffc94a'>⚓ SAVAŞ!</b> düğmesine bas.");
-  else { const s=FLEET[state.placeIdx]; msg(`Yerleştir: <b>${s.name}</b> (${s.size} kare, ${state.horizontal?"yatay":"dikey"})`); }
+  else { const s=FLEET[state.placeIdx]; msg(`Boş bir kareye dokun: <b>${s.name}</b> (${s.size} kare)`); }
 }
-function afterPlacement(){ clearPreview(); render(); $("startBtn").disabled=state.placeIdx<FLEET.length; updateSetupMsg(); }
-$("rotateBtn").onclick=()=>{ Sound.click(); state.horizontal=!state.horizontal; $("rotateBtn").textContent="↻ "+(state.horizontal?"Yatay":"Dikey"); updateSetupMsg(); };
+function afterPlacement(){
+  if(state.placeIdx>0&&state.placeIdx<FLEET.length&&!store.get("rotTip",0)) setTimeout(()=>{ if(state.phase==="setup") msg(`İstersen az önce koyduğun gemiye dokunup <b>döndür</b>. Sıradaki: <b>${FLEET[state.placeIdx].name}</b> (${FLEET[state.placeIdx].size} kare)`); },0); clearPreview(); $("player").classList.toggle("setup",state.phase==="setup"); render(); $("startBtn").disabled=state.placeIdx<FLEET.length; updateSetupMsg(); }
 $("randomBtn").onclick=()=>{ Sound.place(); randomPlace(state.player); state.placeIdx=FLEET.length; afterPlacement(); };
 $("clearBtn").onclick=()=>{ Sound.click(); state.player=newBoard(); state.placeIdx=0; afterPlacement(); };
 $("startBtn").onclick=async()=>{
   if(state.online) return onlineReady();
   Sound.click(); Sound.alarm();
-  state.phase="battle"; state.busy=true;
+  state.phase="battle"; state.busy=true; $("player").classList.remove("setup"); $("setupHelp").style.display="none";
   $("setupBar").style.display="none"; $("queue").style.display="none"; $("fleets").style.display=""; $("hint").textContent="Köşedeki küçük tahtaya dokunarak filona bakabilirsin.";
   $("enemyPanel").classList.remove("hidden"); $("stage").classList.remove("solo");
   setView("enemy"); render();
@@ -624,7 +752,9 @@ async function onEnemyBoard(r,c){
   enemyTurn();
 }
 function sinkFx(id,ship){
+  ship.sinking=true; setTimeout(()=>{ ship.sinking=false; },1800);
   ship.cells.forEach(([r,c],i)=>setTimeout(()=>{ const [x,y]=cellCenter(id,r,c); FX.explosion(x,y,.7); },120+i*140));
+  ship.cells.forEach(([r,c],i)=>setTimeout(()=>{ const [x,y]=cellCenter(id,r,c); FX.bubbles(x,y,6); },700+i*90));
 }
 async function enemyTurn(){
   setTurn("foe","⚠️ DÜŞMAN ATEŞ EDİYOR"); Sound.alarm();
@@ -912,7 +1042,7 @@ async function onlineReady(){
   if(state.phase!=="setup") return;
   tclr("setup");
   if(state.placeIdx<FLEET.length){ randomPlace(state.player); state.placeIdx=FLEET.length; afterPlacement(); }
-  Sound.click(); state.phase="ready";
+  Sound.click(); state.phase="ready"; $("player").classList.remove("setup"); $("setupHelp").style.display="none";
   $("setupBar").style.display="none"; $("queue").style.display="none"; $("hint").textContent="";
   setTurn("setup","⏳ RAKİP BEKLENİYOR"); msg("Filon hazır! Rakibin yerleştirmesi bekleniyor...");
   sendReady();
@@ -929,7 +1059,7 @@ async function sendReady(){
   ON.readyBusy=false;
 }
 async function beginOnlineBattle(){
-  state.phase="battle"; state.busy=true; ON.anim++;
+  state.phase="battle"; state.busy=true; ON.anim++; $("player").classList.remove("setup"); $("setupHelp").style.display="none";
   $("fleets").style.display=""; $("hint").textContent="Köşedeki küçük tahtaya dokunarak öbür tahtaya bakabilirsin.";
   $("enemyPanel").classList.remove("hidden"); $("stage").classList.remove("solo");
   render(); banner("SAVAŞ!",ON.g.turn===ON.uid?"İlk atış senin!":"İlk atış rakibin",false); Sound.boom(.4);
