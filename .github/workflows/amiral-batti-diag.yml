@@ -11,6 +11,6 @@ jobs:
           node-version: 22
       - run: npm i --no-save firebase-admin@12
       - run: echo '${{ secrets.FIREBASE_KEY }}' > "$RUNNER_TEMP/key.json"
-      - run: node tools/amiral_diag.js
+      - run: node tools/amiral_diag.js && node tools/amiral_dump.js
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/key.json
