@@ -1,0 +1,15 @@
+name: Amiral Batti kural testi
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: |
+          echo '${{ secrets.FIREBASE_KEY }}' > "$RUNNER_TEMP/key.json"
+          npm i --no-save firebase-admin@12 >/dev/null 2>&1
+          GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/key.json" node tools/amiral_rules_test.js
