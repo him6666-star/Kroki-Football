@@ -63,3 +63,4 @@ jobs:
           releaseFiles: alan-avcisi-app/android/app/build/outputs/bundle/release/app-release.aab
           track: alpha
           status: draft
+          whatsNewDirectory: alan-avcisi-app/whatsnew
