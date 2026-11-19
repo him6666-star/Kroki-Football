@@ -16,4 +16,4 @@ jobs:
         run: |
           echo '${{ secrets.FIREBASE_KEY }}' > "$RUNNER_TEMP/key.json"
           npm i --no-save firebase-admin@12 >/dev/null 2>&1
-          [ -f test_uids.json ] && GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/key.json" node tools/amiral_test_cleanup.js || true
+          GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/key.json" node tools/amiral_test_cleanup.js || true

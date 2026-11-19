@@ -33,6 +33,7 @@ async def main():
         print("eşleşti:", ok, await A.evaluate("ON.gid") == await B.evaluate("ON.gid"))
         print("rakip etiketi A:", await A.inner_text("#foeLabel"), "| B:", await B.inner_text("#foeLabel"))
         uids = [await pg.evaluate("ON.uid") for pg in pages]
+        json.dump(uids, open("test_uids.json", "w"))
         async def play_until_over(winner_i):
             for pg in pages: await pg.click("#randomBtn"); await pg.click("#startBtn")
             for _ in range(60):
@@ -56,10 +57,10 @@ async def main():
             print("PAGE", "AB"[i], await pg.evaluate("({phase:state.phase,result:document.getElementById('result').classList.contains('show'),title:document.getElementById('resTitle').textContent,xp:document.getElementById('xpRes').innerText,rematch:getComputedStyle(document.getElementById('rematchBox')).display,why:ON.g&&ON.g.why})"))
         await asyncio.sleep(3)
         # rövanş
-        await B.click("#rematchBtn"); await asyncio.sleep(2)
+        await B.click("#rematchBtn", force=True); await asyncio.sleep(2)
         print("A rövanş mesajı:", await A.inner_text("#rematchMsg"))
         old = await A.evaluate("ON.gid")
-        await A.click("#rematchBtn")
+        await A.click("#rematchBtn", force=True)
         for _ in range(30):
             ok = [await pg.evaluate("!!(ON.active&&ON.g&&ON.g.status==='setup'&&state.phase==='setup')") for pg in pages]
             if all(ok): break
