@@ -56,6 +56,8 @@ async def main():
         for i, pg in enumerate(pages):
             print("PAGE", "AB"[i], await pg.evaluate("({phase:state.phase,result:document.getElementById('result').classList.contains('show'),title:document.getElementById('resTitle').textContent,xp:document.getElementById('xpRes').innerText,rematch:getComputedStyle(document.getElementById('rematchBox')).display,why:ON.g&&ON.g.why})"))
         await asyncio.sleep(3)
+        for i, pg in enumerate(pages):
+            print("LOG", "AB"[i], await pg.evaluate("LOG.filter(l=>/sıralama|profil|WARN|ERROR/.test(l)).slice(-8).join(' || ')"))
         # rövanş
         await B.click("#rematchBtn", force=True); await asyncio.sleep(2)
         print("A rövanş mesajı:", await A.inner_text("#rematchMsg"))
