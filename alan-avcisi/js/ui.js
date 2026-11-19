@@ -42,7 +42,7 @@ function refreshMenu(){
   const nx=nextLevelToPlay();
   $('#bPlay .lbl').textContent=nx>1?t('menu.continue',{n:nx}):t('menu.play');
   const c=clearedCount(BOSSES.length);
-  $('#mStat').innerHTML=(SAVE.hi?t('menu.best',{n:SAVE.hi})+'<br>':'')+(c?t('menu.progress',{a:c,b:BOSSES.length}):'');
+  $('#mStat').innerHTML=(SAVE.hi?t('menu.best',{n:SAVE.hi})+'<br>':'')+(c?t('menu.progress',{a:c,b:BOSSES.length})+` · <span class="mStars">★ ${totalStars(BOSSES.length)}/${BOSSES.length*3}</span>`:'');
 }
 function goMenu(){
   clearTimeout(clearTimer);
@@ -90,6 +90,10 @@ function onLevelClear(bossKilled,secret,bonus){
   if(bossKilled)html+=t('clear.defeated',{name})+'<br>';
   if(secret)html+=`<b style="color:#fde047">${t('clear.secretBody')}</b><br>`;
   html+=t('clear.body',{p:pctNow.toFixed(1),b:bonus})+'<br>'+t('clear.pic',{name:pic.themeName});
+  const conds=[t('star.clear'),t('star.noDeath'),t('star.boss')],got=[true,levelDeaths===0,bossKilled];
+  html=`<div class="starRow">${got.map((g,k)=>`<span class="bigStar${g?' on':''}" style="animation-delay:${.15+k*.25}s">★</span>`).join('')}</div>`+
+       `<div class="starConds">${conds.map((c,k)=>`<span class="${got[k]?'on':''}">${got[k]?'✓':'○'} ${c}</span>`).join('')}</div>`+html;
+  if(got.filter(Boolean).length)setTimeout(()=>{got.forEach((g,k)=>{if(g)setTimeout(()=>{tone(660+k*220,.12,'triangle',.05);buzz(12)},150+k*250)})},0);
   showMsg({iconHtml:bossKilled?ringIcon(boss.def,'🏆'):ringIcon(null,secret?'✨':'⭐'),title:secret?t('clear.secret'):bossKilled?t('clear.boss'):t('clear.title',{n:level}),html,
     buttons:[{label:t('btn.next'),icon:'next',kind:'success',fn:()=>{level++;startLevel()}},{label:t('btn.menu'),icon:'home',ghost:true,fn:goMenu}]});
 }
@@ -137,13 +141,18 @@ function fxHud(){
 }
 
 /* ---------- Bölümler ---------- */
+// gizli yolu olan bosslar (bölüm kartında soru işareti / altın işaret)
+const SECRET_IDS=new Set(['goz','golem','kovan','ikiz','ejder','bomba','ayna','bukalemun','hortum','dev','saat','zar']);
 function renderLevels(){
   const g=$('#lvGrid');g.innerHTML='';const nx=nextLevelToPlay();
   BOSSES.forEach((b,i)=>{
     const n=i+1,p=SAVE.prog[n]||{};
     const el=document.createElement('button');el.className='lv'+(p.done?' done':'')+(n===nx?' next':'');
     const src=bossImg(b);
-    el.innerHTML=`<span class="no">${n}</span><span class="st">${p.done?(p.boss?'👑':'✓'):''}${p.secret?'✨':''}</span>${src?`<img class="th" src="${src}" alt="">`:`<span class="th">${b.icon}</span>`}<span class="nm">${t('boss.'+b.id+'.name')}</span>${p.best?`<span class="bs">★ ${p.best}</span>`:''}`;
+    const st=p.stars||(p.done?(p.boss?2:1):0);
+    const stars=[0,1,2].map(k=>`<i class="${k<st?'on':''}">★</i>`).join('');
+    const gem=SECRET_IDS.has(b.id)?`<span class="gem${p.secret?' on':''}" title="${p.secret?t('levels.secretFound'):t('levels.secretHidden')}">${p.secret?'✦':'?'}</span>`:'';
+    el.innerHTML=`<span class="no">${n}</span>${gem}${src?`<img class="th" src="${src}" alt="">`:`<span class="th">${b.icon}</span>`}<span class="nm">${t('boss.'+b.id+'.name')}</span><span class="stars">${stars}</span>`;
     el.addEventListener('click',()=>{sfx.click();startGame(n)});
     g.appendChild(el);
   });
@@ -156,6 +165,7 @@ function openSettings(from){
   $('#sSfx').value=Math.round(s.sfx*100);
   $('#sMusVol').value=Math.round(s.musicVol*100);
   $('#sMusic').classList.toggle('on',s.music);
+  $('#sVib').classList.toggle('on',s.vib!==false);
   const L=$('#sLang');L.innerHTML='';
   for(const code in LANGS){const b=document.createElement('button');b.textContent=LANGS[code];b.classList.toggle('on',code===LANG);
     b.addEventListener('click',()=>{setLang(code);openSettings(settingsFrom)});L.appendChild(b)}
@@ -213,6 +223,7 @@ $('#sSfx').addEventListener('input',e=>{SAVE.settings.sfx=e.target.value/100;per
 $('#sSfx').addEventListener('change',()=>sfx.pu());
 $('#sMusVol').addEventListener('input',e=>{SAVE.settings.musicVol=e.target.value/100;persist();applyVolumes()});
 $('#sMusic').addEventListener('click',()=>{SAVE.settings.music=!SAVE.settings.music;persist();applyVolumes();openSettings(settingsFrom)});
+$('#sVib').addEventListener('click',()=>{SAVE.settings.vib=SAVE.settings.vib===false;persist();if(SAVE.settings.vib)buzz(40);openSettings(settingsFrom)});
 $('#sReset').addEventListener('click',()=>$('#resetBox').classList.remove('hidden'));
 $('#sResetNo').addEventListener('click',()=>$('#resetBox').classList.add('hidden'));
 $('#sResetYes').addEventListener('click',()=>{resetProgress();$('#resetBox').classList.add('hidden');$('#resetDone').classList.remove('hidden');refreshMenu()});

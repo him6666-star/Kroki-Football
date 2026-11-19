@@ -1,7 +1,7 @@
 'use strict';
 /* Ayarlar + ilerleme (cihazda localStorage'da tutulur) */
 const SAVE_KEY='alanAvcisi.v2';
-const SAVE={settings:{sfx:.8,music:true,musicVol:.5,lang:null,diff:'normal',fx:0},prog:{},hi:0};
+const SAVE={settings:{sfx:.8,music:true,musicVol:.5,lang:null,diff:'normal',fx:0,vib:true},prog:{},hi:0};
 
 function loadSave(){
   try{
@@ -15,8 +15,10 @@ function recordClear(lv,info){
   const p=SAVE.prog[lv]||{};
   p.done=true;p.boss=!!(p.boss||info.boss);p.secret=!!(p.secret||info.secret);
   p.best=Math.max(p.best||0,info.score||0);
+  p.stars=Math.max(p.stars||0,info.stars||0);
   SAVE.prog[lv]=p;persist();
 }
+function totalStars(max){let c=0;for(let i=1;i<=max;i++)if(SAVE.prog[i])c+=SAVE.prog[i].stars||(SAVE.prog[i].done?(SAVE.prog[i].boss?2:1):0);return c}
 function recordScore(s){if(s>SAVE.hi){SAVE.hi=s;persist()}}
 function clearedCount(max){let c=0;for(let i=1;i<=max;i++)if(SAVE.prog[i]&&SAVE.prog[i].done)c++;return c}
 function nextLevelToPlay(){

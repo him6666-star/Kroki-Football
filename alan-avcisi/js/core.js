@@ -20,7 +20,18 @@ const oc=document.createElement('canvas');oc.width=W;oc.height=H;
 const octx=oc.getContext('2d'),img=octx.createImageData(W,H),pix=img.data;
 let dirty=true;
 
-let state='menu',level=1,lives=10,score=0,initialClaimed=0,pctNow=0;
+let state='menu',level=1,lives=10,score=0,initialClaimed=0,pctNow=0,levelDeaths=0,lastStars=0;
+// titreşim (ayarlardan kapatılabilir)
+function buzz(p){
+  if(SAVE.settings.vib===false)return;
+  try{
+    const H=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.Haptics;
+    if(H){ // Android uygulaması: Capacitor titreşim eklentisi
+      const seq=Array.isArray(p)?p:[p];let t0=0;
+      seq.forEach((d,i)=>{if(i%2===0)setTimeout(()=>H.vibrate({duration:d}).catch(()=>{}),t0);t0+=d});
+    }else if(navigator.vibrate)navigator.vibrate(p);
+  }catch(e){}
+}
 let player={x:W>>1,y:H-1,drawing:false,trail:[],sx:0,sy:0,acc:0};
 let enemies=[],sparks=[],powerups=[],parts=[],pops=[],shots=[],beams=[];
 let effects={speed:0,freeze:0,shield:0};
@@ -207,6 +218,7 @@ const levelTier=()=>Math.floor((level-1)/BOSSES.length);
 function bossForLevel(lv){return BOSSES[(lv-1)%BOSSES.length]}
 
 function startLevel(){
+  levelDeaths=0;
   clearTimeout(clearTimer);
   resetBoard();
   player={x:W>>1,y:H-1,drawing:false,trail:[],sx:0,sy:0,acc:0};
@@ -290,7 +302,7 @@ function capture(){
   p.trail=[];p.drawing=false;
   computeBorder();rebuildOverlay();
   addScore(Math.round(added*10*(1+added/1500)),p.x+.5,p.y+.5);
-  sfx.capture();
+  sfx.capture();buzz(18);
   pctNow=claimedPct();
   enemies=enemies.filter(e=>{
     if(e.boss)return true;
@@ -377,14 +389,14 @@ function killPlayer(){
   for(const n of p.trail){grid[n]=0;paintCell(n)}
   if(p.drawing){p.x=p.sx;p.y=p.sy}
   p.trail=[];p.drawing=false;p.acc=0;fuse=null;
-  lives--;sfx.die();flash=1;updateHud();
+  lives--;levelDeaths++;sfx.die();buzz([90,50,160]);flash=1;updateHud();
   edgeShield=Math.max(edgeShield,Math.min(edgeMax,75));edgeBeep=0;
   state='dying';dyingT=1.2;
 }
 function hurtBoss(n,x,y,label,col){
   if(!boss||boss.dead||state!=='play')return false;
   const e=bossEnt();
-  boss.hp=Math.max(0,boss.hp-n);
+  boss.hp=Math.max(0,boss.hp-n);buzz(45);
   if(e)e.hurt=.6;
   const px=x!=null?x:(e?e.x:W/2),py=y!=null?y:(e?e.y-4:H/2);
   if(label)popText(label,px,py,col||'#f43f5e');
@@ -401,7 +413,7 @@ function killBoss(secret){
   if(boss.def.onKill)boss.def.onKill();
   enemies=[];shots=[];beams=[];fuse=null;
   boss.dead=true;boss.secret=!!secret;boss.hp=0;
-  sfx.bossDie();flash=.8;
+  sfx.bossDie();flash=.8;buzz(secret?[60,40,60,40,60,40,220]:[70,40,70,40,200]);
   if(secret){sfx.secret();popText(t('pop.secret'),W/2,H/2,'#fde047',2.2)}
   levelClear(true,!!secret);
 }
@@ -532,7 +544,8 @@ function levelClear(bossKilled,secret){
   let bonus=bossKilled?5000+levelIn()*1500+Math.round(pctNow*30):Math.round((pctNow-GOAL)*400)+levelIn()*1000;
   if(secret)bonus*=2;
   score+=bonus;recordScore(score);
-  recordClear(level,{boss:bossKilled,secret,score});
+  lastStars=1+(levelDeaths===0?1:0)+(bossKilled?1:0);
+  recordClear(level,{boss:bossKilled,secret,score,stars:lastStars});
   updateHud();bossHud(true);
   if(bossKilled)popText(t('pop.defeated',{name:t('boss.'+boss.def.id+'.name')}),W/2,H*.35,'#f0abfc',1.8);
   clearTimeout(clearTimer);
