@@ -11,6 +11,9 @@ if 'screenOrientation' not in m:
     m = m.replace('android:name=".MainActivity"', 'android:name=".MainActivity"\n            android:screenOrientation="portrait"', 1)
 if 'android.permission.VIBRATE' not in m:
     m = m.replace('<application', '<uses-permission android:name="android.permission.VIBRATE" />\n    <application', 1)
+# dikey ekran kilidi "zorunlu donanım" sayılmasın (Play: tüm cihazlar yükleyebilsin)
+if 'android.hardware.screen.portrait' not in m:
+    m = m.replace('<application', '<uses-feature android:name="android.hardware.screen.portrait" android:required="false" />\n    <application', 1)
 if 'hardwareAccelerated' not in m:
     m = m.replace('<application', '<application\n        android:hardwareAccelerated="true"', 1)
 open(p, 'w', encoding='utf-8').write(m)
