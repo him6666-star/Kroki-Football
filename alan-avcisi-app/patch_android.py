@@ -5,6 +5,8 @@ p = base + '/AndroidManifest.xml'
 m = open(p, encoding='utf-8').read()
 if 'screenOrientation' not in m:
     m = m.replace('android:name=".MainActivity"', 'android:name=".MainActivity"\n            android:screenOrientation="sensorPortrait"', 1)
+if 'android.hardware.screen.portrait' not in m:  # dikey ekran zorunlu donanım sayılmasın (Play uyarısı)
+    m = m.replace('<application', '<uses-feature android:name="android.hardware.screen.portrait" android:required="false" />\n    <uses-feature android:name="android.hardware.touchscreen" android:required="false" />\n    <application', 1)
 if 'hardwareAccelerated' not in m:
     m = m.replace('<application', '<application\n        android:hardwareAccelerated="true"', 1)
 open(p, 'w', encoding='utf-8').write(m)
