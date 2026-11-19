@@ -58,10 +58,10 @@ button{font-family:inherit;cursor:pointer;border:0;color:inherit}
   filter:drop-shadow(0 4px 0 #6b3a00) drop-shadow(0 0 30px rgba(255,180,40,.35));animation:logoIn .8s cubic-bezier(.2,1.6,.4,1)}
 .logo .tag{font-weight:900;letter-spacing:6px;font-size:13px;opacity:.75;margin-top:8px}
 @keyframes logoIn{from{transform:scale(.3) rotate(-8deg);opacity:0}to{transform:none;opacity:1}}
-.hero{position:relative;width:min(92vw,560px);height:min(30vw,170px);margin:6px 0 10px}
-.hero img.ship{position:absolute;left:50%;top:50%;width:100%;transform:translate(-50%,-50%) rotate(-4deg);
+.hero{position:relative;flex-shrink:0;width:min(92vw,560px);height:clamp(46px,min(26vw,11vh),140px);margin:2px 0 6px}
+.hero img.ship{position:absolute;left:50%;top:50%;width:100%;height:88%;object-fit:contain;transform:translate(-50%,-50%) rotate(-4deg);
   filter:drop-shadow(0 18px 14px rgba(0,0,0,.55));animation:bob 3.4s ease-in-out infinite}
-@media (max-height:700px){.hero{height:min(22vw,110px);margin:0 0 4px}.logo h1{font-size:clamp(40px,12vw,70px)}}
+@media (max-height:700px){.logo h1{font-size:clamp(38px,min(12vw,8.5vh),70px)}.logo .tag{margin-top:4px}#menu{gap:6px}.menu-buttons{gap:10px}.menu-buttons .btn.gold,.menu-buttons .btn.green{padding:13px}}
 @keyframes bob{0%,100%{transform:translate(-50%,-50%) rotate(-4deg)}50%{transform:translate(-50%,-44%) rotate(-2deg)}}
 .hero .wake{position:absolute;left:4%;right:2%;top:58%;height:22%;border-radius:50%;
   background:radial-gradient(ellipse at 15% 50%,rgba(255,255,255,.55),rgba(255,255,255,0) 70%);filter:blur(6px);animation:wake 1.6s ease-in-out infinite}
@@ -76,7 +76,8 @@ button{font-family:inherit;cursor:pointer;border:0;color:inherit}
 .diff-row{display:flex;gap:8px;justify-content:center}
 .chip{flex:1;font-weight:800;font-size:14px;padding:10px 6px;border-radius:12px;background:rgba(10,40,70,.75);border:2px solid rgba(255,255,255,.1);transition:.15s}
 .chip.on{border-color:var(--gold);color:var(--gold);background:rgba(80,55,0,.55);box-shadow:0 0 14px rgba(255,201,74,.35)}
-.menu-foot{display:flex;gap:10px;justify-content:center}
+.menu-foot{display:flex;gap:8px;justify-content:center}
+.menu-foot .btn.sm{padding:10px 12px}.menu-foot .btn.ic{padding:10px 11px;font-size:16px}
 .best{font-size:13px;opacity:.7;text-align:center;min-height:16px}
 
 /* ---------- GAME ---------- */
@@ -311,12 +312,10 @@ a.btn{text-decoration:none;display:inline-block}
         <button class="chip" data-d="hard">Zor</button>
       </div>
       <div class="menu-foot">
-        <button class="btn sm" id="profBtn">👤 Profil & Görevler</button>
+        <button class="btn sm" id="profBtn">👤 Profil</button>
         <button class="btn sm" id="boardBtn">🏆 Sıralama</button>
-      </div>
-      <div class="menu-foot">
-        <button class="btn sm" id="howBtn">❓ Nasıl Oynanır</button>
-        <button class="btn sm" id="menuSound">🔊 Ses: Açık</button>
+        <button class="btn sm ic" id="howBtn" title="Nasıl oynanır">❓</button>
+        <button class="btn sm ic" id="menuSound" title="Ses">🔊</button>
       </div>
       <div class="best" id="bestLine"></div>
     </div>
@@ -1672,7 +1671,7 @@ function updateBest(){
   const b=store.get("best_"+difficulty,null), w=store.get("wins",0), ow=store.get("onwins",0);
   $("bestLine").textContent=(w?`🏆 ${w} zafer`:"")+(ow?`  ·  🌐 ${ow} online zafer`:"")+(b!==null?`  ·  ${({easy:"Kolay",normal:"Normal",hard:"Zor"})[difficulty]} rekoru: ${b} atış`:"");
 }
-function setSoundUI(){ $("soundBtn").textContent=Sound.on?"🔊":"🔇"; $("menuSound").textContent=Sound.on?"🔊 Ses: Açık":"🔇 Ses: Kapalı"; }
+function setSoundUI(){ $("soundBtn").textContent=Sound.on?"🔊":"🔇"; $("menuSound").textContent=Sound.on?"🔊":"🔇"; }
 document.querySelectorAll("#diffRow .chip").forEach(ch=>{ ch.classList.toggle("on",ch.dataset.d===difficulty);
   ch.onclick=()=>{ Sound.init(); Sound.click(); difficulty=ch.dataset.d; store.set("diff",difficulty);
     document.querySelectorAll("#diffRow .chip").forEach(x=>x.classList.toggle("on",x===ch)); updateBest(); }; });
