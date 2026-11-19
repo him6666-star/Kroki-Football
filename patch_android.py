@@ -7,6 +7,8 @@ if 'screenOrientation' not in m:
     m = m.replace('android:name=".MainActivity"', 'android:name=".MainActivity"\n            android:screenOrientation="sensorLandscape"', 1)
 if 'hardwareAccelerated' not in m:
     m = m.replace('<application', '<application\n        android:hardwareAccelerated="true"', 1)
+if 'screen.landscape' not in m:
+    m = m.replace('<application', '<uses-feature android:name="android.hardware.screen.landscape" android:required="false" />\n    <uses-feature android:name="android.hardware.screen.portrait" android:required="false" />\n    <application', 1)
 open(p, 'w', encoding='utf-8').write(m)
 # 2) MainActivity: tam ekran (immersive), ekran acik kalsin, ses otomatik baslasin
 act = '''package com.scribblekick.game;
