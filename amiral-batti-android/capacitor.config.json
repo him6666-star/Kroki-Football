@@ -1,9 +1,17 @@
 {
   "appId": "com.amiralbatti.game",
-  "appName": "Amiral Battı",
+  "appName": "Amiral Batt\u0131",
   "webDir": "www",
   "backgroundColor": "#04111f",
   "android": {
     "backgroundColor": "#04111f"
+  },
+  "plugins": {
+    "FirebaseAuthentication": {
+      "skipNativeAuth": true,
+      "providers": [
+        "google.com"
+      ]
+    }
   }
 }

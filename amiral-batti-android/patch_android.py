@@ -120,3 +120,15 @@ if vc:
     print('versionCode', vc)
 open(b, 'w', encoding='utf-8').write(t)
 print('patch tamam')
+
+# Google ile kaydet: Firebase Authentication eklentisi (Google) + google-services.json
+v = 'android/variables.gradle'
+t = open(v, encoding='utf-8').read()
+if 'rgcfaIncludeGoogle' not in t:
+    t = t.replace('ext {', 'ext {\n    rgcfaIncludeGoogle = true', 1)
+    open(v, 'w', encoding='utf-8').write(t)
+if os.path.exists('google-services.json'):
+    shutil.copy('google-services.json', 'android/app/google-services.json')
+    print('google-services.json kopyalandi')
+else:
+    print('UYARI: google-services.json yok, Google ile kaydet calismaz')
