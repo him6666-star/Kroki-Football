@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "307843857448-j7s3jltlotrmmns4j211icbo41irquai.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.amiralbatti.game",
+            "certificate_hash": "286bae501b7afe19bd968a747e99cd7047ccfc8a"
+          }
+        },
+        {
           "client_id": "307843857448-l2hog4jfnoe5f3e84p60j6kjavo10ndv.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
