@@ -1,0 +1,52 @@
+name: Amiral Batti Firebase kurulumu
+# Bir kez calistirilir: Android uygulamasini Firebase'e tanitir (Google ile kaydet icin), imza parmak izlerini ekler,
+# google-services.json'i yazdirir ve amiral-batti.web.app'i Google girisi icin yetkili alanlara ekler.
+on:
+  workflow_dispatch:
+    inputs:
+      play_sha1:
+        description: "Play Console > Uygulama butunlugu > Uygulama imzalama anahtari SHA-1 (opsiyonel)"
+        required: false
+        default: ""
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - run: echo '${{ secrets.FIREBASE_KEY }}' > "$RUNNER_TEMP/key.json"
+      - name: Android uygulamasi + parmak izleri + google-services.json
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/key.json
+          PLAY_SHA1: ${{ github.event.inputs.play_sha1 }}
+        run: |
+          FB="npx -y firebase-tools@13 --project scribble-kick"
+          APP=$($FB apps:list ANDROID --json | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const r=JSON.parse(s).result||[];const a=r.find(x=>x.packageName==="com.amiralbatti.game");console.log(a?a.appId:"")})')
+          if [ -z "$APP" ]; then
+            $FB apps:create ANDROID "Amiral Batti" --package-name com.amiralbatti.game
+            APP=$($FB apps:list ANDROID --json | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const r=JSON.parse(s).result||[];const a=r.find(x=>x.packageName==="com.amiralbatti.game");console.log(a?a.appId:"")})')
+          fi
+          echo "APP_ID=$APP"
+          DEBUG_SHA1=$(keytool -list -v -keystore amiral-batti-android/amiral-batti-debug.keystore -storepass android 2>/dev/null | grep -m1 "SHA1:" | awk '{print $2}')
+          UPLOAD_SHA1="40:60:89:10:74:41:C3:AD:E3:65:8E:1C:31:56:B2:4C:4C:E4:39:AF"
+          EXIST=$($FB apps:android:sha:list $APP 2>/dev/null | tr 'a-f' 'A-F')
+          for S in "$DEBUG_SHA1" "$UPLOAD_SHA1" "$PLAY_SHA1"; do
+            [ -z "$S" ] && continue
+            S=$(echo "$S" | tr 'a-f' 'A-F' | tr -d ' ')
+            if echo "$EXIST" | tr -d ':' | grep -q "$(echo $S | tr -d ':')"; then echo "zaten var: $S"; else $FB apps:android:sha:create $APP "$S" && echo "eklendi: $S"; fi
+          done
+          $FB apps:android:sha:list $APP
+          $FB apps:sdkconfig ANDROID $APP -o gs.json
+          echo "GSJSON_BASLA"; base64 -w0 gs.json; echo; echo "GSJSON_BITTI"
+      - name: Web icin yetkili alan adi
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/key.json
+        run: |
+          npm i --no-save firebase-admin@12 >/dev/null 2>&1
+          node tools/amiral_auth_domain.js
