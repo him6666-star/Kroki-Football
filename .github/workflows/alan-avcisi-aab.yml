@@ -30,7 +30,7 @@ jobs:
       - name: Oyun dosyalarini kopyala
         run: |
           rm -rf www && mkdir www
-          cp -r ../alan-avcisi/index.html ../alan-avcisi/css ../alan-avcisi/js ../alan-avcisi/assets www/
+          cp -r ../alan-avcisi/index.html ../alan-avcisi/gizlilik.html ../alan-avcisi/css ../alan-avcisi/js ../alan-avcisi/assets www/
       - name: Bagimliliklari kur
         run: npm install
       - name: Android projesini olustur
