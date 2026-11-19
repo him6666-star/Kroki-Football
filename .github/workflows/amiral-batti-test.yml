@@ -10,4 +10,10 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install playwright && python -m playwright install --with-deps chromium
-      - run: python tools/amiral_online_test.py https://amiral-batti.web.app
+      - run: python tools/amiral_room_test.py https://amiral-batti.web.app
+      - name: Test kayitlarini temizle
+        if: always()
+        run: |
+          echo '${{ secrets.FIREBASE_KEY }}' > "$RUNNER_TEMP/key.json"
+          npm i --no-save firebase-admin@12 >/dev/null 2>&1
+          [ -f test_uids.json ] && GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/key.json" node tools/amiral_test_cleanup.js || true
