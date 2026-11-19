@@ -6,8 +6,11 @@
    ========================================================= */
 const W=90,H=120,GOAL=80,FUSE_SPEED=70,FUSE_SPEED_SLOW=40;
 // Zorluk ayarı
-const DIFFS={easy:{sp:.75,boss:.8,nSmall:.6,hunt:0,atk:2.2,rage:.35,fuse:.7,shield:1.6},normal:{sp:.9,boss:.92,nSmall:.85,hunt:.7,atk:1.4,rage:.7,fuse:.85,shield:1.25},hard:{sp:1,boss:1,nSmall:1,hunt:1,atk:1,rage:1,fuse:1,shield:1}};
+const DIFFS={easy:{sp:.75,boss:.8,nSmall:.6,hunt:0,atk:2.2,rage:.35,fuse:.7,shield:1.6,lives:8},normal:{sp:.9,boss:.92,nSmall:.85,hunt:.7,atk:1.4,rage:.7,fuse:.85,shield:1.25,lives:5},hard:{sp:1,boss:1,nSmall:1,hunt:1,atk:1,rage:1,fuse:1,shield:1,lives:3}};
 const DIFF=()=>DIFFS[SAVE.settings.diff]||DIFFS.normal;
+const startLives=()=>isDaily(level)?3:DIFF().lives;
+const MAX_LIVES=9;
+let prevTry=null; // tekrar denemede bir önceki denemenin puanı
 const idx=(x,y)=>y*W+x;
 const R=Math.random;
 const clamp01=v=>Math.max(0,Math.min(1,v));
@@ -213,9 +216,9 @@ function relocate(e){
 }
 
 /* ---------- Bölüm ---------- */
-const levelIn=()=>(level-1)%BOSSES.length+1;
-const levelTier=()=>Math.floor((level-1)/BOSSES.length);
-function bossForLevel(lv){return BOSSES[(lv-1)%BOSSES.length]}
+const levelIn=()=>isFinal(level)?finalOf(level).at:isDaily(level)?bossIdx(dailyDef().id):(level-1)%BOSSES.length+1;
+const levelTier=()=>isFinal(level)?0:isDaily(level)?1:Math.floor((level-1)/BOSSES.length);
+function bossForLevel(lv){if(isFinal(lv))return BOSSES.find(b=>b.id===finalOf(lv).a);if(isDaily(lv))return dailyDef();return BOSSES[(lv-1)%BOSSES.length]}
 
 function startLevel(){
   levelDeaths=0;
@@ -227,6 +230,7 @@ function startLevel(){
   const D=DIFF(),bs=Math.min(9+li*.9+tier*3,24)*D.boss;
   boss={def,hp:1,maxHp:1,tier,dead:false,timer:2.5,bs};
   def.setup(bs,tier);
+  if(isFinal(level))spawnGuest(finalOf(level));
   const nSmall=def.smalls!==undefined?def.smalls:Math.max(1,Math.round(Math.min(1+Math.floor(li/3)+tier,6)*D.nSmall));
   const ss=Math.min(14+li*1.1+tier*3,30)*D.sp;
   for(let k=0;k<nSmall;k++){
@@ -249,7 +253,7 @@ const DIRS={U:[0,-1],D:[0,1],L:[-1,0],R:[1,0]};
 // Kenardayken yön seçimi: parmak açıkça içeriyi göstermiyorsa kenarda kal (köşe dönüşleri kolay),
 // içeriyi net gösteriyorsa beklemeden çık.
 const LEAVE_DOT=.94; // ~20 derece
-const LEAVE_DELAY=.12; // kenardan çıkmadan önce bekleme (sn)
+const LEAVE_DELAY=.08; // kenardan çıkmadan önce bekleme (sn)
 function pickDir(dir){
   const p=player,v=(typeof joyVec!=='undefined'&&joyVec&&joyDir===dir)?joyVec:{x:DIRS[dir][0],y:DIRS[dir][1]};
   if(p.drawing||!border[idx(p.x,p.y)])return DIRS[dir];
@@ -271,8 +275,13 @@ function tryMove(d){
   const p=player,nx=p.x+d[0],ny=p.y+d[1];
   for(const k in DIRS)if(DIRS[k]===d)p.lastK=k;
   if(nx<0||ny<0||nx>=W||ny>=H)return false;
-  const n=idx(nx,ny),c=grid[n];
-  if(c===2)return false;
+  const n=idx(nx,ny),c=grid[n],L=p.trail.length;
+  // geri dönüş: izin üstünden geldiğin yola dönersen iz geri sarılır
+  if(c===2){
+    if(p.drawing&&L>=2&&p.trail[L-2]===n){const last=p.trail.pop();grid[last]=0;paintCell(last);p.x=nx;p.y=ny;return true}
+    return false;
+  }
+  if(p.drawing&&c===1&&L===1&&nx===p.sx&&ny===p.sy){const last=p.trail.pop();grid[last]=0;paintCell(last);p.drawing=false;p.trail=[];fuse=null;p.x=nx;p.y=ny;p.hold=0;return true}
   if(c===0){
     if(!p.drawing){p.drawing=true;p.sx=p.x;p.sy=p.y;p.trail=[];fuse=null;sfx.start()}
     grid[n]=2;trailIdx[n]=p.trail.length;p.trail.push(n);paintCell(n);p.x=nx;p.y=ny;
@@ -293,7 +302,7 @@ function capture(){
   let added=trailCells.length;
   fuse=null;
   const mark=new Uint8Array(W*H);
-  const seeds=def.seeds?def.seeds():enemies.filter(e=>e.boss);
+  const seeds=def.seeds?def.seeds():enemies.filter(e=>e.boss&&!e.guest);
   if(seeds.length){
     seeds.forEach((e,k)=>{const s=findFreeCell(e.x,e.y,e.r);if(s<0)return;if(k>0&&!mark[s])cx.separated=true;if(!mark[s])flood(s,mark)});
   }else keepLargest(mark);
@@ -317,6 +326,7 @@ function capture(){
   powerups=powerups.filter(u=>{if(grid[idx(u.x,u.y)]===1){activate(u);cx.activated.push(u);return false}return true});
   if(def.postCapture)def.postCapture(cx);
   if(state!=='play')return;
+  for(const e of enemies)if(e.guest&&grid[cellAt(e.x,e.y)]===1){const q=freeSpotFar(e.r,player.x,player.y,25);e.x=q.x;e.y=q.y;burst(e.x,e.y,'#fff',16)} // final misafiri kapanda kalırsa başka yere ışınlanır
   for(const e of enemies)if(hitsClaimed(e.x,e.y,e.r))relocate(e);
   const nb=nearestBorder(p.x,p.y);p.x=nb[0];p.y=nb[1];
   for(const s of sparks){const b=nearestBorder(s.x,s.y);s.x=b[0];s.y=b[1];s.px=-1;s.py=-1}
@@ -339,7 +349,7 @@ function spawnPU(){
 function activate(u){
   sfx.pu();burst(u.x+.5,u.y+.5,PU[u.t].c,18);
   popText(t('pop.'+u.t),u.x,u.y,PU[u.t].c);
-  if(u.t==='L')lives=Math.min(lives+1,15);
+  if(u.t==='L')lives=Math.min(lives+1,MAX_LIVES);
   if(u.t==='S')effects.speed=8;
   if(u.t==='F')effects.freeze=5;
   if(u.t==='K'){effects.shield=7;edgeShield=Math.min(edgeMax,edgeShield+45)}
@@ -466,7 +476,7 @@ function update(dt){
   if(!frozen){
     if(def.ai)def.ai(dt);
     if(state!=='play')return;
-    bossAttack(dt);updateBeams(dt);
+    bossAttack(dt);guestAttack(dt);updateBeams(dt);
     const fr=clamp01(pctNow/GOAL),pRage=1+.85*DIFF().rage*fr*fr;
     // sıkışma öfkesi: boss'un etrafında duvara takılmadan ulaşabildiği alan daraldıkça
     boss.confT=(boss.confT||0)-dt;
@@ -545,7 +555,7 @@ function levelClear(bossKilled,secret){
   if(secret)bonus*=2;
   score+=bonus;recordScore(score);
   lastStars=1+(levelDeaths===0?1:0)+(bossKilled?1:0);
-  recordClear(level,{boss:bossKilled,secret,score,stars:lastStars});
+  if(!isDaily(level))recordClear(level,{boss:bossKilled,secret,score,stars:lastStars});
   updateHud();bossHud(true);
   if(bossKilled)popText(t('pop.defeated',{name:t('boss.'+boss.def.id+'.name')}),W/2,H*.35,'#f0abfc',1.8);
   clearTimeout(clearTimer);

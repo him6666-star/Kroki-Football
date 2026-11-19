@@ -24,7 +24,7 @@ function bossAttack(dt){
   boss.atk-=dt*(player.drawing?1.6:1)*(boss.rage||1);
   if(boss.atk>0)return;
   boss.atk=a.every*DIFF().atk*Math.max(.6,1-boss.tier*.15)*(.85+R()*.3);
-  const srcs=enemies.filter(e=>e.boss&&!e.harmless&&!(e.sleep>0)&&!e.hidden&&(!a.when||a.when(e)));
+  const srcs=enemies.filter(e=>e.boss&&!e.guest&&!e.harmless&&!(e.sleep>0)&&!e.hidden&&(!a.when||a.when(e)));
   if(!srcs.length)return;
   const px=player.x+.5,py=player.y+.5;
   srcs.forEach((e,k)=>{

@@ -71,6 +71,30 @@
   {
    "level": 18,
    "file": "bg/18.jpg"
+  },
+  {
+   "level": 19,
+   "file": "bg/19.jpg"
+  },
+  {
+   "level": 20,
+   "file": "bg/20.jpg"
+  },
+  {
+   "level": 21,
+   "file": "bg/21.jpg"
+  },
+  {
+   "level": 22,
+   "file": "bg/22.jpg"
+  },
+  {
+   "level": 23,
+   "file": "bg/23.jpg"
+  },
+  {
+   "level": 24,
+   "file": "bg/24.jpg"
   }
  ],
  "boss": [
@@ -213,6 +237,54 @@
   {
    "id": "m_zirh",
    "file": "boss/m_zirh.png"
+  },
+  {
+   "id": "at",
+   "file": "boss/at.png"
+  },
+  {
+   "id": "saat",
+   "file": "boss/saat.png"
+  },
+  {
+   "id": "bulut",
+   "file": "boss/bulut.png"
+  },
+  {
+   "id": "taklit",
+   "file": "boss/taklit.png"
+  },
+  {
+   "id": "sarmasik",
+   "file": "boss/sarmasik.png"
+  },
+  {
+   "id": "zar",
+   "file": "boss/zar.png"
+  },
+  {
+   "id": "m_at",
+   "file": "boss/m_at.png"
+  },
+  {
+   "id": "m_saat",
+   "file": "boss/m_saat.png"
+  },
+  {
+   "id": "m_bulut",
+   "file": "boss/m_bulut.png"
+  },
+  {
+   "id": "m_taklit",
+   "file": "boss/m_taklit.png"
+  },
+  {
+   "id": "m_sarmasik",
+   "file": "boss/m_sarmasik.png"
+  },
+  {
+   "id": "m_zar",
+   "file": "boss/m_zar.png"
   }
  ],
  "ui": [

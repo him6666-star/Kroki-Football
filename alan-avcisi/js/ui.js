@@ -41,8 +41,10 @@ function showMsg({icon,iconHtml,title,html,buttons}){
 function refreshMenu(){
   const nx=nextLevelToPlay();
   $('#bPlay .lbl').textContent=nx>1?t('menu.continue',{n:nx}):t('menu.play');
-  const c=clearedCount(BOSSES.length);
-  $('#mStat').innerHTML=(SAVE.hi?t('menu.best',{n:SAVE.hi})+'<br>':'')+(c?t('menu.progress',{a:c,b:BOSSES.length})+` · <span class="mStars">★ ${totalStars(BOSSES.length)}/${BOSSES.length*3}</span>`:'');
+  const c=clearedCount(BOSSES.length),fk=FINALS.map((f,i)=>1001+i);
+  $('#mStat').innerHTML=(SAVE.hi?t('menu.best',{n:SAVE.hi})+'<br>':'')+(c?t('menu.progress',{a:c,b:BOSSES.length})+` · <span class="mStars">★ ${totalStars(BOSSES.length,fk)}/${(BOSSES.length+FINALS.length)*3}</span>`:'');
+  const di=dailyInfo(),db=$('#bDaily');
+  if(db){db.querySelector('.lbl').textContent=t('daily.btn');db.querySelector('.dsub').textContent=di.played?t('daily.best',{n:di.best}):dailyDef().icon+' '+t('boss.'+dailyDef().id+'.name');db.classList.toggle('played',di.played)}
 }
 function goMenu(){
   clearTimeout(clearTimer);
@@ -74,14 +76,17 @@ function menuUpdate(dt){
 /* ---------- Oyun akışı ---------- */
 function startGame(lv){
   ensureAudio();
-  level=lv;lives=10;score=0;
+  level=lv;lives=startLives();score=0;prevTry=null;
   setInMenu(false);
   startLevel();
 }
 function onLevelStart(){
   const def=boss.def,name=t('boss.'+def.id+'.name');
-  showMsg({iconHtml:ringIcon(def),title:t('intro.title',{n:level,name}),
-    html:`<b style="color:#f0abfc">${t('intro.how')}</b><br>${t('boss.'+def.id+'.how')}<br><span class="small">${t('intro.skip',{g:GOAL})}</span>`,
+  let title=t('intro.title',{n:level,name}),pre='';
+  if(isFinal(level)){const F=finalOf(level),gn=t('boss.'+F.b+'.name');title=t('final.title',{n:level-1000,a:name,b:gn});pre=`<b style="color:#fde047">${t('final.note',{a:name,b:gn})}</b><br>`}
+  if(isDaily(level)){title=t('daily.title',{name});pre=`<b style="color:#fde047">${t('daily.note')}</b><br>`}
+  showMsg({iconHtml:ringIcon(def),title,
+    html:`${pre}<b style="color:#f0abfc">${t('intro.how')}</b><br>${t('boss.'+def.id+'.how')}<br><span class="small">${t('intro.skip',{g:GOAL})}</span>${prevTry&&prevTry.lv===level?`<br><b style="color:#7cc8ff">${t('retry.prev',{n:prevTry.s})}</b>`:''}`,
     buttons:[{label:t('intro.start'),icon:'play',fn:()=>{hideScreens();state='play';last=performance.now()}}]});
 }
 function onLevelClear(bossKilled,secret,bonus){
@@ -94,19 +99,22 @@ function onLevelClear(bossKilled,secret,bonus){
   html=`<div class="starRow">${got.map((g,k)=>`<span class="bigStar${g?' on':''}" style="animation-delay:${.15+k*.25}s">★</span>`).join('')}</div>`+
        `<div class="starConds">${conds.map((c,k)=>`<span class="${got[k]?'on':''}">${got[k]?'✓':'○'} ${c}</span>`).join('')}</div>`+html;
   if(got.filter(Boolean).length)setTimeout(()=>{got.forEach((g,k)=>{if(g)setTimeout(()=>{tone(660+k*220,.12,'triangle',.05);buzz(12)},150+k*250)})},0);
-  showMsg({iconHtml:bossKilled?ringIcon(boss.def,'🏆'):ringIcon(null,secret?'✨':'⭐'),title:secret?t('clear.secret'):bossKilled?t('clear.boss'):t('clear.title',{n:level}),html,
-    buttons:[{label:t('btn.next'),icon:'next',kind:'success',fn:()=>{level++;startLevel()}},{label:t('btn.menu'),icon:'home',ghost:true,fn:goMenu}]});
+  if(isDaily(level)){const nb=recordDaily(score+bonus);html+=`<br><b style="color:#fde047">${t('daily.score',{n:score+bonus})}${nb?' · '+t('daily.newBest'):''}</b><br>`+t('daily.streak',{n:(SAVE.daily||{}).streak||1})}
+  const btns=isDaily(level)?[{label:t('btn.menu'),icon:'home',kind:'success',fn:goMenu}]:[{label:t('btn.next'),icon:'next',kind:'success',fn:()=>{level=nextAfter(level);startLevel()}},{label:t('btn.menu'),icon:'home',ghost:true,fn:goMenu}];
+  showMsg({iconHtml:bossKilled?ringIcon(boss.def,'🏆'):ringIcon(null,secret?'✨':'⭐'),title:secret?t('clear.secret'):bossKilled?t('clear.boss'):t('clear.title',{n:levelLabel()}),html,buttons:btns});
 }
 function onGameOver(){
-  showMsg({icon:'💥',title:t('over.title'),html:t('over.body',{s:score,n:level,h:SAVE.hi}),
-    buttons:[{label:t('btn.retry'),icon:'retry',fn:()=>{lives=10;score=0;startLevel()}},{label:t('btn.menu'),icon:'home',ghost:true,fn:goMenu}]});
+  let html=t('over.body',{s:score,n:levelLabel(),h:SAVE.hi});
+  if(isDaily(level)){const nb=recordDaily(score);html=t('daily.score',{n:score})+(nb?' · '+t('daily.newBest'):'')+'<br>'+t('daily.streak',{n:(SAVE.daily||{}).streak||1})}
+  showMsg({icon:'💥',title:t('over.title'),html,
+    buttons:[{label:t('btn.retry'),icon:'retry',fn:()=>{prevTry={lv:level,s:score};lives=startLives();score=0;startLevel()}},{label:t('btn.menu'),icon:'home',ghost:true,fn:goMenu}]});
 }
 function pauseGame(){
   if(state!=='play')return;
   state='paused';showPause();
 }
 function showPause(){
-  showMsg({icon:'⏸',title:t('pause.title'),html:t('pause.body',{n:level,p:pctNow.toFixed(1)}),
+  showMsg({icon:'⏸',title:t('pause.title'),html:t('pause.body',{n:levelLabel(),p:pctNow.toFixed(1)}),
     buttons:[{label:t('btn.resume'),icon:'play',fn:()=>{hideScreens();state='play';last=performance.now()}},
              {label:t('btn.settings'),icon:'gear',ghost:true,fn:()=>openSettings('pause')},
              {label:t('btn.menu'),icon:'home',ghost:true,fn:goMenu}]});
@@ -114,7 +122,7 @@ function showPause(){
 
 /* ---------- HUD ---------- */
 function updateHud(){
-  $('#lv').textContent=level;$('#sc').textContent=score;
+  $('#lv').textContent=levelLabel();$('#sc').textContent=score;
   $('#lives').textContent=Math.max(0,lives);
   const p=Math.min(100,pctNow);
   $('#fill').style.width=p+'%';$('#pct').textContent=(LANG==='tr'?'%'+p.toFixed(1):p.toFixed(1)+'%')+' / '+(LANG==='tr'?'%'+GOAL:GOAL+'%');
@@ -155,6 +163,14 @@ function renderLevels(){
     el.innerHTML=`<span class="no">${n}</span>${gem}${src?`<img class="th" src="${src}" alt="">`:`<span class="th">${b.icon}</span>`}<span class="nm">${t('boss.'+b.id+'.name')}</span><span class="stars">${stars}</span>`;
     el.addEventListener('click',()=>{sfx.click();startGame(n)});
     g.appendChild(el);
+    const fi=FINALS.findIndex(f=>f.at===n);
+    if(fi>=0){
+      const F=FINALS[fi],fn=1001+fi,fp=SAVE.prog[fn]||{},fs=fp.stars||0,fe=document.createElement('button');
+      fe.className='lv final'+(fp.done?' done':'');
+      const ia=bossImg(BOSSES.find(b=>b.id===F.a)),ib=bossImg(BOSSES.find(b=>b.id===F.b));
+      fe.innerHTML=`<span class="no">F${fi+1}</span><span class="duo">${ia?`<img src="${ia}" alt="">`:''}${ib?`<img src="${ib}" alt="">`:''}</span><span class="nm">${t('final.tile')}</span><span class="stars">${[0,1,2].map(k=>`<i class="${k<fs?'on':''}">★</i>`).join('')}</span>`;
+      fe.addEventListener('click',()=>{sfx.click();startGame(fn)});g.appendChild(fe);
+    }
   });
 }
 
@@ -167,8 +183,9 @@ function openSettings(from){
   $('#sMusic').classList.toggle('on',s.music);
   $('#sVib').classList.toggle('on',s.vib!==false);
   const L=$('#sLang');L.innerHTML='';
-  for(const code in LANGS){const b=document.createElement('button');b.textContent=LANGS[code];b.classList.toggle('on',code===LANG);
-    b.addEventListener('click',()=>{setLang(code);openSettings(settingsFrom)});L.appendChild(b)}
+  const sel=document.createElement('select');sel.className='langSel';
+  for(const code in LANGS){const o=document.createElement('option');o.value=code;o.textContent=LANGS[code];o.selected=code===LANG;sel.appendChild(o)}
+  sel.addEventListener('change',()=>{sfx.click();setLang(sel.value);openSettings(settingsFrom)});L.appendChild(sel);
   const Dg=$('#sDiff');Dg.innerHTML='';
   for(const k of['easy','normal','hard']){const b=document.createElement('button');b.textContent=t('diff.'+k);b.classList.toggle('on',(s.diff||'normal')===k);
     b.addEventListener('click',()=>{sfx.click();s.diff=k;persist();openSettings(settingsFrom)});Dg.appendChild(b)}
@@ -212,6 +229,7 @@ document.addEventListener('contextmenu',e=>e.preventDefault());
 document.addEventListener('visibilitychange',()=>{if(document.hidden)pauseGame()});
 
 /* ---------- Düğmeler ---------- */
+$('#bDaily').addEventListener('click',()=>{sfx.click();startGame(2000)});
 $('#bPlay').addEventListener('click',()=>{sfx.click();if(!SAVE.seenTut)openTut(true);else startGame(nextLevelToPlay())});
 $('#bLevels').addEventListener('click',()=>{sfx.click();renderLevels();show('scrLevels')});
 $('#bSettings').addEventListener('click',()=>{sfx.click();openSettings('scrMenu')});

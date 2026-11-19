@@ -380,8 +380,10 @@ const BOSSES=[
   setup(bs){const e=spawnBoss(W/2,H*.42,3.4,bs*.9,'balcik');e.gen=0;boss.hp=boss.maxHp=7},
   ai(dt){for(const e of enemies)if(e.kind==='balcik')wander(e,dt)},
   always(){let m=0;for(const e of enemies)if(e.kind==='balcik')m+=[7,3,1][e.gen];boss.hp=m;if(m<=0)killBoss(false)},
+  seeds(){return []}, // tek alan kalır; kapanda kalan parçalar ölür (oyuncu ayrı bir adaya hapsolmasın)
   preCapture(cx){cx.split=enemies.filter(e=>e.kind==='balcik'&&e.gen<2&&cx.trailDist(e)<e.r+11)},
   postCapture(cx){
+    enemies=enemies.filter(e=>{if(e.kind==='balcik'&&grid[cellAt(e.x,e.y)]===1){burst(e.x,e.y,'#4ade80',24);addScore(500,e.x,e.y);sfx.kill();cx.split=cx.split.filter(q=>q!==e);return false}return true});
     for(const e of cx.split){
       if(!enemies.includes(e))continue;
       const ng=e.gen+1,nr=ng===1?2.3:1.3,a=Math.atan2(e.vy,e.vx)+Math.PI/2,base=e.base*(ng===1?1.15:1.4);

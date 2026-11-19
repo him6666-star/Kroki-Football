@@ -40,9 +40,13 @@ const THEMES=[
   {key:'masque',sky:['#2e1065','#86198f','#f0abfc'],sun:'#fdf4ff',layers:[],city:1,stars:1},
   {key:'jungle',sky:['#064e3b','#15803d','#bbf7d0'],sun:'#fefce8',layers:['#166534','#14532d','#052e16'],trees:1},
   {key:'casino',sky:['#450a0a','#9f1239','#fda4af'],sun:'#fde047',layers:[],synth:1,stars:1,noSun:1},
+  {key:'magnet',sky:['#0f172a','#1e3a8a','#93c5fd'],sun:'#f87171',layers:['#334155','#1e293b','#0f172a'],city:1},
+  {key:'deepsea',sky:['#020617','#1e1b4b','#6d28d9'],sun:'#c4b5fd',layers:['#312e81','#1e1b4b','#0b0a2a'],stars:1,noSun:1},
+  {key:'petri',sky:['#052e16','#15803d','#d9f99d'],sun:'#fefce8',layers:['#166534','#14532d','#052e16'],aurora:1},
 ];
 function themeFor(lv){return THEMES[(lv-1)%THEMES.length]}
 function genPicture(lv){
+  if(isFinal(lv))lv=finalOf(lv).at;else if(isDaily(lv))lv=bossIdx(dailyDef().id);
   const ti=(lv-1)%THEMES.length,th=THEMES[ti],r=rng(lv*977+13);
   const c=document.createElement('canvas');c.width=W*cpx;c.height=H*cpx;
   const g=c.getContext('2d'),w=c.width,h=c.height;
