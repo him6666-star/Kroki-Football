@@ -68,9 +68,11 @@ async def main():
             if all(ok): break
             await asyncio.sleep(0.5)
         print("rövanş başladı:", ok, "yeni maç farklı:", await A.evaluate("ON.gid") != old, "aynı maç:", await A.evaluate("ON.gid") == await B.evaluate("ON.gid"))
-        # sıralama
-        await B.click("#homeBtn"); await B.wait_for_timeout(300); await B.click("#quitYes"); await asyncio.sleep(3)
-        await A.click("#resMenu") if await A.evaluate("document.getElementById('result').classList.contains('show')") else None
+        # rövanş maçını da A batırarak kazansın (sıralamada güncelleme yolu)
+        await play_until_over(0)
+        for i, pg in enumerate(pages):
+            print("REMATCH", "AB"[i], await pg.evaluate("({title:document.getElementById('resTitle').textContent,why:ON.g&&ON.g.why})"))
+            print("LOG2", "AB"[i], await pg.evaluate("LOG.filter(l=>/sıralama|profil/.test(l)).slice(-4).join(' || ')"))
         await A.evaluate("document.getElementById('result').classList.remove('show'); leaveOnline(false); show('menu')")
         await A.click("#boardBtn"); await asyncio.sleep(3)
         print("sıralama:", (await A.inner_text("#bdList")).replace("\n", " | ")[:300])
