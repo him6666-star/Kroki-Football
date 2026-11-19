@@ -51,8 +51,8 @@ button{font-family:inherit;cursor:pointer;border:0;color:inherit}
 .icon-btn:active{transform:translateY(2px)}
 
 /* ---------- MENU ---------- */
-#menu{justify-content:center;gap:10px}
-.logo{text-align:center;position:relative;margin-top:-20px}
+#menu{justify-content:safe center;gap:10px}
+.logo{text-align:center;position:relative;margin-top:0}
 .logo h1{font-family:"Black Ops One",cursive;font-weight:400;margin:0;line-height:.9;font-size:clamp(46px,14vw,86px);letter-spacing:3px;
   background:linear-gradient(180deg,#fff3c4 0%,#ffd45a 40%,#ff9d1c 100%);-webkit-background-clip:text;background-clip:text;color:transparent;
   filter:drop-shadow(0 4px 0 #6b3a00) drop-shadow(0 0 30px rgba(255,180,40,.35));animation:logoIn .8s cubic-bezier(.2,1.6,.4,1)}
@@ -61,6 +61,7 @@ button{font-family:inherit;cursor:pointer;border:0;color:inherit}
 .hero{position:relative;width:min(92vw,560px);height:min(30vw,170px);margin:6px 0 10px}
 .hero img.ship{position:absolute;left:50%;top:50%;width:100%;transform:translate(-50%,-50%) rotate(-4deg);
   filter:drop-shadow(0 18px 14px rgba(0,0,0,.55));animation:bob 3.4s ease-in-out infinite}
+@media (max-height:700px){.hero{height:min(22vw,110px);margin:0 0 4px}.logo h1{font-size:clamp(40px,12vw,70px)}}
 @keyframes bob{0%,100%{transform:translate(-50%,-50%) rotate(-4deg)}50%{transform:translate(-50%,-44%) rotate(-2deg)}}
 .hero .wake{position:absolute;left:4%;right:2%;top:58%;height:22%;border-radius:50%;
   background:radial-gradient(ellipse at 15% 50%,rgba(255,255,255,.55),rgba(255,255,255,0) 70%);filter:blur(6px);animation:wake 1.6s ease-in-out infinite}
@@ -71,6 +72,7 @@ button{font-family:inherit;cursor:pointer;border:0;color:inherit}
 @keyframes menuBoom{0%,100%{opacity:0;transform:scale(.2)}4%{opacity:1;transform:scale(1.1)}14%{opacity:0;transform:scale(1.4)}}
 .menu-buttons{display:flex;flex-direction:column;gap:14px;width:min(80vw,300px)}
 .menu-buttons .btn.gold,.menu-buttons .btn.green{font-size:20px;padding:16px}
+.menu-buttons #friendBtn{font-size:17px;padding:13px}
 .diff-row{display:flex;gap:8px;justify-content:center}
 .chip{flex:1;font-weight:800;font-size:14px;padding:10px 6px;border-radius:12px;background:rgba(10,40,70,.75);border:2px solid rgba(255,255,255,.1);transition:.15s}
 .chip.on{border-color:var(--gold);color:var(--gold);background:rgba(80,55,0,.55);box-shadow:0 0 14px rgba(255,201,74,.35)}
@@ -193,6 +195,75 @@ button{font-family:inherit;cursor:pointer;border:0;color:inherit}
 @keyframes blip{0%,60%{opacity:0}70%{opacity:1}100%{opacity:0}}
 .mmsub{font-size:12px;opacity:.7;min-height:30px;margin:6px 0 14px}
 
+/* ---------- arkadaşla oyna / rövanş ---------- */
+.or{text-align:center;opacity:.6;font-size:12px;font-weight:800;margin:12px 0 10px;letter-spacing:2px}
+.codein{display:flex;gap:8px}
+.codein input{flex:1;min-width:0;font-family:"Black Ops One",cursive;font-size:28px;letter-spacing:10px;text-align:center;border-radius:14px;border:2px solid rgba(255,255,255,.18);
+  background:rgba(0,0,0,.35);color:#fff;padding:8px 6px;outline:none}
+.codein input:focus{border-color:var(--gold)}
+.bigcode{font-family:"Black Ops One",cursive;font-size:64px;letter-spacing:14px;text-align:center;color:var(--gold);text-shadow:0 4px 0 #6b3a00,0 0 26px rgba(255,201,74,.45);padding-left:14px}
+.waitline{text-align:center;font-weight:700;font-size:14px;margin:14px 0 4px;opacity:.85}
+.dots::before{content:"⚓";display:inline-block;animation:spin 2s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.roommsg{min-height:20px;text-align:center;font-weight:700;font-size:13px;margin:10px 0;color:#ff9b85}
+#room .card .btn.sm.red{margin-top:4px}
+a.btn{text-decoration:none;display:inline-block}
+.mmalt{margin:0 0 12px}
+.mmalt-t{font-size:13px;opacity:.85;margin-bottom:10px}
+.rematch{margin:-4px 0 14px}
+.rematch .btn{width:100%}
+.rematch .btn.wait{filter:grayscale(.5) brightness(.85)}
+.rematch .btn.ask{animation:tipPulse2 1s ease-in-out infinite}
+@keyframes tipPulse2{50%{transform:scale(1.05)}}
+.rmsg{font-size:13px;font-weight:700;margin-top:8px;min-height:16px;color:#9fd3ff}
+
+/* ---------- profil / rütbe / sıralama ---------- */
+.rb{display:inline-flex;align-items:center;gap:5px;font-weight:900;font-size:13px;padding:3px 10px 3px 6px;border-radius:999px;white-space:nowrap;vertical-align:middle;
+  border:1.5px solid rgba(255,255,255,.25);box-shadow:inset 0 1px 0 rgba(255,255,255,.25)}
+.rb i{font-style:normal;font-size:11px;letter-spacing:-1px;background:rgba(0,0,0,.28);border-radius:999px;padding:2px 6px}
+.rb.t0{background:linear-gradient(180deg,#c98b5a,#8a5530);color:#fff3e6}
+.rb.t1{background:linear-gradient(180deg,#d9e3ec,#8b9aa8);color:#1b2733}
+.rb.t2{background:linear-gradient(180deg,#ffe07a,#d79a12);color:#3a2700}
+.rb.t3{background:linear-gradient(180deg,#24406b,#0d1d36);color:#ffd45a;border-color:#ffc94a;box-shadow:0 0 12px rgba(255,201,74,.45)}
+.rb.sm{font-size:10px;padding:2px 7px 2px 4px}.rb.sm i{font-size:9px;padding:1px 4px}
+.menu-prof{position:relative;align-self:flex-start;flex-shrink:0;margin:0 0 4px 0;max-width:200px;text-align:left;border-radius:14px;padding:8px 10px;
+  background:rgba(4,20,38,.8);border:1.5px solid rgba(255,201,74,.35);box-shadow:0 4px 12px rgba(0,0,0,.4);color:var(--foam);font-family:inherit;z-index:3}
+.mp-name{font-weight:900;font-size:14px;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mp-xp{font-size:10.5px;opacity:.75;margin-top:3px}
+.mp-task{position:absolute;top:-8px;right:-8px;background:#ff5a36;color:#fff;font-weight:900;font-size:11px;border-radius:999px;padding:3px 7px;box-shadow:0 2px 6px rgba(0,0,0,.5)}
+.xpbar{height:6px;border-radius:9px;background:rgba(255,255,255,.12);overflow:hidden;margin-top:5px}
+.xpbar b{display:block;height:100%;background:linear-gradient(90deg,#ffc94a,#ff9d1c);border-radius:9px;transition:width .8s ease}
+.xpbar.big{height:10px;margin-top:10px}
+.card.wide{width:min(94vw,400px);max-height:88vh;overflow-y:auto;text-align:left}
+.card.wide h2{text-align:center}
+.pf-rank{text-align:center;margin-bottom:6px}.pf-rank .rb{font-size:17px;padding:5px 14px 5px 8px}
+.pf-sec{font-weight:900;font-size:13px;letter-spacing:.5px;margin:14px 0 8px;color:#9fd3ff}
+.pf-sec small{opacity:.7;font-weight:600}
+.codein input#pfName{font-family:Rubik,sans-serif;font-size:17px;letter-spacing:0;text-align:left;padding:10px 12px}
+.task{display:flex;justify-content:space-between;align-items:center;gap:10px;background:rgba(0,0,0,.25);border-radius:12px;padding:9px 11px;margin-bottom:7px;font-size:13px}
+.task>span{font-weight:900;color:var(--gold);white-space:nowrap;font-size:12px}
+.task.done{opacity:.6}.task.done b{text-decoration:line-through}
+.tbar{height:5px;border-radius:9px;background:rgba(255,255,255,.12);margin-top:6px;overflow:hidden}.tbar i{display:block;height:100%;background:#5dff8f}
+.gbtn{width:100%;background:linear-gradient(180deg,#ffffff,#dfe6ee);color:#1b2733;text-shadow:none;box-shadow:0 4px 0 #8b9aa8}
+.gbtn b{color:#4285f4;font-size:17px;margin-right:4px}
+.gnote{font-size:11.5px;opacity:.7;margin-top:8px;text-align:center}
+.gok{text-align:center;font-weight:800;font-size:14px;color:#7dffa6}.gok small{color:var(--foam);opacity:.7;font-weight:600}
+.bd-sub{text-align:center;font-size:12px;opacity:.75;margin:-2px 0 12px}
+.bd-list{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.bd-row{display:flex;align-items:center;gap:8px;background:rgba(0,0,0,.25);border-radius:10px;padding:8px 10px;font-size:13.5px}
+.bd-row.me{background:rgba(255,201,74,.18);border:1px solid rgba(255,201,74,.5)}
+.bd-row.sep{margin-top:8px}
+.bd-pos{width:28px;text-align:center;font-weight:900}
+.bd-n{flex:1;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bd-w{font-weight:900;color:var(--gold);min-width:26px;text-align:right}
+.bd-empty{text-align:center;opacity:.75;padding:18px 6px;font-size:14px}
+.bd-note{font-size:11.5px;opacity:.65;text-align:center;margin-bottom:12px}
+.xpres{margin:-6px 0 14px;font-size:13px}
+.xpres .gain{font-weight:900;color:#7dffa6;font-size:16px}
+.xpres .promo{display:block;margin-top:6px;font-weight:900;color:var(--gold);font-size:15px;animation:tipPulse2 1s ease-in-out 3}
+.xpres .tdone{display:block;font-size:12px;margin-top:4px;color:#9fd3ff}
+#foeLabel .rb{margin-left:4px}
+
 /* ---------- modals ---------- */
 .overlay{position:fixed;inset:0;background:rgba(1,8,16,.72);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:30;padding:20px}
 .overlay.show{display:flex}
@@ -220,6 +291,7 @@ button{font-family:inherit;cursor:pointer;border:0;color:inherit}
 
   <!-- ===== MAIN MENU ===== -->
   <section class="screen show" id="menu">
+    <button class="menu-prof" id="menuProf"></button>
     <div class="logo">
       <h1>AMİRAL<br>BATTI</h1>
       <div class="tag">⚓ DENİZ SAVAŞI ⚓</div>
@@ -232,10 +304,15 @@ button{font-family:inherit;cursor:pointer;border:0;color:inherit}
     <div class="menu-buttons">
       <button class="btn gold" id="playBtn">▶ BİLGİSAYARA KARŞI</button>
       <button class="btn green" id="onlineBtn">🌐 ONLINE RAKİP BUL</button>
+      <button class="btn" id="friendBtn">👥 ARKADAŞLA OYNA</button>
       <div class="diff-row" id="diffRow">
         <button class="chip" data-d="easy">Kolay</button>
         <button class="chip on" data-d="normal">Normal</button>
         <button class="chip" data-d="hard">Zor</button>
+      </div>
+      <div class="menu-foot">
+        <button class="btn sm" id="profBtn">👤 Profil & Görevler</button>
+        <button class="btn sm" id="boardBtn">🏆 Sıralama</button>
       </div>
       <div class="menu-foot">
         <button class="btn sm" id="howBtn">❓ Nasıl Oynanır</button>
@@ -254,7 +331,7 @@ button{font-family:inherit;cursor:pointer;border:0;color:inherit}
     </div>
     <div class="fleets" id="fleets" style="display:none">
       <div class="side"><span>🛡️ FİLON</span><div class="bars" id="myBars"></div></div>
-      <div class="side r"><span>DÜŞMAN 🎯</span><div class="bars" id="foeBars"></div></div>
+      <div class="side r"><span id="foeLabel">DÜŞMAN 🎯</span><div class="bars" id="foeBars"></div></div>
     </div>
     <div class="queue" id="queue"></div>
     <div class="msg" id="msg"></div>
@@ -301,7 +378,61 @@ button{font-family:inherit;cursor:pointer;border:0;color:inherit}
     <div class="radar" id="mmRadar"></div>
     <div style="font-weight:800;font-size:17px" id="mmText">Rakip aranıyor...</div>
     <div class="mmsub" id="mmSub"></div>
+    <div class="mmalt" id="mmAlt" style="display:none">
+      <div class="mmalt-t">Şu an rakip yok gibi görünüyor 🤔 Aramaya devam ediyorum, istersen:</div>
+      <div class="row"><button class="btn sm" id="mmBot">🤖 Bilgisayara karşı</button><button class="btn sm" id="mmFriend">👥 Arkadaşını davet et</button></div>
+    </div>
     <button class="btn sm red" id="mmCancel">✕ Vazgeç</button>
+  </div>
+</div>
+
+<div class="overlay" id="profile">
+  <div class="card wide">
+    <h2 style="font-size:30px">PROFİL</h2>
+    <div class="pf-rank" id="pfRank"></div>
+    <div class="pf-sec">İsmin (rakiplerin görür)</div>
+    <div class="codein"><input id="pfName" maxlength="14" autocomplete="off" spellcheck="false"><button class="btn green sm" id="pfSave">Kaydet</button></div>
+    <div class="roommsg" id="pfNameMsg"></div>
+    <div class="statgrid" id="pfStats"></div>
+    <div class="pf-sec">📅 Bugünün görevleri <small>(her gün yenilenir)</small></div>
+    <div id="pfTasks"></div>
+    <div class="pf-sec">💾 Kayıt</div>
+    <div id="gBox"></div><div class="roommsg" id="gMsg"></div>
+    <button class="btn gold" id="pfClose" style="width:100%">TAMAM</button>
+  </div>
+</div>
+
+<div class="overlay" id="board">
+  <div class="card wide">
+    <h2 style="font-size:30px">🏆 SIRALAMA</h2>
+    <div class="bd-sub" id="bdSub"></div>
+    <div class="bd-list" id="bdList"></div>
+    <div class="bd-note">Sadece online maçta rakibin tüm filosunu batırarak kazandığın maçlar sayılır.</div>
+    <button class="btn gold" id="bdClose" style="width:100%">TAMAM</button>
+  </div>
+</div>
+
+<div class="overlay" id="room">
+  <div class="card" style="border-color:#7cc4ff">
+    <h2 style="color:#9fd3ff;text-shadow:0 3px 0 #0b2d52;font-size:30px">ARKADAŞLA OYNA</h2>
+    <div id="roomChoose">
+      <p style="text-align:center;margin:6px 0 14px">Oda kur ve kodu arkadaşına gönder, ya da arkadaşının kodunu gir.</p>
+      <button class="btn gold" id="roomCreate" style="width:100%">➕ ODA KUR</button>
+      <div class="or">ya da</div>
+      <div class="codein"><input id="roomCode" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="Kod"><button class="btn green" id="roomJoin">Katıl</button></div>
+    </div>
+    <div id="roomHost" style="display:none">
+      <p style="text-align:center;margin:6px 0 4px">Oda kodun:</p>
+      <div class="bigcode" id="roomCodeBig">----</div>
+      <p style="text-align:center;margin:4px 0 14px;font-size:13px">Arkadaşın <b>Arkadaşla Oyna → Katıl</b> kısmına bu kodu girsin ya da linke tıklasın.</p>
+      <div class="row" style="flex-wrap:wrap">
+        <a class="btn sm green" id="roomWa" target="_blank" rel="noopener">💬 WhatsApp'ta gönder</a>
+        <button class="btn sm" id="roomCopy">🔗 Linki kopyala</button>
+      </div>
+      <div class="waitline"><span class="dots"></span> Arkadaşın bekleniyor…</div>
+    </div>
+    <div class="roommsg" id="roomMsg"></div>
+    <button class="btn sm red" id="roomCancel">✕ Vazgeç</button>
   </div>
 </div>
 
@@ -310,11 +441,13 @@ button{font-family:inherit;cursor:pointer;border:0;color:inherit}
     <h2 id="resTitle">ZAFER!</h2>
     <div class="stars" id="stars"></div>
     <div class="newbest" id="newBest"></div>
+    <div class="xpres" id="xpRes"></div>
     <div class="statgrid">
       <div class="stat"><b id="sShots">0</b><small>Atış</small></div>
       <div class="stat"><b id="sAcc">0%</b><small>İsabet</small></div>
       <div class="stat"><b id="sLeft">0</b><small>Kalan Gemi</small></div>
     </div>
+    <div class="rematch" id="rematchBox" style="display:none"><button class="btn green" id="rematchBtn">🔁 RÖVANŞ</button><div class="rmsg" id="rematchMsg"></div></div>
     <div class="row"><button class="btn sm" id="resMenu">⌂ Menü</button><button class="btn gold" id="resAgain">↻ Tekrar</button></div>
   </div>
 </div>
@@ -550,7 +683,7 @@ const allSunk=b=>b.ships.every(s=>s.hits===s.size);
 const coord=(r,c)=>LETTERS[r]+(c+1);
 
 function newGame(online){
-  online=!!online;
+  online=!!online; if(!online) $("foeLabel").textContent="DÜŞMAN 🎯";
   state={online,phase:"setup",horizontal:true,placeIdx:0,sel:0,player:newBoard(),enemy:newBoard(),busy:false,view:"player",
          ai:{targets:[]},shotsP:0,hitsP:0,shotsE:0,lastE:null,lastP:null,reveal:false,newShip:-1};
   if(!online) randomPlace(state.enemy);
@@ -873,7 +1006,15 @@ function endGame(won,opt){
     if(won&&(best===null||state.shotsP<best)){ store.set(key,state.shotsP); nb=best===null?"İLK ZAFER! 🎉":"🎉 YENİ REKOR!"; }
     if(won) store.set("wins",store.get("wins",0)+1);
   }
+  const lost=state.player.ships.filter(s=>s.hits===s.size).length, sunk=state.enemy.ships.filter(s=>s.hits===s.size).length;
+  const xr=PROF.onGameEnd({won,online:!!opt.online,why:opt.why||"",diff:difficulty,shots:state.shotsP,hits:state.hitsP,acc,lost,sunk,stars});
+  if(opt.online&&won&&opt.why==="sunk"&&ON.gid) PROF.creditWin(ON.gid);
+  let xh=xr.gain?`<span class="gain">+${xr.gain} XP</span>`:"";
+  xr.done.forEach(T=>{ xh+=`<span class="tdone">✅ Görev tamam: ${T.t} (+${T.xp})</span>`; });
+  if(xr.r1>xr.r0){ xh+=`<span class="promo">🎖️ TERFİ! Artık ${RANKS[xr.r1][1]}sın!</span>`; setTimeout(()=>{ banner("TERFİ!",RANKS[xr.r1][1].toUpperCase(),false); Sound.win(); },won?3400:3800); }
+  $("xpRes").innerHTML=xh;
   $("resAgain").textContent=opt.online?"🌐 Yeni Rakip":"↻ Tekrar";
+  $("rematchBox").style.display="none"; if(opt.online) setTimeout(()=>rematchUI(ON.g),0);
   setTimeout(()=>{
     $("resultCard").className="card"+(won?"":" lose");
     $("resTitle").textContent=won?"ZAFER!":"YENİLGİ";
@@ -908,17 +1049,18 @@ function fbInit(){ if(ON.db) return true; if(!window.firebase) return false;
   firebase.initializeApp(AB_CFG); ON.auth=firebase.auth(); ON.db=firebase.firestore();
   try{ ON.db.settings({experimentalAutoDetectLongPolling:true,merge:true}); }catch(e){} ON.FV=firebase.firestore.FieldValue; return true; }
 async function fbUser(){ if(ON.auth.currentUser) return ON.auth.currentUser.uid; const c=await ON.auth.signInAnonymously(); return c.user.uid; }
-const myName=()=>{ let n=store.get("name",null); if(!n){ n="Kaptan "+(1000+Math.random()*9000|0); store.set("name",n); } return n; };
+const myName=()=>PROF.name();
 const tset=(k,fn,ms,rep)=>{ tclr(k); ON.timers[k]=rep?setInterval(fn,ms):setTimeout(fn,ms); };
 const tclr=k=>{ if(ON.timers[k]){ clearInterval(ON.timers[k]); clearTimeout(ON.timers[k]); delete ON.timers[k]; } };
 const packShip=s=>({name:s.name,size:s.size,hor:!!s.hor,cells:s.cells.map(([r,c])=>r*10+c).join(",")});
 const unpackCells=str=>str.split(",").map(Number).map(v=>[v/10|0,v%10]);
 
 /* ---------- matchmaking UI ---------- */
-function showMM(t){ $("mmText").textContent=t; $("mmSub").textContent=""; $("mmRadar").style.display=""; $("mm").classList.add("show");
+function showMM(t){ $("mmText").textContent=t; $("mmSub").textContent=""; $("mmRadar").style.display=""; $("mm").classList.add("show"); $("mmAlt").style.display="none";
+  tset("mmalt",()=>{ if(ON.searching) $("mmAlt").style.display=""; },25000);
   const t0=Date.now(); tset("mmclock",()=>{ if(ON.searching) $("mmSub").textContent=`⏱️ ${Math.round((Date.now()-t0)/1000)} sn · Arkadaşına linki atarsan anında eşleşirsiniz`; },1000,true); }
 function setMM(t,err){ $("mmText").textContent=t; if(err){ $("mmRadar").style.display="none"; $("mmSub").textContent=""; tclr("mmclock"); } }
-function hideMM(){ $("mm").classList.remove("show"); tclr("mmclock"); }
+function hideMM(){ $("mm").classList.remove("show"); tclr("mmclock"); tclr("mmalt"); }
 
 async function findMatch(){
   Sound.init(); Sound.click();
@@ -937,11 +1079,11 @@ async function joinLobby(){
     const fresh=L&&L.uid&&L.uid!==ON.uid&&L.gid&&L.t&&(Date.now()-L.t.toMillis())<LOBBY_FRESH;
     if(fresh){
       tx.set(lob,{uid:null,gid:null,t:null});
-      tx.update(db.collection("ab_games").doc(L.gid),{p2:ON.uid,status:"setup",["names."+ON.uid]:myName(),["hb."+ON.uid]:FV.serverTimestamp()});
+      tx.update(db.collection("ab_games").doc(L.gid),{p2:ON.uid,status:"setup",["names."+ON.uid]:myName(),["ranks."+ON.uid]:PROF.rank(),["hb."+ON.uid]:FV.serverTimestamp()});
       return {gid:L.gid,opp:L.uid};
     }
     const g=db.collection("ab_games").doc();
-    tx.set(g,{p1:ON.uid,p2:null,status:"wait",created:FV.serverTimestamp(),names:{[ON.uid]:myName()},ready:{},res:[],turn:null,pending:null,
+    tx.set(g,{p1:ON.uid,p2:null,status:"wait",created:FV.serverTimestamp(),names:{[ON.uid]:myName()},ranks:{[ON.uid]:PROF.rank()},ready:{},res:[],turn:null,pending:null,
               hb:{[ON.uid]:FV.serverTimestamp()},fleet:{},winner:null,why:null});
     tx.set(lob,{uid:ON.uid,gid:g.id,t:FV.serverTimestamp()});
     return {gid:g.id,opp:null};
@@ -974,15 +1116,17 @@ async function cancelMatch(){
 
 /* ---------- game session ---------- */
 function startOnline(){
-  ON.searching=false; hideMM();
+  ON.searching=false; hideMM(); hideRoom(); $("result").classList.remove("show");
   ON.active=true; ON.seen=0; ON.resolving=-1; ON.my=null; ON.anim=0; ON.lastTurn=null; ON.revealed=false; ON.g=null;
-  ON.done=null; ON.shotAt=0; ON.oppTurnAt=0; ON.setupAt=0; ON.readyBusy=false; ON.ver=-1; ON.pollTick=0; ON.polling=false;
+  ON.done=null; ON.shotAt=0; ON.oppTurnAt=0; ON.setupAt=0; ON.readyBusy=false; ON.ver=-1; ON.pollTick=0; ON.polling=false; ON.switching=false;
   LOG.length=0; L("maç başladı",ON.gid,"ben="+ON.uid.slice(0,5),"rakip="+ON.opp.slice(0,5));
   show("game"); newGame(true);
   Sound.alarm(); vibrate([40,40,40]);
   subscribe();
   hb(); tset("hb",hb,12000,true); tset("chk",checkOpp,1000,true);
-  setTimeout(()=>{ const n=ON.g&&ON.g.names&&ON.g.names[ON.opp]; banner("RAKİP BULUNDU!",(n||"Rakip")+" ile karşılaşıyorsun",false); },150);
+  $("foeLabel").textContent="RAKİP 🎯"; ON.labeled=false;
+  setTimeout(()=>{ const n=ON.g&&ON.g.names&&ON.g.names[ON.opp], rk=ON.g&&ON.g.ranks?ON.g.ranks[ON.opp]:null;
+    banner("RAKİP BULUNDU!",(n||"Rakip")+(rk!=null?" · "+RANKS[Math.min(RANKS.length-1,rk|0)][1]:"")+" ile karşılaşıyorsun",false); },150);
 }
 function subscribe(){
   if(ON.unsub){ ON.unsub(); ON.unsub=null; }
@@ -1057,8 +1201,10 @@ function onGame(s){
   const ver=gameVer(g); if(ON.g&&ver<ON.ver){ L("eski bilgi atlandı",ver,ON.ver); return; }
   if(ver!==ON.ver) L("snap v"+ver,g.status,"turn="+(g.turn===ON.uid?"ben":"rakip"),"pend="+(g.pending?(g.pending.by===ON.uid?"ben":"rakip")+"#"+g.pending.n:"-"),"res="+(g.res||[]).length,s.metadata&&s.metadata.fromCache?"cache":"srv");
   ON.ver=ver; ON.g=g; ON.snapAt=Date.now();
+  if(!ON.labeled&&g.names&&g.names[ON.opp]){ ON.labeled=true; $("foeLabel").innerHTML=esc(g.names[ON.opp])+(g.ranks&&g.ranks[ON.opp]!=null?" "+rankBadge(g.ranks[ON.opp],true):""); }
   if(state.phase==="battle"){ const res=g.res||[]; while(ON.seen<res.length){ const e=res[ON.seen++]; if(e.by===ON.uid) myResult(e); } }
   if(g.status==="over"){
+    if(state.phase==="over"){ rematchUI(g); if(g.next&&!ON.switching){ ON.switching=true; Sound.alarm(); return goRematch(g.next); } }
     if(g.fleet&&g.fleet[ON.opp]&&!ON.revealed&&state.phase==="over") revealFleet(g.fleet[ON.opp]);
     if(ON.my&&ON.my.landed&&!ON.my.entry) ON.my=null;
     if(state.phase!=="over"&&!ON.anim&&!ON.my) onlineOver(g);
@@ -1232,14 +1378,290 @@ async function playIncoming(r,c,res){
 function revealFleet(list){
   ON.revealed=true; list.forEach(p=>addEnemyShip(p,false)); state.reveal=true; render();
 }
+/* ---------- Arkadaşla oyna: oda kodu ---------- */
+const ROOM_TTL=30*60*1000;
+const roomLink=c=>"https://amiral-batti.web.app/?oda="+c;
+function showRoom(mode){ $("room").classList.add("show"); $("roomChoose").style.display=mode==="choose"?"":"none"; $("roomHost").style.display=mode==="host"?"":"none"; if(mode!=="keep") $("roomMsg").textContent=""; }
+function hideRoom(){ $("room").classList.remove("show"); tclr("roomhb"); }
+function roomMsg(t,ok){ $("roomMsg").style.color=ok?"#9fd3ff":"#ff9b85"; $("roomMsg").textContent=t; }
+async function fbReady(){ if(!fbInit()) throw new Error("firebase yok"); ON.uid=await fbUser(); }
+async function createRoom(){
+  Sound.init(); Sound.click(); roomMsg("Oda kuruluyor...",true);
+  try{
+    await fbReady(); const db=ON.db, FV=ON.FV;
+    let code=null, gref=null;
+    for(let k=0;k<8&&!code;k++){
+      const c=String(1000+Math.floor(Math.random()*9000)), rref=db.collection("ab_rooms").doc(c);
+      const ok=await db.runTransaction(async tx=>{
+        const d=await tx.get(rref); const R=d.exists?d.data():null;
+        if(R&&R.t&&Date.now()-R.t.toMillis()<ROOM_TTL) return false;      // kod dolu, başka kod dene
+        const g=db.collection("ab_games").doc();
+        tx.set(g,{p1:ON.uid,p2:null,status:"wait",room:c,created:FV.serverTimestamp(),names:{[ON.uid]:myName()},ranks:{[ON.uid]:PROF.rank()},ready:{},res:[],turn:null,pending:null,
+                  hb:{[ON.uid]:FV.serverTimestamp()},fleet:{},winner:null,why:null});
+        tx.set(rref,{gid:g.id,uid:ON.uid,t:FV.serverTimestamp()}); gref=g; return true; });
+      if(ok) code=c;
+    }
+    if(!code) throw new Error("kod bulunamadı");
+    ON.room=code; ON.gid=gref.id; ON.ref=gref; ON.opp=null; ON.hosting=true;
+    $("roomCodeBig").textContent=code;
+    $("roomWa").href="https://wa.me/?text="+encodeURIComponent(`Amiral Battı oynayalım mı? ⚓ Oda kodum: ${code}\n${roomLink(code)}`);
+    showRoom("host"); Sound.yourTurn();
+    // oda kaydını taze tut; biri gelince başla
+    tset("roomhb",()=>{ db.collection("ab_rooms").doc(code).update({t:FV.serverTimestamp()}).catch(()=>{}); },60000,true);
+    ON.unsub=gref.onSnapshot(s=>{ const g=s.data(); if(g&&g.p2&&ON.hosting){ ON.hosting=false; ON.opp=g.p2; if(ON.unsub){ON.unsub();ON.unsub=null;} tclr("roomhb"); startOnline(); } },()=>{});
+  }catch(e){ console.warn(e); roomMsg("Oda kurulamadı. İnternetini kontrol edip tekrar dene."); showRoom("keep"); }
+}
+async function joinRoom(code){
+  Sound.init(); Sound.click();
+  code=String(code||"").replace(/\D/g,"");
+  if(code.length!==4){ roomMsg("4 haneli kodu gir."); return; }
+  roomMsg("Odaya bağlanılıyor...",true);
+  try{
+    await fbReady(); const db=ON.db, FV=ON.FV, rref=db.collection("ab_rooms").doc(code);
+    const r=await db.runTransaction(async tx=>{
+      const d=await tx.get(rref); if(!d.exists) return {err:"Bu kodla bir oda yok. Kodu kontrol et."};
+      const R=d.data(); if(!R.t||Date.now()-R.t.toMillis()>ROOM_TTL) return {err:"Bu odanın süresi dolmuş. Arkadaşın yeni oda kursun."};
+      if(R.uid===ON.uid) return {err:"Bu senin kendi odan 🙂 Kodu arkadaşına gönder."};
+      const gref=db.collection("ab_games").doc(R.gid), gd=await tx.get(gref);
+      if(!gd.exists||gd.data().p2||gd.data().status!=="wait") return {err:"Bu oda dolu ya da kapanmış."};
+      tx.update(gref,{p2:ON.uid,status:"setup",["names."+ON.uid]:myName(),["ranks."+ON.uid]:PROF.rank(),["hb."+ON.uid]:FV.serverTimestamp()});
+      tx.delete(rref);
+      return {gid:R.gid,opp:R.uid};
+    });
+    if(r.err){ Sound.error(); roomMsg(r.err); return; }
+    ON.gid=r.gid; ON.ref=db.collection("ab_games").doc(r.gid); ON.opp=r.opp; ON.hosting=false;
+    startOnline();
+  }catch(e){ console.warn(e); roomMsg("Bağlanılamadı. İnternetini kontrol edip tekrar dene."); }
+}
+async function cancelRoom(){
+  Sound.click(); hideRoom();
+  if(ON.hosting){
+    ON.hosting=false; if(ON.unsub){ ON.unsub(); ON.unsub=null; }
+    const code=ON.room, ref=ON.ref;
+    if(ON.db&&code) ON.db.collection("ab_rooms").doc(code).delete().catch(()=>{});
+    if(ref) ref.delete().catch(()=>{});
+    ON.ref=null; ON.gid=null;
+  }
+}
+function openRoomFromLink(){
+  try{ const c=new URLSearchParams(location.search).get("oda"); if(!c||!/^\d{4}$/.test(c)) return;
+    history.replaceState(null,"",location.pathname);
+    showRoom("choose"); $("roomCode").value=c; roomMsg(`Davet kodu: ${c} — "Katıl"a bas.`,true);
+  }catch(e){}
+}
+
+/* ---------- Rövanş ---------- */
+function rematchUI(g){
+  const box=$("rematchBox"), btn=$("rematchBtn"), m=$("rematchMsg");
+  if(!state.online||!g){ box.style.display="none"; return; }
+  box.style.display="";
+  const rm=g.rematch||{}, mine=!!rm[ON.uid], his=!!rm[ON.opp];
+  btn.classList.toggle("wait",mine&&!his); btn.classList.toggle("ask",his&&!mine);
+  if(g.why==="left"){ btn.disabled=true; m.textContent="Rakip oyundan ayrıldı."; return; }
+  btn.disabled=mine;
+  m.textContent=mine?(his?"Rövanş başlıyor…":"Rakibin cevabı bekleniyor…"):(his?"⚡ Rakip rövanş istiyor!":"");
+}
+async function askRematch(){
+  if(!ON.ref||!ON.g) return; Sound.click();
+  const db=ON.db, FV=ON.FV, old=ON.ref;
+  try{ await db.runTransaction(async tx=>{
+    const d=await tx.get(old); const g=d.data(); if(!g||g.next) return;
+    const rm=Object.assign({},g.rematch||{}); rm[ON.uid]=true;
+    if(rm[ON.opp]){   // ikimiz de istedik: yeni maçı aç
+      const n=db.collection("ab_games").doc();
+      tx.set(n,{p1:g.p1,p2:g.p2,status:"setup",created:FV.serverTimestamp(),names:g.names||{},ranks:g.ranks||{},ready:{},res:[],turn:null,pending:null,
+                hb:{[ON.uid]:FV.serverTimestamp()},fleet:{},winner:null,why:null,rematchOf:old.id});
+      tx.update(old,{["rematch."+ON.uid]:true,next:n.id});
+    } else tx.update(old,{["rematch."+ON.uid]:true});
+  }); }catch(e){ console.warn(e); $("rematchMsg").textContent="Bağlantı sorunu, tekrar dene."; }
+}
+function goRematch(nextId){
+  const opp=ON.opp;
+  if(ON.unsub){ ON.unsub(); ON.unsub=null; }
+  Object.keys(ON.timers).forEach(tclr);
+  ON.gid=nextId; ON.ref=ON.db.collection("ab_games").doc(nextId); ON.opp=opp;
+  startOnline();
+  setTimeout(()=>banner("RÖVANŞ!","Aynı rakip, yeni savaş",false),200);
+}
+
 function onlineOver(g){
   if(state.phase==="over") return;
   L("oyun bitti",g.winner===ON.uid?"kazandım":"kaybettim",g.why); setTimeout(flushLog,500);
   const won=g.winner===ON.uid;
-  ["turn","setup","hb","chk"].forEach(tclr);
+  ["turn","setup","chk"].forEach(tclr);
   if(won&&ON.ref&&!(g.fleet&&g.fleet[ON.uid])) ON.ref.update({["fleet."+ON.uid]:state.player.ships.map(packShip)}).catch(()=>{});
   endGame(won,{online:true,why:g.why});
   if(!won&&g.fleet&&g.fleet[ON.opp]) revealFleet(g.fleet[ON.opp]);
+}
+
+/* =====================================================================
+   PROFİL: isim, rütbe/XP, günlük görevler, haftalık sıralama, Google ile kaydet
+===================================================================== */
+const RANKS=[[0,"Er","●",0],[100,"Onbaşı","▲",0],[250,"Çavuş","▲▲",0],[450,"Astsubay","▲▲▲",0],[700,"Asteğmen","◆",1],[1000,"Teğmen","★",1],
+  [1400,"Üsteğmen","★★",1],[1900,"Yüzbaşı","★★★",1],[2500,"Binbaşı","✪",2],[3300,"Yarbay","✪★",2],[4300,"Albay","✪★★",2],
+  [5600,"Tuğamiral","⚓★",3],[7200,"Tümamiral","⚓★★",3],[9200,"Koramiral","⚓★★★",3],[12000,"Oramiral","⚓★★★★",3]];
+const rankOf=xp=>{ let i=0; while(i+1<RANKS.length&&xp>=RANKS[i+1][0]) i++; return i; };
+const rankBadge=(i,small)=>{ i=Math.max(0,Math.min(RANKS.length-1,i|0)); const r=RANKS[i]; return `<span class="rb t${r[3]}${small?" sm":""}"><i>${r[2]}</i>${r[1]}</span>`; };
+const esc=t=>String(t).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c]);
+const weekNo=ms=>Math.floor((ms+3*3600e3-345600000)/604800000);   // hafta pazartesi 00:00 (İstanbul) başlar
+const dayKey=()=>{ const d=new Date(Date.now()+3*3600e3); return d.toISOString().slice(0,10); };  // İstanbul günü
+
+const TASKS={
+  w_any:{t:"Herhangi bir maç kazan",n:1,xp:40,f:e=>e.won},
+  w_2:{t:"2 maç kazan",n:2,xp:70,f:e=>e.won},
+  w_norm:{t:"Normal'de bir maç kazan",n:1,xp:60,f:e=>e.won&&!e.online&&e.diff==="normal"},
+  w_hard:{t:"Zor'da bir maç kazan",n:1,xp:120,f:e=>e.won&&!e.online&&e.diff==="hard"},
+  w_30:{t:"30 atıştan az atışla kazan",n:1,xp:90,f:e=>e.won&&e.shots<30&&e.why!=="left"},
+  w_acc:{t:"%60 isabetle bir maç kazan",n:1,xp:80,f:e=>e.won&&e.acc>=60&&e.why!=="left"},
+  w_clean:{t:"Hiç gemi kaybetmeden kazan",n:1,xp:110,f:e=>e.won&&e.lost===0&&e.why!=="left"},
+  o_play:{t:"1 online maç oyna",n:1,xp:60,f:e=>e.online&&e.why!=="left"},
+  o_win:{t:"1 online maç kazan",n:1,xp:120,f:e=>e.online&&e.won},
+  sink10:{t:"Toplam 10 gemi batır",n:10,xp:60,f:e=>e.sunk},
+  hit40:{t:"Toplam 40 isabet yap",n:40,xp:50,f:e=>e.hits}
+};
+function dailyIds(day){ let h=0; for(const ch of day) h=(h*31+ch.charCodeAt(0))>>>0;
+  const ids=Object.keys(TASKS), out=[]; while(out.length<3){ h=(h*1103515245+12345)>>>0; const id=ids[h%ids.length]; if(!out.includes(id)) out.push(id); } return out; }
+
+const BAD=["amk","aq","orospu","oc","pic","sik","yarak","yarrak","got","amcik","amina","ibne","pezevenk","kahpe","gavat","sikis","fuck","shit","bitch","porn","nazi","hitler"];
+function nameError(n){
+  n=String(n||"").trim().replace(/\s+/g," ");
+  if(n.length<3||n.length>14) return "İsim 3–14 karakter olmalı.";
+  if(!/^[A-Za-zÇĞİÖŞÜçğıöşü0-9 _.\-]+$/.test(n)) return "Sadece harf, rakam, boşluk ve _ . - kullan.";
+  const k=n.toLocaleLowerCase("tr").replace(/[ç]/g,"c").replace(/[ğ]/g,"g").replace(/[ı]/g,"i").replace(/[ö]/g,"o").replace(/[ş]/g,"s").replace(/[ü]/g,"u")
+    .replace(/0/g,"o").replace(/1/g,"i").replace(/3/g,"e").replace(/4/g,"a").replace(/5/g,"s").replace(/[^a-z]/g,"");
+  if(BAD.some(w=>k.includes(w))) return "Bu isim uygun değil, başka bir isim seç.";
+  return null;
+}
+
+const PROF={
+  d:null,
+  load(){
+    const def={name:"Kaptan "+(1000+Math.random()*9000|0),xp:0,games:0,wins:0,losses:0,onlineWins:0,onlineGames:0,day:"",tasks:[]};
+    let d=store.get("prof",null);
+    if(!d){ d=def; const old=store.get("name",null); if(old) d.name=old; d.wins=store.get("wins",0); d.onlineWins=store.get("onwins",0); }
+    this.d=Object.assign(def,d); this.daily(); this.save(false);
+  },
+  save(remote=true){ store.set("prof",this.d); store.set("name",this.d.name); if(remote) this.push(); updateMenuProfile(); },
+  name(){ return this.d.name; }, rank(){ return rankOf(this.d.xp); },
+  daily(){ const day=dayKey(); if(this.d.day!==day){ this.d.day=day; this.d.tasks=dailyIds(day).map(id=>({id,p:0,done:false})); } },
+  // maç sonu: XP + görevler. Dönüş: {gain, before, after, doneTasks[]}
+  onGameEnd(e){
+    this.daily();
+    const before=this.d.xp, r0=rankOf(before);
+    let gain=0;
+    if(e.online) gain+=e.won?80:(e.why==="left"?0:20);
+    else gain+=e.won?({easy:20,normal:40,hard:70})[e.diff]:({easy:5,normal:10,hard:15})[e.diff];
+    if(e.stars===3) gain+=15;
+    const done=[];
+    for(const t of this.d.tasks){ if(t.done) continue; const T=TASKS[t.id], v=T.f(e); if(!v) continue;
+      t.p=Math.min(T.n,t.p+(v===true?1:v)); if(t.p>=T.n){ t.done=true; gain+=T.xp; done.push(T); } }
+    this.d.xp+=gain; this.d.games++; if(e.won) this.d.wins++; else this.d.losses++;
+    if(e.online){ this.d.onlineGames++; if(e.won) this.d.onlineWins++; }
+    this.save();
+    return {gain,before,after:this.d.xp,r0,r1:rankOf(this.d.xp),done};
+  },
+  // ---- sunucu eşitleme (ab_players/{uid}) ----
+  async push(){ try{ if(!ON.db||!ON.uid) return; const d=this.d;
+      await ON.db.collection("ab_players").doc(ON.uid).set({name:d.name,xp:d.xp|0,games:d.games|0,wins:d.wins|0,losses:d.losses|0,onlineWins:d.onlineWins|0,
+        onlineGames:d.onlineGames|0,day:d.day,tasks:d.tasks,up:ON.FV.serverTimestamp()});
+    }catch(e){ L("profil yazılamadı",e&&e.code); } },
+  async pull(){ try{ if(!ON.db||!ON.uid) return; const s=await ON.db.collection("ab_players").doc(ON.uid).get(); if(!s.exists){ this.push(); return; }
+      const r=s.data(), d=this.d;
+      if((r.xp|0)>(d.xp|0)){ // sunucudaki ilerleme daha ileri (ör. yeni cihaz + Google): onu al
+        Object.assign(d,{name:r.name||d.name,xp:r.xp|0,games:r.games|0,wins:r.wins|0,losses:r.losses|0,onlineWins:r.onlineWins|0,onlineGames:r.onlineGames|0});
+        if(r.day===d.day&&Array.isArray(r.tasks)) d.tasks=r.tasks;
+        this.save(false);
+      } else if((r.xp|0)<(d.xp|0)||r.name!==d.name) this.push();
+    }catch(e){ L("profil okunamadı",e&&e.code); } },
+  // ---- haftalık sıralama: yalnızca rakibin filosunu batırarak kazanılan online maçlar ----
+  async creditWin(gid){
+    try{ const db=ON.db, wk=String(weekNo(Date.now())), FV=ON.FV;
+      const wref=db.collection("ab_weekly").doc(wk).collection("players").doc(ON.uid), winRef=db.collection("ab_wins").doc(gid);
+      await db.runTransaction(async tx=>{
+        const w=await tx.get(wref), x=await tx.get(winRef); if(x.exists) return;
+        const wins=(w.exists?w.data().wins|0:0)+1;
+        tx.set(winRef,{uid:ON.uid,wk:+wk,t:FV.serverTimestamp()});
+        tx.set(wref,{name:this.d.name,rank:this.rank(),wins,lastGid:gid,t:FV.serverTimestamp()});
+      });
+      L("sıralamaya galibiyet yazıldı",gid);
+    }catch(e){ L("sıralama yazılamadı",e&&e.code); }
+  }
+};
+
+/* ---------- Firebase'i arka planda başlat (profil eşitleme için) ---------- */
+async function bootCloud(){ try{ if(!fbInit()) return; ON.uid=await fbUser(); await PROF.pull(); updateGoogleUI(); }catch(e){ L("bulut başlatılamadı",e&&e.message); } }
+
+/* ---------- Google ile kaydet ---------- */
+const isApp=()=>!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
+const faPlugin=()=>{ const C=window.Capacitor; if(!C) return null; if(C.Plugins&&C.Plugins.FirebaseAuthentication) return C.Plugins.FirebaseAuthentication;
+  if(typeof C.registerPlugin==="function") return C.registerPlugin("FirebaseAuthentication"); return null; };
+function googleUser(){ const u=ON.auth&&ON.auth.currentUser; return u&&!u.isAnonymous?u:null; }
+function updateGoogleUI(){
+  const box=$("gBox"); if(!box) return; const g=googleUser();
+  box.innerHTML=g?`<div class="gok">✅ İlerlemen Google hesabına kayıtlı<br><small>${esc(g.email||"")}</small></div>`
+    :`<button class="btn sm gbtn" id="gLink"><b>G</b> İlerlememi Google ile kaydet</button><div class="gnote">Kaydetmezsen uygulamayı silince rütben kaybolur. Yeni telefonda aynı hesapla girersen geri gelir.</div>`;
+  const b=$("gLink"); if(b) b.onclick=googleLink;
+}
+async function googleLink(){
+  Sound.click(); const note=$("gMsg"); note.textContent="Google'a bağlanılıyor..."; note.style.color="#9fd3ff";
+  try{
+    if(!fbInit()) throw new Error("firebase yok"); await fbUser();
+    const auth=ON.auth, cu=auth.currentUser; let cred=null;
+    if(isApp()){
+      const FA=faPlugin(); if(!FA) throw new Error("eklenti yok");
+      const r=await FA.signInWithGoogle(); const idt=r&&r.credential&&r.credential.idToken; if(!idt) throw new Error("token yok");
+      cred=firebase.auth.GoogleAuthProvider.credential(idt);
+      try{ await cu.linkWithCredential(cred); }catch(e){ if(e.code==="auth/credential-already-in-use"||e.code==="auth/email-already-in-use") await auth.signInWithCredential(e.credential||cred); else throw e; }
+    } else {
+      const pr=new firebase.auth.GoogleAuthProvider();
+      try{ await cu.linkWithPopup(pr); }catch(e){ if(e.code==="auth/credential-already-in-use"&&e.credential) await auth.signInWithCredential(e.credential); else throw e; }
+    }
+    ON.uid=auth.currentUser.uid; await PROF.pull(); PROF.push();
+    note.textContent="Kaydedildi! 🎉"; Sound.yourTurn(); updateGoogleUI(); renderProfile();
+  }catch(e){ console.warn(e); note.style.color="#ff9b85";
+    note.textContent=e&&e.code==="auth/popup-closed-by-user"?"Pencere kapatıldı.":e&&e.code==="auth/unauthorized-domain"?"Bu site henüz Google girişine açılmadı.":"Google'a bağlanılamadı, tekrar dene."; }
+}
+
+/* ---------- Menü profil kartı ---------- */
+function updateMenuProfile(){
+  const el=$("menuProf"); if(!el||!PROF.d) return; const d=PROF.d, i=rankOf(d.xp);
+  const next=RANKS[i+1], pct=next?Math.round(100*(d.xp-RANKS[i][0])/(next[0]-RANKS[i][0])):100;
+  const left=PROF.d.tasks.filter(t=>!t.done).length;
+  el.innerHTML=`<div class="mp-name">${esc(d.name)}</div><div class="mp-rank">${rankBadge(i)}</div>
+    <div class="xpbar"><b style="width:${pct}%"></b></div><div class="mp-xp">${d.xp} XP${next?` · ${next[1]}: ${next[0]}`:" · En yüksek rütbe!"}</div>
+    ${left?`<span class="mp-task">📅 ${left}</span>`:""}`;
+}
+/* ---------- Profil penceresi ---------- */
+function renderProfile(){
+  const d=PROF.d; PROF.daily(); const i=rankOf(d.xp), next=RANKS[i+1];
+  const pct=next?Math.round(100*(d.xp-RANKS[i][0])/(next[0]-RANKS[i][0])):100;
+  $("pfRank").innerHTML=rankBadge(i)+`<div class="xpbar big"><b style="width:${pct}%"></b></div><div class="mp-xp">${d.xp} XP${next?` — sonraki rütbe <b>${next[1]}</b>: ${next[0]} XP`:" — En yüksek rütbedesin! ⚓"}</div>`;
+  $("pfName").value=d.name; $("pfNameMsg").textContent="";
+  $("pfStats").innerHTML=`<div class="stat"><b>${d.games}</b><small>Maç</small></div><div class="stat"><b>${d.wins}</b><small>Galibiyet</small></div><div class="stat"><b>${d.onlineWins}</b><small>Online G.</small></div>`;
+  $("pfTasks").innerHTML=d.tasks.map(t=>{ const T=TASKS[t.id]; return `<div class="task ${t.done?"done":""}"><div><b>${t.done?"✅":"🎯"} ${T.t}</b><div class="tbar"><i style="width:${Math.round(100*t.p/T.n)}%"></i></div></div><span>${T.n>1?`${t.p}/${T.n} · `:""}+${T.xp} XP</span></div>`; }).join("");
+  updateGoogleUI(); $("gMsg").textContent="";
+}
+function saveName(){
+  const v=$("pfName").value.trim().replace(/\s+/g," "), err=nameError(v);
+  if(err){ Sound.error(); $("pfNameMsg").style.color="#ff9b85"; $("pfNameMsg").textContent=err; return; }
+  PROF.d.name=v; PROF.save(); Sound.place(); $("pfNameMsg").style.color="#7dffa6"; $("pfNameMsg").textContent="Kaydedildi ✓";
+}
+/* ---------- Haftalık sıralama ---------- */
+async function openBoard(){
+  Sound.init(); Sound.click(); $("board").classList.add("show"); const list=$("bdList"); list.innerHTML=`<div class="bd-empty">Yükleniyor…</div>`;
+  const wk=weekNo(Date.now()), monday=new Date((wk*604800000)+345600000-3*3600e3+7*86400000);
+  $("bdSub").textContent=`Bu haftanın online galibiyetleri · ${monday.toLocaleDateString("tr-TR",{day:"numeric",month:"long"})} pazartesi sıfırlanır`;
+  try{
+    if(!fbInit()) throw new Error("firebase yok"); ON.uid=ON.uid||await fbUser();
+    const qs=await ON.db.collection("ab_weekly").doc(String(wk)).collection("players").orderBy("wins","desc").limit(30).get();
+    let me=null, html="";
+    qs.docs.forEach((doc,k)=>{ const x=doc.data(), mine=doc.id===ON.uid; if(mine) me=k+1;
+      html+=`<div class="bd-row ${mine?"me":""}"><span class="bd-pos">${k<3?["🥇","🥈","🥉"][k]:k+1}</span><span class="bd-n">${esc(x.name||"Kaptan")} ${rankBadge(x.rank|0,true)}</span><span class="bd-w">${x.wins|0}</span></div>`; });
+    if(!html) html=`<div class="bd-empty">Bu hafta henüz kimse kazanmadı. İlk sen ol! 🌐</div>`;
+    if(!me){ const m=await ON.db.collection("ab_weekly").doc(String(wk)).collection("players").doc(ON.uid).get();
+      html+=`<div class="bd-row me sep"><span class="bd-pos">—</span><span class="bd-n">${esc(PROF.d.name)} (sen) ${rankBadge(PROF.rank(),true)}</span><span class="bd-w">${m.exists?m.data().wins|0:0}</span></div>`; }
+    list.innerHTML=html;
+  }catch(e){ console.warn(e); list.innerHTML=`<div class="bd-empty">Sıralama yüklenemedi. İnternetini kontrol et.</div>`; }
 }
 
 /* =====================================================================
@@ -1264,8 +1686,30 @@ $("quitNo").onclick=()=>{ Sound.click(); $("quit").classList.remove("show"); };
 $("quitYes").onclick=()=>{ Sound.click(); $("quit").classList.remove("show"); if(state.online) leaveOnline(true); state.phase="over"; show("menu"); updateBest(); };
 $("resAgain").onclick=()=>{ Sound.click(); $("result").classList.remove("show"); if(state.online){ leaveOnline(false); findMatch(); } else newGame(); };
 $("resMenu").onclick=()=>{ Sound.click(); $("result").classList.remove("show"); if(state.online) leaveOnline(false); show("menu"); updateBest(); };
+openRoomFromLink();
+$("menuProf").onclick=()=>{ Sound.init(); Sound.click(); renderProfile(); $("profile").classList.add("show"); };
+$("profBtn").onclick=$("menuProf").onclick;
+$("pfSave").onclick=saveName;
+$("pfName").addEventListener("keydown",e=>{ if(e.key==="Enter") saveName(); });
+$("pfClose").onclick=()=>{ Sound.click(); $("profile").classList.remove("show"); };
+$("boardBtn").onclick=openBoard;
+$("bdClose").onclick=()=>{ Sound.click(); $("board").classList.remove("show"); };
+PROF.load(); updateMenuProfile(); setTimeout(bootCloud,600);
 $("onlineBtn").onclick=()=>findMatch();
 $("mmCancel").onclick=()=>cancelMatch();
+$("mmBot").onclick=async()=>{ await cancelMatch(); show("game"); newGame(); };
+$("mmFriend").onclick=async()=>{ await cancelMatch(); showRoom("choose"); };
+$("friendBtn").onclick=()=>{ Sound.init(); Sound.click(); showRoom("choose"); };
+$("roomCreate").onclick=()=>createRoom();
+$("roomJoin").onclick=()=>joinRoom($("roomCode").value);
+$("roomCode").addEventListener("keydown",e=>{ if(e.key==="Enter") joinRoom($("roomCode").value); });
+$("roomCode").addEventListener("input",e=>{ e.target.value=e.target.value.replace(/\D/g,"").slice(0,4); });
+$("roomCancel").onclick=()=>cancelRoom();
+$("roomCopy").onclick=async()=>{ Sound.click(); const t=roomLink(ON.room);
+  try{ await navigator.clipboard.writeText(t); $("roomCopy").textContent="✅ Kopyalandı"; }
+  catch(e){ $("roomCopy").textContent=t; }
+  setTimeout(()=>{ $("roomCopy").textContent="🔗 Linki kopyala"; },2500); };
+$("rematchBtn").onclick=()=>askRematch();
 document.addEventListener("pointerdown",()=>Sound.init(),{once:true});
 
 buildBoard($("player"),"player"); buildBoard($("enemy"),"enemy");

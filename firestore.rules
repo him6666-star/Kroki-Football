@@ -126,16 +126,50 @@ service cloud.firestore {
     match /ab_lobby/{id} {
       allow read, write: if request.auth != null;
     }
+    // oyuncu profili (isim, rutbe puani, gunluk gorevler): herkes okur, sadece sahibi yazar; puan bir seferde en fazla 1000 artar
+    match /ab_players/{uid} {
+      allow read: if request.auth != null;
+      allow create, update: if request.auth != null && request.auth.uid == uid
+        && request.resource.data.name is string && request.resource.data.name.size() >= 3 && request.resource.data.name.size() <= 14
+        && request.resource.data.xp is int && request.resource.data.xp >= 0
+        && request.resource.data.xp <= (resource == null ? 3000 : resource.data.xp + 1000);
+    }
+    // haftalik siralama: sadece rakibin filosunu batirarak kazanilan online maclar; her mac bir kez sayilir
+    match /ab_wins/{gid} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && request.resource.data.uid == request.auth.uid
+        && get(/databases/$(database)/documents/ab_games/$(gid)).data.status == 'over'
+        && get(/databases/$(database)/documents/ab_games/$(gid)).data.winner == request.auth.uid
+        && get(/databases/$(database)/documents/ab_games/$(gid)).data.why == 'sunk';
+    }
+    match /ab_weekly/{wk}/players/{uid} {
+      allow read: if request.auth != null;
+      allow create, update: if request.auth != null && request.auth.uid == uid
+        && wk == string(math.floor((request.time.toMillis() + 10800000 - 345600000) / 604800000))
+        && request.resource.data.wins == (resource == null ? 0 : resource.data.wins) + 1
+        && request.resource.data.name is string && request.resource.data.name.size() <= 14
+        && request.resource.data.lastGid is string
+        && !exists(/databases/$(database)/documents/ab_wins/$(request.resource.data.lastGid))
+        && existsAfter(/databases/$(database)/documents/ab_wins/$(request.resource.data.lastGid))
+        && getAfter(/databases/$(database)/documents/ab_wins/$(request.resource.data.lastGid)).data.uid == uid;
+    }
+    // arkadasla oyna: 4 haneli oda kodu -> mac belgesi
+    match /ab_rooms/{code} {
+      allow read, write: if request.auth != null && code.matches('^[0-9]{4}$');
+    }
     // mac belgesi: yalnizca iki oyuncu okur/yazar; bos koltuga ikinci oyuncu oturabilir
     match /ab_games/{gid} {
       allow read: if request.auth != null && (resource == null
         || request.auth.uid == resource.data.p1 || request.auth.uid == resource.data.p2 || resource.data.p2 == null);
-      allow create: if request.auth != null
-        && request.resource.data.p1 == request.auth.uid && request.resource.data.p2 == null;
+      allow create: if request.auth != null && (
+        (request.resource.data.p1 == request.auth.uid && request.resource.data.p2 == null)
+        // rövanş: aynı iki oyuncu için yeni maç, oyunculardan biri açar
+        || (request.resource.data.rematchOf is string
+            && (request.auth.uid == request.resource.data.p1 || request.auth.uid == request.resource.data.p2)));
       allow update: if request.auth != null && (
         request.auth.uid == resource.data.p1 || request.auth.uid == resource.data.p2
         || (resource.data.p2 == null && request.resource.data.p2 == request.auth.uid
-            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['p2','status','names','hb'])));
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['p2','status','names','ranks','hb'])));
       allow delete: if request.auth != null && request.auth.uid == resource.data.p1;
     }
 
