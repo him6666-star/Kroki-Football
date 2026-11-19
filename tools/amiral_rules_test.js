@@ -16,6 +16,22 @@ const admin = require('firebase-admin'), fs = require('fs');
        {function: 'exists', args: [{exactValue: D + '/ab_wins/G1'}], result: {value: false}},
        {function: 'existsAfter', args: [{exactValue: D + '/ab_wins/G1'}], result: {value: true}},
        {function: 'getAfter', args: [{exactValue: D + '/ab_wins/G1'}], result: {value: {data: {uid: 'A'}}}}]},
+    {name: 'weekly update', expectation: 'ALLOW', request: {auth: {uid: 'A'}, path: D + `/ab_weekly/${wk}/players/A`, method: 'update', time: now.toISOString(),
+      resource: {data: {name: 'TestBotA', rank: 1, wins: 2, lastGid: 'G2'}}},
+     functionMocks: [
+       {function: 'get', args: [{exactValue: D + `/ab_weekly/${wk}/players/A`}], result: {value: {data: {wins: 1}}}},
+       {function: 'exists', args: [{exactValue: D + '/ab_wins/G2'}], result: {value: false}},
+       {function: 'existsAfter', args: [{exactValue: D + '/ab_wins/G2'}], result: {value: true}},
+       {function: 'getAfter', args: [{exactValue: D + '/ab_wins/G2'}], result: {value: {data: {uid: 'A'}}}}]},
+    {name: 'weekly hile (2 birden)', expectation: 'DENY', request: {auth: {uid: 'A'}, path: D + `/ab_weekly/${wk}/players/A`, method: 'create', time: now.toISOString(),
+      resource: {data: {name: 'X', wins: 5, lastGid: 'G1'}}},
+     functionMocks: [
+       {function: 'exists', args: [{exactValue: D + '/ab_wins/G1'}], result: {value: false}},
+       {function: 'existsAfter', args: [{exactValue: D + '/ab_wins/G1'}], result: {value: true}},
+       {function: 'getAfter', args: [{exactValue: D + '/ab_wins/G1'}], result: {value: {data: {uid: 'A'}}}}]},
+    {name: 'ab_wins hile (iska kazanc)', expectation: 'DENY', request: {auth: {uid: 'A'}, path: D + '/ab_wins/G3', method: 'create', time: now.toISOString(),
+      resource: {data: {uid: 'A', wk: +wk}}},
+     functionMocks: [{function: 'get', args: [{exactValue: D + '/ab_games/G3'}], result: {value: {data: {status: 'over', winner: 'A', why: 'left'}}}}]},
     {name: 'player create', expectation: 'ALLOW', request: {auth: {uid: 'A'}, path: D + '/ab_players/A', method: 'create', time: now.toISOString(),
       resource: {data: {name: 'TestBotA', xp: 195, games: 1}}}},
   ];
