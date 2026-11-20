@@ -6,8 +6,21 @@ defs = json.load(open(os.path.join(D, 'defs.json')))
 cred = service_account.Credentials.from_service_account_info(json.loads(os.environ['PLAY_JSON']), scopes=['https://www.googleapis.com/auth/androidpublisher'])
 s = google.auth.transport.requests.AuthorizedSession(cred)
 B = 'https://www.googleapis.com/games/v1configuration'
-def bundle(en, tr): return {'kind': 'gamesConfiguration#localizedStringBundle', 'translations': [
-    {'kind': 'gamesConfiguration#localizedString', 'locale': 'en-US', 'value': en}]}  # PGS projesinde yalnız en-US tanımlı
+TR = os.environ.get('PGS_TR') == '1'
+def bundle(en, tr):
+    t = [{'kind': 'gamesConfiguration#localizedString', 'locale': 'en-US', 'value': en}]
+    if TR: t.append({'kind': 'gamesConfiguration#localizedString', 'locale': 'tr-TR', 'value': tr})
+    return {'kind': 'gamesConfiguration#localizedStringBundle', 'translations': t}
+def add_tr(kind, x, name, desc=None):
+    # mevcut kayda Türkçe adı ekle (projede Türkçe dil tanımlıysa)
+    if not TR: return
+    d = x.get('draft') or x.get('published') or {}
+    if any(t['locale'] == 'tr-TR' for t in d.get('name', {}).get('translations', [])): return
+    d['name'] = bundle(*name)
+    if desc: d['description'] = bundle(*desc)
+    body = dict(x); body['draft'] = d; body.pop('published', None)
+    r = s.put(f'{B}/{kind}/{x["id"]}', json=body)
+    print('  tr', kind, x['id'][-3:], r.status_code, '' if r.ok else __import__('base64').b64encode(r.text[:400].encode()).decode())
 def listall(kind):
     out, tok = [], None
     while True:
@@ -20,7 +33,7 @@ def name_of(x):
         if t['locale'] == 'en-US': return t['value']
 def icon(rid, typ, path):
   import time
-  for k in range(4):
+  for k in range(2):
     r = s.post(f'https://www.googleapis.com/upload/games/v1configuration/images/{rid}/imageType/{typ}', params={'uploadType': 'media'}, data=open(path, 'rb').read(), headers={'Content-Type': 'image/png'})
     print('  simge', typ, r.status_code, '' if r.ok else __import__('base64').b64encode(r.text[:400].encode()).decode())
     if r.ok: return
@@ -35,6 +48,7 @@ for i, l in enumerate(defs['leaderboards']):
                           'scoreFormat': {'numberFormatType': 'NUMERIC', 'numDecimalPlaces': 0}}}
         r = s.post(f'{B}/applications/{APP}/leaderboards', json=body)
         print('LB', l['key'], r.status_code, '' if r.ok else __import__('base64').b64encode(r.text[:900].encode()).decode()); r.raise_for_status(); x = r.json()
+    else: add_tr('leaderboards', x, (l['en'], l['tr']))
     if not (x.get('draft') or x.get('published') or {}).get('iconUrl'):
         icon(x['id'], 'LEADERBOARD_ICON', os.path.join(D, 'icons', 'lb_' + l['key'] + '.png'))
     ids['lb'][l['key']] = x['id']
@@ -49,6 +63,7 @@ for i, a in enumerate(defs['achievements']):
         if a.get('steps'): body['stepsToUnlock'] = a['steps']
         r = s.post(f'{B}/applications/{APP}/achievements', json=body)
         print('ACH', a['key'], r.status_code, '' if r.ok else __import__('base64').b64encode(r.text[:900].encode()).decode()); r.raise_for_status(); x = r.json()
+    else: add_tr('achievements', x, (a['en'][0], a['tr'][0]), (a['en'][1], a['tr'][1]))
     if not (x.get('draft') or x.get('published') or {}).get('iconUrl'):
         icon(x['id'], 'ACHIEVEMENT_ICON', os.path.join(D, 'icons', 'ach_' + a['key'] + '.png'))
     ids['ach'][a['key']] = x['id']

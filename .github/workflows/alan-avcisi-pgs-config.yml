@@ -1,5 +1,11 @@
 name: Alan Avcisi Play Oyun Hizmetleri ayarlari
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+    inputs:
+      turkce:
+        description: 'Turkce adlari da yukle (projede Turkce dil ekli olmali)'
+        type: boolean
+        default: false
 jobs:
   config:
     runs-on: ubuntu-latest
@@ -22,4 +28,5 @@ jobs:
           PY
       - env:
           PLAY_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          PGS_TR: ${{ inputs.turkce && '1' || '0' }}
         run: python tools/pgs_config.py 307843857448 alan-avcisi-app/pgs
