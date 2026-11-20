@@ -13,7 +13,7 @@ def listall(kind):
     out, tok = [], None
     while True:
         r = s.get(f'{B}/applications/{APP}/{kind}', params={'maxResults': 200, **({'pageToken': tok} if tok else {})})
-        if r.status_code != 200: print('LIST HATA', kind, r.status_code, r.text[:600]); sys.exit(1)
+        if r.status_code != 200: import base64; print('LIST HATA', kind, r.status_code, base64.b64encode(r.text[:900].encode()).decode()); sys.exit(1)
         j = r.json(); out += j.get('items', []); tok = j.get('nextPageToken')
         if not tok: return out
 def name_of(x):
