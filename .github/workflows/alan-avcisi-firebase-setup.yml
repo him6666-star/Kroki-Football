@@ -1,0 +1,57 @@
+name: Alan Avcisi Firebase kurulumu
+# Bir kez calistirilir: Alan Avcisi Android uygulamasini scribble-kick Firebase projesine tanitir ve imza parmak izlerini ekler.
+# Her parmak izi icin Google otomatik bir "Android client" (OAuth) olusturur; Play Oyun Hizmetleri bunu kullanir.
+on:
+  workflow_dispatch:
+    inputs:
+      play_sha1:
+        description: "Uygulama imzalama anahtari SHA-1 (bos birakilirsa Play'den otomatik bulunur)"
+        required: false
+        default: ""
+      version_code:
+        description: "Play'e yuklenmis bir surum kodu (otomatik SHA-1 icin)"
+        required: false
+        default: "6"
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - run: echo '${{ secrets.FIREBASE_KEY }}' > "$RUNNER_TEMP/key.json"
+      - name: Play imzalama SHA-1
+        id: sha
+        env:
+          PLAY_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          IN_SHA1: ${{ github.event.inputs.play_sha1 }}
+        run: |
+          if [ -n "$IN_SHA1" ]; then echo "sha1=$IN_SHA1" >> $GITHUB_OUTPUT; exit 0; fi
+          pip install -q google-auth requests
+          OUT=$(python tools/play_signing_sha1.py com.fairridegames.alanavcisi "${{ github.event.inputs.version_code }}")
+          echo "$OUT"
+          echo "sha1=$(echo "$OUT" | grep PLAY_SHA1= | cut -d= -f2)" >> $GITHUB_OUTPUT
+      - name: Android uygulamasi + parmak izleri
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/key.json
+          PLAY_SHA1: ${{ steps.sha.outputs.sha1 }}
+        run: |
+          PKG=com.fairridegames.alanavcisi
+          FB="npx -y firebase-tools@13 --project scribble-kick"
+          find_app(){ $FB apps:list ANDROID --json | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const r=JSON.parse(s).result||[];const a=r.find(x=>x.packageName===process.argv[1]);console.log(a?a.appId:"")})' $PKG; }
+          APP=$(find_app)
+          if [ -z "$APP" ]; then $FB apps:create ANDROID "Alan Avcisi" --package-name $PKG; APP=$(find_app); fi
+          echo "APP_ID=$APP"
+          UPLOAD_SHA1="40:60:89:10:74:41:C3:AD:E3:65:8E:1C:31:56:B2:4C:4C:E4:39:AF"
+          EXIST=$($FB apps:android:sha:list $APP 2>/dev/null | tr 'a-f' 'A-F')
+          for S in "$PLAY_SHA1" "$UPLOAD_SHA1"; do
+            [ -z "$S" ] && continue
+            S=$(echo "$S" | tr 'a-f' 'A-F' | tr -d ' ')
+            if echo "$EXIST" | tr -d ':' | grep -q "$(echo $S | tr -d ':')"; then echo "zaten var: $S"; else $FB apps:android:sha:create $APP "$S" && echo "eklendi: $S"; fi
+          done
+          $FB apps:android:sha:list $APP
