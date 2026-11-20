@@ -95,6 +95,10 @@
   {
    "level": 24,
    "file": "bg/24.jpg"
+  },
+  {
+   "level": 25,
+   "file": "bg/25.jpg"
   }
  ],
  "boss": [
@@ -285,6 +289,14 @@
   {
    "id": "m_zar",
    "file": "boss/m_zar.png"
+  },
+  {
+   "id": "miknatis",
+   "file": "boss/miknatis.png"
+  },
+  {
+   "id": "m_miknatis",
+   "file": "boss/m_miknatis.png"
   }
  ],
  "ui": [

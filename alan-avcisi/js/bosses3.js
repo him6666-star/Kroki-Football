@@ -59,6 +59,7 @@ BOSSES.push({id:'miknatis',icon:'🧲',
   draw(e,cs,tm,frz){
     const x=e.x*cs,y=e.y*cs,r=e.r*cs,hurt=e.hurt>0&&Math.floor(tm/60)%2,stuck=boss.stuck>0;
     if(stuck)glowCircle(x,y,r*2.4,'rgba(147,197,253,.9)',.5+.3*Math.sin(tm/70));
+    else if(!frz)glowCircle(x+(boss.pol>0?-r*.55:r*.55),y+r*.6,r*1.3,boss.pol>0?'rgba(248,113,113,.9)':'rgba(96,165,250,.9)',.55+.25*Math.sin(tm/90)); // aktif kutup parlar
     if(bImg('miknatis',x,y,r*3,stuck?0:Math.sin(tm/300)*.1,frz,hurt))return;
     ctx.save();ctx.translate(x,y);ctx.rotate(stuck?0:Math.sin(tm/300)*.1);ctx.lineCap='butt';
     const L=boss.pol>0?'#ef4444':'#3b82f6',Rc=boss.pol>0?'#3b82f6':'#ef4444';
