@@ -1,0 +1,11 @@
+name: Alan Avcisi Play Oyun Hizmetleri ayarlari
+on: workflow_dispatch
+jobs:
+  config:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install -q google-auth requests
+      - env:
+          PLAY_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+        run: python tools/pgs_config.py 307843857448 alan-avcisi-app/pgs

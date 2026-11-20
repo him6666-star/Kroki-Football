@@ -1,0 +1,23 @@
+{"leaderboards":[
+ {"key":"hi","icon":"ship","en":"High Score","tr":"En Yüksek Puan","order":1},
+ {"key":"daily","icon":"zar","en":"Daily Challenge","tr":"Günün Meydan Okuması","order":2},
+ {"key":"stars","icon":"star","en":"Stars","tr":"Yıldızlar","order":3}
+],
+"achievements":[
+ {"key":"first","icon":"hayalet","pts":5,"en":["First Hunt","Clear your first level."],"tr":["İlk Av","İlk bölümünü geç."]},
+ {"key":"boss","icon":"goz","pts":10,"en":["Boss Hunter","Defeat a boss."],"tr":["Boss Avcısı","Bir boss'u yen."]},
+ {"key":"flawless","icon":"ship","pts":15,"en":["Flawless","Clear a level without losing a life."],"tr":["Kusursuz","Hiç can kaybetmeden bir bölümü geç."]},
+ {"key":"p90","icon":"golem","pts":20,"en":["Land Grabber","Claim 90% of the area in one level."],"tr":["Toprak Ağası","Bir bölümde alanın %90'ını kapat."]},
+ {"key":"secret","icon":"ayna","pts":15,"hidden":true,"en":["Hidden Path","Find a secret way to beat a boss."],"tr":["Gizli Yol","Bir boss'u yenmenin gizli yolunu bul."]},
+ {"key":"secrets","icon":"bukalemun","pts":60,"steps":12,"hidden":true,"en":["Secret Keeper","Find all 12 secret ways."],"tr":["Sır Ustası","12 gizli yolun hepsini bul."]},
+ {"key":"half","icon":"ejder","pts":40,"steps":13,"en":["Halfway There","Clear 13 different levels."],"tr":["Yolun Yarısı","13 farklı bölümü geç."]},
+ {"key":"all","icon":"dev","pts":100,"steps":27,"en":["Master Hunter","Clear all 27 levels."],"tr":["Usta Avcı","27 bölümün hepsini geç."]},
+ {"key":"final1","icon":"golem","pts":30,"en":["First Final","Beat Final 1."],"tr":["İlk Final","Final 1'i geç."]},
+ {"key":"finals","icon":"kartopu","pts":80,"steps":4,"en":["Champion","Beat all 4 finals."],"tr":["Şampiyon","4 finalin hepsini geç."]},
+ {"key":"stars50","icon":"star","pts":40,"steps":50,"en":["Star Collector","Collect 50 stars."],"tr":["Yıldız Toplayıcı","50 yıldız topla."]},
+ {"key":"stars_all","icon":"yildiz","pts":150,"steps":93,"en":["All the Stars","Collect all 93 stars."],"tr":["Bütün Yıldızlar","93 yıldızın hepsini topla."]},
+ {"key":"daily1","icon":"zar","pts":10,"en":["Daily Hunter","Play a Daily Challenge."],"tr":["Günlük Avcı","Bir Günün Meydan Okuması oyna."]},
+ {"key":"streak7","icon":"saat","pts":50,"steps":7,"en":["Week Streak","Play the Daily Challenge 7 days in a row."],"tr":["Bir Hafta","Günün Meydan Okuması'nı 7 gün üst üste oyna."]},
+ {"key":"hard","icon":"zirh","pts":30,"en":["Hardcore","Clear a level on Hard."],"tr":["Zorlu","Zor modda bir bölümü geç."]},
+ {"key":"cells","icon":"hucre","pts":25,"en":["No Room Left","Beat the Cell boss."],"tr":["Yer Kalmadı","Hücre boss'unu yen."]}
+]}
