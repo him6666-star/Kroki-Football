@@ -302,7 +302,7 @@ function capture(){
   let added=trailCells.length;
   fuse=null;
   const mark=new Uint8Array(W*H);
-  const seeds=def.seeds?def.seeds():enemies.filter(e=>e.boss&&!e.guest);
+  const seeds=def.seeds?def.seeds():isFinal(level)?[]:enemies.filter(e=>e.boss); // finalde tek (en büyük) alan kalır
   if(seeds.length){
     seeds.forEach((e,k)=>{const s=findFreeCell(e.x,e.y,e.r);if(s<0)return;if(k>0&&!mark[s])cx.separated=true;if(!mark[s])flood(s,mark)});
   }else keepLargest(mark);
@@ -324,9 +324,14 @@ function capture(){
   });
   cx.activated=[];
   powerups=powerups.filter(u=>{if(grid[idx(u.x,u.y)]===1){activate(u);cx.activated.push(u);return false}return true});
+  if(isFinal(level)){ // final: kapanda kalan boss ölür
+    const g=enemies.find(e=>e.guest);
+    if(g&&grid[cellAt(g.x,g.y)]===1){burst(g.x,g.y,'#fde047',40);burst(g.x,g.y,'#fff',20);addScore(1500,g.x,g.y);popText(t('pop.trappedBoss'),g.x,g.y-5,'#fde047',1.6);sfx.kill();buzz(60);enemies=enemies.filter(e=>e!==g);beams=beams.filter(b=>b.e!==g);boss.guestAtk=null}
+    const pe=enemies.find(e=>e.boss&&!e.guest);
+    if(pe&&grid[cellAt(pe.x,pe.y)]===1){popText(t('pop.trappedBoss'),pe.x,pe.y-5,'#fde047',1.6);killBoss(false);return}
+  }
   if(def.postCapture)def.postCapture(cx);
   if(state!=='play')return;
-  for(const e of enemies)if(e.guest&&grid[cellAt(e.x,e.y)]===1){const q=freeSpotFar(e.r,player.x,player.y,25);e.x=q.x;e.y=q.y;burst(e.x,e.y,'#fff',16)} // final misafiri kapanda kalırsa başka yere ışınlanır
   for(const e of enemies)if(hitsClaimed(e.x,e.y,e.r))relocate(e);
   const nb=nearestBorder(p.x,p.y);p.x=nb[0];p.y=nb[1];
   for(const s of sparks){const b=nearestBorder(s.x,s.y);s.x=b[0];s.y=b[1];s.px=-1;s.py=-1}

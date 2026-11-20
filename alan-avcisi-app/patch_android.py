@@ -24,7 +24,9 @@ import com.getcapacitor.BridgeActivity;
 public class MainActivity extends BridgeActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        registerPlugin(PlayGamesPlugin.class);
         super.onCreate(savedInstanceState);
+        try { com.google.android.gms.games.PlayGamesSdk.initialize(this); } catch (Exception e) { }
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         if (Build.VERSION.SDK_INT >= 28) {
             WindowManager.LayoutParams lp = getWindow().getAttributes();
@@ -57,6 +59,99 @@ public class MainActivity extends BridgeActivity {
 }
 '''
 open(glob.glob(base + '/java/com/fairridegames/alanavcisi/MainActivity.java')[0], 'w', encoding='utf-8').write(act)
+# 2b) Play Oyun Hizmetleri: eklenti + APP_ID + bağımlılık
+plug = '''package com.fairridegames.alanavcisi;
+
+import com.getcapacitor.JSObject;
+import com.getcapacitor.Plugin;
+import com.getcapacitor.PluginCall;
+import com.getcapacitor.PluginMethod;
+import com.getcapacitor.annotation.CapacitorPlugin;
+import com.google.android.gms.games.PlayGames;
+import com.google.android.gms.games.SnapshotsClient;
+import com.google.android.gms.games.snapshot.Snapshot;
+import com.google.android.gms.games.snapshot.SnapshotMetadataChange;
+import java.nio.charset.StandardCharsets;
+
+@CapacitorPlugin(name = "PlayGames")
+public class PlayGamesPlugin extends Plugin {
+    private static final String SLOT = "alan-avcisi-ilerleme";
+
+    private void authResult(PluginCall call, com.google.android.gms.tasks.Task<com.google.android.gms.games.AuthenticationResult> task) {
+        task.addOnCompleteListener(t -> {
+            JSObject r = new JSObject();
+            r.put("signedIn", t.isSuccessful() && t.getResult() != null && t.getResult().isAuthenticated());
+            call.resolve(r);
+        });
+    }
+    @PluginMethod public void status(PluginCall call) { authResult(call, PlayGames.getGamesSignInClient(getActivity()).isAuthenticated()); }
+    @PluginMethod public void signIn(PluginCall call) { authResult(call, PlayGames.getGamesSignInClient(getActivity()).signIn()); }
+
+    @PluginMethod public void submitScore(PluginCall call) {
+        String id = call.getString("id"); Long s = call.getLong("score");
+        if (id != null && s != null) PlayGames.getLeaderboardsClient(getActivity()).submitScore(id, s);
+        call.resolve();
+    }
+    @PluginMethod public void unlock(PluginCall call) {
+        String id = call.getString("id");
+        if (id != null) PlayGames.getAchievementsClient(getActivity()).unlock(id);
+        call.resolve();
+    }
+    @PluginMethod public void setSteps(PluginCall call) {
+        String id = call.getString("id"); Integer n = call.getInt("steps");
+        if (id != null && n != null && n > 0) PlayGames.getAchievementsClient(getActivity()).setSteps(id, n);
+        call.resolve();
+    }
+    @PluginMethod public void showLeaderboards(PluginCall call) {
+        PlayGames.getLeaderboardsClient(getActivity()).getAllLeaderboardsIntent()
+            .addOnSuccessListener(i -> getActivity().startActivityForResult(i, 9101));
+        call.resolve();
+    }
+    @PluginMethod public void showAchievements(PluginCall call) {
+        PlayGames.getAchievementsClient(getActivity()).getAchievementsIntent()
+            .addOnSuccessListener(i -> getActivity().startActivityForResult(i, 9102));
+        call.resolve();
+    }
+    @PluginMethod public void saveGame(PluginCall call) {
+        String data = call.getString("data", ""); String desc = call.getString("desc", "");
+        SnapshotsClient sc = PlayGames.getSnapshotsClient(getActivity());
+        sc.open(SLOT, true, SnapshotsClient.RESOLUTION_POLICY_MOST_RECENTLY_MODIFIED).addOnCompleteListener(t -> {
+            if (!t.isSuccessful() || t.getResult() == null || t.getResult().isConflict()) { call.reject("open"); return; }
+            Snapshot snap = t.getResult().getData();
+            snap.getSnapshotContents().writeBytes(data.getBytes(StandardCharsets.UTF_8));
+            sc.commitAndClose(snap, new SnapshotMetadataChange.Builder().setDescription(desc).build())
+                .addOnCompleteListener(c -> { if (c.isSuccessful()) call.resolve(); else call.reject("commit"); });
+        });
+    }
+    @PluginMethod public void loadGame(PluginCall call) {
+        SnapshotsClient sc = PlayGames.getSnapshotsClient(getActivity());
+        sc.open(SLOT, true, SnapshotsClient.RESOLUTION_POLICY_MOST_RECENTLY_MODIFIED).addOnCompleteListener(t -> {
+            if (!t.isSuccessful() || t.getResult() == null || t.getResult().isConflict()) { call.reject("open"); return; }
+            Snapshot snap = t.getResult().getData();
+            try {
+                byte[] b = snap.getSnapshotContents().readFully();
+                JSObject r = new JSObject(); r.put("data", b == null ? "" : new String(b, StandardCharsets.UTF_8));
+                sc.discardAndClose(snap);
+                call.resolve(r);
+            } catch (Exception e) { call.reject("read"); }
+        });
+    }
+}
+'''
+open(os.path.dirname(glob.glob(base + '/java/com/fairridegames/alanavcisi/MainActivity.java')[0]) + '/PlayGamesPlugin.java', 'w', encoding='utf-8').write(plug)
+p = base + '/AndroidManifest.xml'
+m = open(p, encoding='utf-8').read()
+if 'games.APP_ID' not in m:
+    m = m.replace('</application>', '    <meta-data android:name="com.google.android.gms.games.APP_ID" android:value="@string/game_services_project_id" />\n    </application>', 1)
+    open(p, 'w', encoding='utf-8').write(m)
+open(base + '/res/values/games-ids.xml', 'w', encoding='utf-8').write(
+    '<?xml version="1.0" encoding="utf-8"?>\n<resources>\n    <string name="game_services_project_id" translatable="false">307843857448</string>\n</resources>\n')
+bg = 'android/app/build.gradle'
+t = open(bg, encoding='utf-8').read()
+if 'play-services-games-v2' not in t:
+    t = t.replace('dependencies {', 'dependencies {\n    implementation "com.google.android.gms:play-services-games-v2:20.1.2"', 1)
+    open(bg, 'w', encoding='utf-8').write(t)
+print('play games tamam')
 # 3) Ikonlar
 for d in glob.glob('icons/mipmap-*'):
     dst = base + '/res/' + os.path.basename(d)
