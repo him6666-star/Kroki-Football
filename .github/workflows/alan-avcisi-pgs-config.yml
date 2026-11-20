@@ -6,6 +6,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: pip install -q google-auth requests
+      - name: Yayinlama API'sini etkinlestir
+        env:
+          FB_JSON: ${{ secrets.FIREBASE_KEY }}
+        run: |
+          python - <<'PY'
+          import json, os, time, google.auth.transport.requests
+          from google.oauth2 import service_account
+          c = service_account.Credentials.from_service_account_info(json.loads(os.environ['FB_JSON']), scopes=['https://www.googleapis.com/auth/cloud-platform'])
+          s = google.auth.transport.requests.AuthorizedSession(c)
+          for api in ['gamesconfiguration.googleapis.com', 'games.googleapis.com']:
+              r = s.post(f'https://serviceusage.googleapis.com/v1/projects/307843857448/services/{api}:enable')
+              print(api, r.status_code, r.text[:200].replace(chr(10), ' '))
+          time.sleep(60)
+          PY
       - env:
           PLAY_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
         run: python tools/pgs_config.py 307843857448 alan-avcisi-app/pgs
