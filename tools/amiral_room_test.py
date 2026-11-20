@@ -16,7 +16,7 @@ async def main():
         A, B = pages
         for i, pg in enumerate(pages):
             await pg.evaluate(f"PROF.d.name='TestBot{'AB'[i]}'; PROF.save()")
-        await A.click("#friendBtn"); await A.click("#roomCreate")
+        await A.click("#onlineMenuBtn"); await A.click("#friendBtn"); await A.click("#roomCreate")
         for _ in range(30):
             code = await A.inner_text("#roomCodeBig")
             if code.strip().isdigit(): break
