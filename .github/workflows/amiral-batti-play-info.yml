@@ -1,0 +1,12 @@
+name: Amiral Batti Play bilgisi
+on:
+  workflow_dispatch:
+jobs:
+  info:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install google-auth requests >/dev/null
+      - run: python tools/amiral_play_testers.py
+        env:
+          SA: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
