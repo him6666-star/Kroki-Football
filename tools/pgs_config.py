@@ -29,7 +29,7 @@ for i, l in enumerate(defs['leaderboards']):
     if not x:
         body = {'kind': 'gamesConfiguration#leaderboardConfiguration', 'scoreOrder': 'LARGER_IS_BETTER',
                 'draft': {'kind': 'gamesConfiguration#leaderboardConfigurationDetail', 'name': bundle(l['en'], l['tr']), 'sortRank': l['order'],
-                          'scoreFormat': {'numberFormatType': 'NUMERIC', 'numberFormat': {'numDecimalPlaces': 0}}}}
+                          'scoreFormat': {'numberFormatType': 'NUMERIC', 'numDecimalPlaces': 0}}}
         r = s.post(f'{B}/applications/{APP}/leaderboards', json=body)
         print('LB', l['key'], r.status_code, '' if r.ok else __import__('base64').b64encode(r.text[:900].encode()).decode()); r.raise_for_status(); x = r.json()
         icon(x['id'], 'LEADERBOARD_ICON', os.path.join(D, 'icons', 'lb_' + l['key'] + '.png'))
