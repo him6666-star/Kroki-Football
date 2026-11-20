@@ -19,8 +19,12 @@ def name_of(x):
     for t in (x.get('published') or x.get('draft') or {}).get('name', {}).get('translations', []):
         if t['locale'] == 'en-US': return t['value']
 def icon(rid, typ, path):
+  import time
+  for k in range(4):
     r = s.post(f'https://www.googleapis.com/upload/games/v1configuration/images/{rid}/imageType/{typ}', params={'uploadType': 'media'}, data=open(path, 'rb').read(), headers={'Content-Type': 'image/png'})
-    print('  simge', typ, r.status_code, '' if r.ok else r.text[:300])
+    print('  simge', typ, r.status_code, '' if r.ok else __import__('base64').b64encode(r.text[:400].encode()).decode())
+    if r.ok: return
+    time.sleep(5 * (k + 1))
 ids = {'app': APP, 'lb': {}, 'ach': {}}
 have = {name_of(x): x for x in listall('leaderboards')}
 for i, l in enumerate(defs['leaderboards']):
@@ -31,6 +35,7 @@ for i, l in enumerate(defs['leaderboards']):
                           'scoreFormat': {'numberFormatType': 'NUMERIC', 'numDecimalPlaces': 0}}}
         r = s.post(f'{B}/applications/{APP}/leaderboards', json=body)
         print('LB', l['key'], r.status_code, '' if r.ok else __import__('base64').b64encode(r.text[:900].encode()).decode()); r.raise_for_status(); x = r.json()
+    if not (x.get('draft') or x.get('published') or {}).get('iconUrl'):
         icon(x['id'], 'LEADERBOARD_ICON', os.path.join(D, 'icons', 'lb_' + l['key'] + '.png'))
     ids['lb'][l['key']] = x['id']
 have = {name_of(x): x for x in listall('achievements')}
@@ -44,6 +49,7 @@ for i, a in enumerate(defs['achievements']):
         if a.get('steps'): body['stepsToUnlock'] = a['steps']
         r = s.post(f'{B}/applications/{APP}/achievements', json=body)
         print('ACH', a['key'], r.status_code, '' if r.ok else __import__('base64').b64encode(r.text[:900].encode()).decode()); r.raise_for_status(); x = r.json()
+    if not (x.get('draft') or x.get('published') or {}).get('iconUrl'):
         icon(x['id'], 'ACHIEVEMENT_ICON', os.path.join(D, 'icons', 'ach_' + a['key'] + '.png'))
     ids['ach'][a['key']] = x['id']
-print('PGS_IDS=' + json.dumps(ids))
+print('PGS_IDS=' + json.dumps(ids).replace('{', '(').replace('}', ')'))
