@@ -1838,13 +1838,13 @@ function sendMsg(i){
 }
 function onChat(g){
   const m=g.msg&&g.msg[ON.opp]; if(!m) return;
-  if(CHAT.seen===null||m.k<CHAT.seen){ CHAT.seen=m.k; return; }   // eski mesajı tekrar gösterme
+  if(m.k<CHAT.seen){ CHAT.seen=m.k; return; }
   if(m.k===CHAT.seen) return; CHAT.seen=m.k;
   if(store.get("chatMute",false)) return;
   const n=(g.names&&g.names[ON.opp])||"Rakip";
   bubble(msgText(m.i),"them",n); Sound.tone({type:"triangle",f0:660,f1:990,dur:.14,gain:.14}); vibrate(20);
 }
-function resetChat(){ CHAT.k=0; CHAT.last=0; CHAT.seen=null; $("bubbles").innerHTML=""; }
+function resetChat(){ CHAT.k=0; CHAT.last=0; CHAT.seen=0; $("bubbles").innerHTML=""; }   // her maç yeni belge: mesaj sayacı 0'dan başlar
 // bilgisayarın laf atması
 const BOT_SAY={sunkYou:[6,13,14,5],hitYou:[5,12,15,14],youSunk:[8,18,17],youHit:[8,18]};
 function botSay(kind,chance){
