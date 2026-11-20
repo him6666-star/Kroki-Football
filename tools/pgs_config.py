@@ -7,8 +7,7 @@ cred = service_account.Credentials.from_service_account_info(json.loads(os.envir
 s = google.auth.transport.requests.AuthorizedSession(cred)
 B = 'https://www.googleapis.com/games/v1configuration'
 def bundle(en, tr): return {'kind': 'gamesConfiguration#localizedStringBundle', 'translations': [
-    {'kind': 'gamesConfiguration#localizedString', 'locale': 'en-US', 'value': en},
-    {'kind': 'gamesConfiguration#localizedString', 'locale': 'tr-TR', 'value': tr}]}
+    {'kind': 'gamesConfiguration#localizedString', 'locale': 'en-US', 'value': en}]}  # PGS projesinde yalnız en-US tanımlı
 def listall(kind):
     out, tok = [], None
     while True:
