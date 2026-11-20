@@ -31,7 +31,7 @@ for i, l in enumerate(defs['leaderboards']):
                 'draft': {'kind': 'gamesConfiguration#leaderboardConfigurationDetail', 'name': bundle(l['en'], l['tr']), 'sortRank': l['order'],
                           'scoreFormat': {'numberFormatType': 'NUMERIC', 'numberFormat': {'numDecimalPlaces': 0}}}}
         r = s.post(f'{B}/applications/{APP}/leaderboards', json=body)
-        print('LB', l['key'], r.status_code, '' if r.ok else r.text[:600]); r.raise_for_status(); x = r.json()
+        print('LB', l['key'], r.status_code, '' if r.ok else __import__('base64').b64encode(r.text[:900].encode()).decode()); r.raise_for_status(); x = r.json()
         icon(x['id'], 'LEADERBOARD_ICON', os.path.join(D, 'icons', 'lb_' + l['key'] + '.png'))
     ids['lb'][l['key']] = x['id']
 have = {name_of(x): x for x in listall('achievements')}
@@ -44,7 +44,7 @@ for i, a in enumerate(defs['achievements']):
                           'description': bundle(a['en'][1], a['tr'][1]), 'pointValue': a['pts'], 'sortRank': i + 1}}
         if a.get('steps'): body['stepsToUnlock'] = a['steps']
         r = s.post(f'{B}/applications/{APP}/achievements', json=body)
-        print('ACH', a['key'], r.status_code, '' if r.ok else r.text[:600]); r.raise_for_status(); x = r.json()
+        print('ACH', a['key'], r.status_code, '' if r.ok else __import__('base64').b64encode(r.text[:900].encode()).decode()); r.raise_for_status(); x = r.json()
         icon(x['id'], 'ACHIEVEMENT_ICON', os.path.join(D, 'icons', 'ach_' + a['key'] + '.png'))
     ids['ach'][a['key']] = x['id']
 print('PGS_IDS=' + json.dumps(ids))
