@@ -22,6 +22,10 @@ if not m:
     out = subprocess.run(['keytool', '-printcert', '-jarfile', 'play.apk'], capture_output=True, text=True).stdout
     sha = [l.split('SHA1:')[1].strip() for l in out.splitlines() if 'SHA1:' in l]
 else:
-    h = m.group(1).upper(); sha = [':'.join(h[i:i+2] for i in range(0, 40, 2))]
-print(out[:400])
-print('PLAY_SHA1=' + (sha[0] if sha else ''))
+    hs = []
+    for h in re.findall(r'SHA-1 digest:\s*([0-9a-fA-F]{40})', out):
+        h = h.upper()
+        if h not in hs: hs.append(h)
+    sha = [':'.join(h[i:i+2] for i in range(0, 40, 2)) for h in hs]
+print('\n'.join(l for l in out.splitlines() if 'SHA-1' in l or 'DN' in l))
+print('PLAY_SHA1=' + ' '.join(sha))

@@ -49,7 +49,7 @@ jobs:
           echo "APP_ID=$APP"
           UPLOAD_SHA1="40:60:89:10:74:41:C3:AD:E3:65:8E:1C:31:56:B2:4C:4C:E4:39:AF"
           EXIST=$($FB apps:android:sha:list $APP 2>/dev/null | tr 'a-f' 'A-F')
-          for S in "$PLAY_SHA1" "$UPLOAD_SHA1"; do
+          for S in $PLAY_SHA1 "$UPLOAD_SHA1"; do
             [ -z "$S" ] && continue
             S=$(echo "$S" | tr 'a-f' 'A-F' | tr -d ' ')
             if echo "$EXIST" | tr -d ':' | grep -q "$(echo $S | tr -d ':')"; then echo "zaten var: $S"; else $FB apps:android:sha:create $APP "$S" && echo "eklendi: $S"; fi
