@@ -32,10 +32,18 @@ async def main():
             await asyncio.sleep(0.5)
         print("eşleşti:", ok, await A.evaluate("ON.gid") == await B.evaluate("ON.gid"))
         print("rakip etiketi A:", await A.inner_text("#foeLabel"), "| B:", await B.inner_text("#foeLabel"))
+        # hazır uyarısı: A önce hazır olsun, B'de uyarı çıksın
+        await A.click("#randomBtn"); await A.click("#startBtn"); await asyncio.sleep(2.5)
+        print("B hazır uyarısı:", await B.evaluate("[...document.querySelectorAll('#bubbles .bub')].map(b=>b.innerText.replace(/\\n/g,': '))"), "|", await B.inner_text("#hint"), "| süre:", await B.evaluate("Math.round((ON.deadline-Date.now())/1000)"))
+        # mesaj: B -> A
+        await B.evaluate("sendMsg(1)"); await asyncio.sleep(2)
+        print("A'ya gelen mesaj:", await A.evaluate("[...document.querySelectorAll('#bubbles .bub.them')].map(b=>b.innerText.replace(/\\n/g,': '))"))
         uids = [await pg.evaluate("ON.uid") for pg in pages]
         json.dump(uids, open("test_uids.json", "w"))
+        turn_times = []
         async def play_until_over(winner_i):
-            for pg in pages: await pg.click("#randomBtn"); await pg.click("#startBtn")
+            for pg in pages:
+                if await pg.evaluate("state.phase")=="setup": await pg.click("#randomBtn"); await pg.click("#startBtn")
             for _ in range(60):
                 if [await pg.evaluate("state.phase") for pg in pages] == ["battle", "battle"]: break
                 await asyncio.sleep(0.5)
@@ -49,10 +57,18 @@ async def main():
                         cell = await pg.evaluate("(t)=>{for(const [r,c] of t) if(!state.enemy.shots[r][c]) return [r,c]; return null}", target)
                     else:   # kaybeden hep iska
                         cell = await pg.evaluate("(()=>{for(let r=9;r>=0;r--)for(let c=9;c>=0;c--) if(!state.enemy.shots[r][c]) return [r,c];})()")
-                    if cell: await pg.click(f'#enemy .cell[data-r="{cell[0]}"][data-c="{cell[1]}"]')
+                    if cell:
+                        await pg.click(f'#enemy .cell[data-r="{cell[0]}"][data-c="{cell[1]}"]')
+                        if i != winner_i and len(turn_times) < 6:
+                            t1 = time.time(); other = pages[winner_i]
+                            while time.time() - t1 < 15:
+                                if await other.evaluate("ON.g&&ON.g.turn===ON.uid&&!ON.g.pending&&!state.busy"): break
+                                await asyncio.sleep(0.05)
+                            turn_times.append(round(time.time() - t1, 2))
                 await asyncio.sleep(0.4)
             await asyncio.sleep(4.5)
         await play_until_over(0)
+        print("ıskadan sonra rakibin ateş edebilmesi (sn):", turn_times)
         for i, pg in enumerate(pages):
             print("PAGE", "AB"[i], await pg.evaluate("({phase:state.phase,result:document.getElementById('result').classList.contains('show'),title:document.getElementById('resTitle').textContent,xp:document.getElementById('xpRes').innerText,rematch:getComputedStyle(document.getElementById('rematchBox')).display,why:ON.g&&ON.g.why})"))
         await asyncio.sleep(3)
