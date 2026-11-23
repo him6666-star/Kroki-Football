@@ -11,7 +11,7 @@
 <meta property="og:image" content="ship.png">
 <link rel="icon" type="image/png" href="boom.png">
 <link rel="apple-touch-icon" href="boom.png">
-<link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Rubik:wght@400;600;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Oswald:wght@600;700&family=Rubik:wght@400;600;800;900&display=swap" rel="stylesheet">
 <style>
 :root{
   --deep:#04111f; --foam:#d8ecff; --gold:#ffc94a; --gold2:#ff9d1c; --hit:#ff5a36; --ok:#5dff8f;
@@ -24,7 +24,7 @@ body{font-family:Rubik,system-ui,sans-serif;color:var(--foam);user-select:none;-
 button{font-family:inherit;cursor:pointer;border:0;color:inherit}
 
 /* ---------- animated sea backdrop ---------- */
-#sea{position:fixed;inset:-40px;background:url(sea_bg.jpg) center/cover;animation:drift 40s ease-in-out infinite alternate;z-index:0}
+#sea{position:fixed;inset:-40px;background:url(ocean_bg.jpg) center/cover;animation:drift 40s ease-in-out infinite alternate;z-index:0}
 #sea::after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(60,140,220,.28),transparent 60%),linear-gradient(180deg,rgba(4,17,31,.15),rgba(2,8,16,.7))}
 @keyframes drift{from{transform:scale(1.08) translate(-12px,-8px)}to{transform:scale(1.15) translate(14px,10px)}}
 
@@ -66,7 +66,7 @@ button{font-family:inherit;cursor:pointer;border:0;color:inherit}
 .hero .wake{position:absolute;left:4%;right:2%;top:58%;height:22%;border-radius:50%;
   background:radial-gradient(ellipse at 15% 50%,rgba(255,255,255,.55),rgba(255,255,255,0) 70%);filter:blur(6px);animation:wake 1.6s ease-in-out infinite}
 @keyframes wake{50%{opacity:.5;transform:scaleX(1.05)}}
-.hero .ex{position:absolute;width:30%;aspect-ratio:1;background:url(boom.png) center/contain no-repeat;opacity:0;animation:menuBoom 4.5s infinite}
+.hero .ex{position:absolute;width:30%;aspect-ratio:1;background:url(fx_fireball.webp) center/contain no-repeat;opacity:0;animation:menuBoom 4.5s infinite}
 .hero .ex.a{left:-6%;top:-20%;animation-delay:.6s}
 .hero .ex.b{right:-4%;top:-10%;width:22%;animation-delay:2.7s}
 @keyframes menuBoom{0%,100%{opacity:0;transform:scale(.2)}4%{opacity:1;transform:scale(1.1)}14%{opacity:0;transform:scale(1.4)}}
@@ -104,7 +104,7 @@ button{font-family:inherit;cursor:pointer;border:0;color:inherit}
 .ptag{position:absolute;right:calc(100% + 40px);top:38%;font-size:40px;font-weight:900;letter-spacing:2px;white-space:nowrap;opacity:0;transition:.3s}
 .panel.mini .ptag{opacity:1}
 .board{display:grid;grid-template-columns:repeat(11,var(--cell));grid-template-rows:repeat(11,var(--cell));gap:2px;padding:8px;border-radius:18px;position:relative;
-  background:linear-gradient(rgba(8,40,72,.35),rgba(8,40,72,.35)),url(sea_bg.jpg) center/cover;
+  background:linear-gradient(rgba(8,40,72,.35),rgba(8,40,72,.35)),var(--seaImg,url(sea_classic.jpg)) center/cover;
   border:2px solid rgba(160,210,255,.25);box-shadow:0 14px 34px rgba(0,0,0,.55),inset 0 0 30px rgba(0,0,0,.45)}
 .panel.mini .board{border-width:5px;box-shadow:0 10px 40px rgba(0,0,0,.8)}
 #enemyPanel .board{border-color:rgba(255,120,90,.35)}
@@ -117,14 +117,15 @@ button{font-family:inherit;cursor:pointer;border:0;color:inherit}
 .cell.last{box-shadow:inset 0 0 0 2px #fff}
 .cell.sunk{background:radial-gradient(circle at 50% 55%,rgba(10,8,6,.55),rgba(60,20,10,.35) 60%,rgba(140,25,10,.25))}
 .mark{position:absolute;pointer-events:none;z-index:3}
-.cell.miss .mark{inset:10%;background:url(splash.png) center/contain no-repeat;opacity:.75;animation:pop .35s}
-.cell.hit .mark{inset:-6%;background:url(boom.png) center/contain no-repeat;animation:burn .9s ease-in-out infinite alternate;will-change:transform}
-.cell.sunk .mark{inset:12%;opacity:.55;filter:grayscale(.6) brightness(.7);animation:none}
-@keyframes burn{from{transform:scale(.82) rotate(-6deg)}to{transform:scale(.95) rotate(6deg)}}
+.cell.miss .mark{inset:4%;background:url(fx_ripple.webp) center/contain no-repeat;opacity:.85;animation:pop .35s,ripple 3s linear .35s infinite}
+@keyframes ripple{to{rotate:360deg}}
+.cell.hit .mark{inset:2%;background:url(fx_breach.webp) center/contain no-repeat;animation:pop .35s,burn 1.1s ease-in-out .35s infinite alternate;will-change:transform}
+.cell.sunk .mark{inset:6%;background-image:url(fx_damage.webp);opacity:.8;filter:saturate(.6) brightness(.75);animation:none}
+@keyframes burn{from{transform:scale(.92);filter:brightness(.9)}to{transform:scale(1);filter:brightness(1.25)}}
 @keyframes pop{from{transform:scale(0)}70%{transform:scale(1.2)}to{transform:scale(1)}}
 .shipimg{position:relative;z-index:2;pointer-events:none}
 .shipimg img{position:absolute;left:0;top:0;height:var(--cell);width:calc(var(--len) * var(--cell) + (var(--len) - 1) * 2px);
-  filter:drop-shadow(0 4px 3px rgba(0,0,0,.6))}
+  filter:var(--hullF,contrast(1.06) brightness(1.05)) drop-shadow(0 4px 3px rgba(0,0,0,.6))}
 .shipimg.v img{transform-origin:0 0;transform:rotate(90deg) translateY(-100%)}
 .shipimg.sunk img{filter:brightness(.35) sepia(.7) hue-rotate(-25deg) drop-shadow(0 2px 2px rgba(0,0,0,.6));opacity:.9}
 .shipimg.sinking img{animation:sinkShip 1.8s ease-in forwards}
@@ -133,7 +134,7 @@ button{font-family:inherit;cursor:pointer;border:0;color:inherit}
   60%{rotate:2deg;opacity:.95}100%{filter:brightness(.35) sepia(.7) hue-rotate(-25deg) drop-shadow(0 2px 2px rgba(0,0,0,.6));opacity:.9;rotate:0deg}}
 .shipimg.ghost img{opacity:.8;filter:drop-shadow(0 0 8px rgba(93,255,143,.9))}
 .shipimg.ghost.bad img{opacity:.6;filter:drop-shadow(0 0 8px rgba(255,60,40,.95)) saturate(.4)}
-.shipimg.sel img{filter:drop-shadow(0 0 6px rgba(255,201,74,.95)) drop-shadow(0 4px 3px rgba(0,0,0,.6))}
+.shipimg.sel img{filter:var(--hullF,none) drop-shadow(0 0 6px rgba(255,201,74,.95)) drop-shadow(0 4px 3px rgba(0,0,0,.6))}
 #player.setup{touch-action:none}
 .rtip{position:absolute;z-index:4;pointer-events:none;white-space:nowrap;font-weight:900;font-size:12px;color:#3a2700;
   background:linear-gradient(180deg,#ffe07a,#ffb51f);border-radius:999px;padding:4px 9px;box-shadow:0 3px 8px rgba(0,0,0,.5);
@@ -232,6 +233,7 @@ a.btn{text-decoration:none;display:inline-block}
   background:rgba(4,20,38,.8);border:1.5px solid rgba(255,201,74,.35);box-shadow:0 4px 12px rgba(0,0,0,.4);color:var(--foam);font-family:inherit;z-index:3}
 .mp-name{font-weight:900;font-size:14px;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .mp-xp{font-size:10.5px;opacity:.75;margin-top:3px}
+.mp-task.rdy{background:#21b04d;animation:askp .8s ease-in-out infinite alternate}
 .mp-task{position:absolute;top:-8px;right:-8px;background:#ff5a36;color:#fff;font-weight:900;font-size:11px;border-radius:999px;padding:3px 7px;box-shadow:0 2px 6px rgba(0,0,0,.5)}
 .xpbar{height:6px;border-radius:9px;background:rgba(255,255,255,.12);overflow:hidden;margin-top:5px}
 .xpbar b{display:block;height:100%;background:linear-gradient(90deg,#ffc94a,#ff9d1c);border-radius:9px;transition:width .8s ease}
@@ -245,6 +247,51 @@ a.btn{text-decoration:none;display:inline-block}
 .task{display:flex;justify-content:space-between;align-items:center;gap:10px;background:rgba(0,0,0,.25);border-radius:12px;padding:9px 11px;margin-bottom:7px;font-size:13px}
 .task>span{font-weight:900;color:var(--gold);white-space:nowrap;font-size:12px}
 .task.done{opacity:.6}.task.done b{text-decoration:line-through}
+.pfcard{width:min(95vw,440px)}
+.pf-head{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.pf-av{width:64px;height:64px;border-radius:16px;border:2px solid var(--gold);object-fit:cover;box-shadow:0 4px 12px rgba(0,0,0,.5);flex-shrink:0}
+.pf-hi{flex:1;min-width:0}.pf-nm{font-weight:900;font-size:19px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pf-motto{font-size:12px;font-style:italic;opacity:.8;margin:1px 0 4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pf-hi .rb{font-size:12px}
+.gold-pill{align-self:flex-start;background:linear-gradient(180deg,#ffd85a,#d99a12);color:#3a2400;font-weight:900;border-radius:999px;padding:5px 11px;font-size:14px;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.4)}
+.gold-pill.bump{animation:pop .4s}
+.pf-lb{display:block;font-size:12px;font-weight:800;color:#cfe6ff;opacity:.9;margin:12px 0 6px}
+.pf-in{width:100%;box-sizing:border-box;border-radius:12px;border:2px solid rgba(255,255,255,.16);background:rgba(3,18,34,.6);color:#fff;font:600 15px Rubik,sans-serif;padding:10px 12px;outline:none}
+.pf-in:focus{border-color:var(--gold)}
+.pick4{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+@media (max-width:380px){.pick4{grid-template-columns:repeat(2,1fr)}}
+.pick{position:relative;display:flex;flex-direction:column;align-items:center;gap:5px;padding:7px 4px 6px;border-radius:12px;border:2px solid rgba(255,255,255,.1);
+  background:rgba(3,18,34,.55);color:#e8f3ff;font:700 10.5px Rubik,sans-serif;cursor:pointer;text-align:center;line-height:1.15;transition:border-color .15s,transform .1s}
+.pick:active{transform:scale(.96)}
+.pick.on{border-color:var(--gold);background:rgba(255,201,74,.14);box-shadow:0 0 0 1px rgba(255,201,74,.35)}
+.pick.lock>*:not(.price){opacity:.45}
+.pick .price{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%);background:rgba(0,0,0,.75);border-radius:999px;padding:3px 8px;font-size:11px;font-weight:900;color:#ffd85a;white-space:nowrap}
+.pick.ask{border-color:#ffd85a;animation:askp .8s ease-in-out infinite alternate}
+.pick.ask .price{background:#ffc94a;color:#3a2400}
+@keyframes askp{to{box-shadow:0 0 12px rgba(255,201,74,.8)}}
+.pick.no{animation:noshake .35s}
+@keyframes noshake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+.pick img.av{width:52px;height:52px;border-radius:10px;object-fit:cover}
+.pick .hullp{width:100%;height:26px;background:url(ship4.webp) center/contain no-repeat;filter:drop-shadow(0 2px 2px rgba(0,0,0,.6))}
+.pick .seap{width:100%;aspect-ratio:16/10;border-radius:8px;background-size:cover;background-position:center}
+.task .tl{flex:1;min-width:0}
+.task .ic{font-size:20px;flex-shrink:0}
+.task .rw{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0}
+.task .rw small{font-weight:900;color:var(--gold);font-size:11.5px;white-space:nowrap}
+.task .claim{border:0;border-radius:10px;padding:6px 10px;font:900 12px Rubik,sans-serif;cursor:pointer;background:linear-gradient(180deg,#7dff9e,#21b04d);color:#03270f;box-shadow:0 3px 0 #0d6b2a;animation:askp .8s ease-in-out infinite alternate}
+.task .claimed{font-size:11px;font-weight:800;opacity:.75}
+.task.ready{background:rgba(93,255,143,.13);box-shadow:inset 0 0 0 1px rgba(93,255,143,.4)}
+.langsw{display:flex;gap:8px}.langsw button{flex:1;border-radius:12px;border:2px solid rgba(255,255,255,.15);background:rgba(3,18,34,.55);color:#fff;font:800 14px Rubik,sans-serif;padding:9px;cursor:pointer}
+.langsw button.on{border-color:var(--gold);background:rgba(255,201,74,.16)}
+.vscard{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 64px);transform:translate(-50%,-30px);opacity:0;pointer-events:none;z-index:60;display:flex;align-items:center;gap:10px;
+  background:linear-gradient(180deg,rgba(20,70,111,.97),rgba(10,39,66,.97));border:2px solid #ff8f6b;border-radius:16px;padding:8px 14px 8px 8px;max-width:min(92vw,360px);box-shadow:0 10px 30px rgba(0,0,0,.6);transition:.35s cubic-bezier(.2,1.3,.4,1)}
+.vscard.show{opacity:1;transform:translate(-50%,0)}
+.vscard img{width:48px;height:48px;border-radius:12px;object-fit:cover;border:2px solid #ff8f6b;flex-shrink:0}
+.vs-n{font-weight:900;font-size:15px}.vs-n .rb{font-size:11px;margin-left:4px}.vs-m{font-size:12.5px;font-style:italic;opacity:.85}
+#foeLabel img.fav{width:20px;height:20px;border-radius:6px;object-fit:cover;vertical-align:-5px;margin-right:5px;border:1px solid #ff8f6b}
+#foeLabel{cursor:pointer}
+.mp-gold{font-size:11px;font-weight:900;color:#ffd85a;margin-top:3px}
+.menu-prof .mp-top{display:flex;align-items:center;gap:8px}.menu-prof .mp-top img{width:34px;height:34px;border-radius:9px;object-fit:cover;border:1px solid rgba(255,201,74,.6)}
 .tbar{height:5px;border-radius:9px;background:rgba(255,255,255,.12);margin-top:6px;overflow:hidden}.tbar i{display:block;height:100%;background:#5dff8f}
 .gbtn{width:100%;background:linear-gradient(180deg,#ffffff,#dfe6ee);color:#1b2733;text-shadow:none;box-shadow:0 4px 0 #8b9aa8}
 .gbtn b{color:#4285f4;font-size:17px;margin-right:4px}
@@ -261,6 +308,7 @@ a.btn{text-decoration:none;display:inline-block}
 .bd-empty{text-align:center;opacity:.75;padding:18px 6px;font-size:14px}
 .bd-note{font-size:11.5px;opacity:.65;text-align:center;margin-bottom:12px}
 .xpres{margin:-6px 0 14px;font-size:13px}
+.xpres .gain.gold{color:#ffd85a}
 .xpres .gain{font-weight:900;color:#7dffa6;font-size:16px}
 .xpres .promo{display:block;margin-top:6px;font-weight:900;color:var(--gold);font-size:15px;animation:tipPulse2 1s ease-in-out 3}
 .xpres .tdone{display:block;font-size:12px;margin-top:4px;color:#9fd3ff}
@@ -379,6 +427,100 @@ a.btn{text-decoration:none;display:inline-block}
 .menu-buttons{gap:12px}
 .menu-foot{margin-top:4px}
 @media (max-height:760px){.mbtn{padding:6px 12px 6px 7px}.mbtn .mi{width:38px;height:38px}.mbtn .mt b{font-size:16.5px}.mbtn .mt small{margin-top:1px}}
+/* ===== ana menü v3 (amiralbattik düzeni) ===== */
+#menu{justify-content:flex-start;gap:12px}
+.mtop{width:100%;max-width:980px;display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-shrink:0}
+.mtop-r{display:flex;gap:8px}
+.sqbtn{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:rgba(10,28,52,.85);border:1px solid rgba(120,180,255,.28);
+  color:#e8f3ff;font:800 14px Rubik,sans-serif;box-shadow:0 4px 14px -6px rgba(0,0,0,.7);transition:transform .12s,background .2s}
+.sqbtn svg{width:19px;height:19px}.sqbtn:active{transform:scale(.92)}.sqbtn:hover{background:rgba(20,48,84,.9)}
+.menu-prof{align-self:auto;margin:0;max-width:none;width:min(62vw,280px);padding:9px 11px;border-radius:16px;background:rgba(10,28,52,.85)!important;
+  border:1px solid rgba(120,180,255,.28)!important;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.menu-prof .mp-top{gap:10px}
+.menu-prof .mp-top img{width:46px;height:46px;border-radius:50%;border:2px solid rgba(255,201,74,.55);box-shadow:0 0 0 3px rgba(0,0,0,.35)}
+.mp-name{font-size:15px;margin-bottom:2px}
+.mp-sub{font-size:12px;font-weight:700;color:#cfe2f5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.mp-sub b{color:#ffc94a}
+.menu-prof .xpbar{height:5px;margin-top:7px}
+.menu-prof .mp-xp{font:600 10.5px ui-monospace,Menlo,monospace;opacity:.7;margin-top:5px}
+.logo{margin-top:clamp(0px,1.2vh,14px)}
+.logo h1{font-family:Oswald,"Black Ops One",sans-serif;font-weight:700;font-size:clamp(40px,12vw,72px);letter-spacing:2px;line-height:1;white-space:nowrap;
+  background:linear-gradient(180deg,#ffe08a 0%,#ffb627 55%,#e8820c 100%);-webkit-background-clip:text;background-clip:text;
+  filter:drop-shadow(0 3px 0 rgba(90,40,0,.9)) drop-shadow(0 0 24px rgba(255,170,40,.3))}
+.logo .tag{display:flex;align-items:center;justify-content:center;gap:12px;font:700 12px Rubik,sans-serif;letter-spacing:5px;color:#9fd3ff;opacity:1;margin-top:8px}
+.logo .tag i{display:block;width:34px;height:1px;background:linear-gradient(90deg,transparent,#5f8fbf)}.logo .tag i:last-child{transform:scaleX(-1)}
+.hero{height:clamp(56px,min(22vw,12vh),120px);margin:0}
+.hero img.ship{transform:translate(-50%,-50%)}
+.hero .ex{display:none}
+.menu-buttons{width:min(92vw,380px);gap:10px}
+.mbtn{border-radius:14px;padding:10px 14px 10px 10px;min-height:64px}
+.mbtn .mt b{font-family:Oswald,Rubik,sans-serif;font-weight:700;font-size:20px;letter-spacing:.8px;text-transform:uppercase}
+.mbtn .mt small{font-size:12.5px;opacity:.85}
+.mbtn .mi{width:42px;height:42px;border-radius:10px}
+.mbtn.gold{background:linear-gradient(180deg,#ffc94a 0%,#f0a21c 100%);color:#2b1700;box-shadow:0 10px 26px -12px rgba(255,160,20,.9),inset 0 1px 0 rgba(255,255,255,.45),inset 0 0 0 1px rgba(255,220,140,.5)}
+.mbtn.gold .mi{background:rgba(70,40,0,.22);box-shadow:inset 0 0 0 1px rgba(70,40,0,.35)}
+.mbtn.gold::before{display:none}
+.mbtn.navy{background:rgba(12,32,58,.92);color:#fff;box-shadow:0 10px 26px -14px rgba(0,0,0,.9),inset 0 0 0 1px rgba(120,180,255,.3)}
+.mbtn.navy .mi{background:rgba(79,224,176,.1);color:#4fe0b0;box-shadow:inset 0 0 0 1px rgba(79,224,176,.45)}
+.mbtn.navy .mc{color:#4fe0b0;opacity:.9}
+.mbtn .mc{font-size:24px}
+.pillrow{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:4px}
+.pillbtn{display:inline-flex;align-items:center;gap:7px;padding:9px 12px;border-radius:12px;background:rgba(12,32,58,.9);border:1px solid rgba(120,180,255,.28);
+  color:#e8f3ff;font:700 13px Rubik,sans-serif;white-space:nowrap;transition:transform .12s,background .2s}
+.pillbtn svg{width:17px;height:17px;flex-shrink:0}.pillbtn:active{transform:scale(.95)}.pillbtn:hover{background:rgba(20,48,84,.95)}
+.dmpanel{width:min(94vw,760px);flex-shrink:0;border-radius:16px;background:rgba(10,28,52,.88);border:1px solid rgba(120,180,255,.28);padding:11px 11px 10px;
+  box-shadow:0 10px 30px -14px rgba(0,0,0,.8);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.dm-h{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 2px 9px}
+.dm-h .t{display:flex;align-items:center;gap:7px;font:700 16px Oswald,Rubik,sans-serif;color:#ffc94a;letter-spacing:.3px}
+.dm-h .t svg{width:18px;height:18px}.dm-h .t small{font:600 11.5px ui-monospace,Menlo,monospace;color:#9fb6cc}
+.dm-h .rs{display:flex;align-items:center;gap:5px;font:600 11px ui-monospace,Menlo,monospace;color:#9fb6cc;white-space:nowrap}.dm-h .rs svg{width:13px;height:13px}
+.dm-list{display:grid;grid-template-columns:1fr;gap:7px}
+@media (min-width:600px){.dm-list{grid-template-columns:repeat(3,1fr)}}
+.dm{border-radius:12px;background:rgba(3,15,30,.55);border:1px solid rgba(120,180,255,.16);padding:9px 10px;display:flex;flex-direction:column;gap:6px}
+.dm.rdy{border-color:rgba(93,255,143,.55);background:rgba(20,80,45,.35)}
+.dm.cl{opacity:.55}
+.dm-top{display:flex;align-items:center;gap:9px}
+.dm-ic{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;flex-shrink:0;background:rgba(255,201,74,.12);border:1px solid rgba(255,201,74,.4);font-size:15px}
+.dm-ti{flex:1;min-width:0;font-weight:700;font-size:13px;line-height:1.2}
+.dm-n{font:700 11.5px ui-monospace,Menlo,monospace;color:#ffc94a;white-space:nowrap}
+.dm-bar{height:5px;border-radius:9px;background:rgba(255,255,255,.1);overflow:hidden}.dm-bar i{display:block;height:100%;background:linear-gradient(90deg,#ffc94a,#ff9d1c);border-radius:9px}
+.dm.rdy .dm-bar i,.dm.cl .dm-bar i{background:#5dff8f}
+.dm-bot{display:flex;align-items:center;justify-content:space-between;gap:6px;font:700 11.5px ui-monospace,Menlo,monospace}
+.dm-bot .xp{color:#7cc4ff}.dm-bot .gd{color:#ffc94a;margin-left:6px}.dm-bot .pc{color:#8aa3bb}
+.dm-bot .claim{border:0;border-radius:8px;padding:5px 10px;font:900 12px Rubik,sans-serif;background:linear-gradient(180deg,#7dff9e,#21b04d);color:#03270f;animation:askp .8s ease-in-out infinite alternate}
+@media (max-width:599px){
+  .dm{display:grid;grid-template-columns:28px 1fr auto;grid-template-areas:"ic ti n" "ic bar bot";column-gap:9px;row-gap:5px;padding:7px 9px;align-items:center}
+  .dm-top{display:contents}.dm-ic{grid-area:ic;width:28px;height:28px;font-size:14px}.dm-ti{grid-area:ti;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .dm-n{grid-area:n;text-align:right}.dm-bar{grid-area:bar}.dm-bot{grid-area:bot;font-size:10.5px}.dm-bot .pc{display:none}
+  .dm.rdy .dm-bot>span:first-child{display:none}.dm-bot .claim{padding:4px 8px;font-size:11px}
+  .dmpanel{padding:9px 9px 8px}.dm-h{margin-bottom:7px}.dm-list{gap:6px}}
+.mp-xp{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (max-height:760px){.logo{margin-top:0}.logo h1{font-size:clamp(34px,10vw,56px)}.hero{height:clamp(44px,9vh,80px)}.mbtn{min-height:56px;padding-top:7px;padding-bottom:7px}#menu{gap:9px}}
+/* ===== seçim pencereleri (zorluk / online) ===== */
+.psheet{width:min(94vw,400px);border-radius:20px;padding:20px 16px 14px;background:linear-gradient(180deg,rgba(14,36,64,.98),rgba(8,24,44,.98));
+  border:1px solid rgba(120,180,255,.28);box-shadow:0 24px 60px -20px rgba(0,0,0,.9),inset 0 1px 0 rgba(255,255,255,.06);animation:sheetUp .3s cubic-bezier(.2,1.2,.4,1)}
+.ps-h{text-align:center;margin-bottom:14px}
+.ps-h h3{margin:0;font:700 24px Oswald,Rubik,sans-serif;letter-spacing:2px;color:#ffc94a;text-shadow:0 2px 0 rgba(90,40,0,.8)}
+.ps-h p{margin:4px 0 0;font-size:12.5px;color:#9fb6cc;font-weight:600}
+.olist{display:flex;flex-direction:column;gap:9px}
+.opt{--c:#7cc4ff;display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:11px 12px 11px 11px;border-radius:14px;cursor:pointer;color:#fff;
+  background:rgba(3,15,30,.55);border:1px solid rgba(120,180,255,.18);transition:transform .12s,border-color .2s,background .2s}
+.opt:hover{border-color:color-mix(in srgb,var(--c) 60%,transparent);background:rgba(10,30,55,.7)}
+.opt:active{transform:scale(.98)}
+.opt.e{--c:#4fe0b0}.opt.n{--c:#ffc94a}.opt.h{--c:#ff7a5c}.opt.g{--c:#4fe0b0}.opt.b{--c:#7cc4ff}
+.oi{flex-shrink:0;width:44px;height:44px;border-radius:12px;display:grid;place-items:center;color:var(--c);
+  background:color-mix(in srgb,var(--c) 12%,transparent);border:1px solid color-mix(in srgb,var(--c) 50%,transparent)}
+.oi svg{width:22px;height:22px}
+.ot{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.2}
+.ot b{font:700 17px Oswald,Rubik,sans-serif;letter-spacing:.8px;text-transform:uppercase}
+.ot small{font-size:12px;color:#9fb6cc;font-weight:600;margin-top:2px}
+.pips{display:flex;align-items:flex-end;gap:3px;height:16px;flex-shrink:0}
+.pips i{display:block;width:4px;border-radius:2px;background:rgba(255,255,255,.14)}
+.pips i:nth-child(1){height:6px}.pips i:nth-child(2){height:11px}.pips i:nth-child(3){height:16px}
+.pips i.on{background:var(--c)}
+.oc{flex-shrink:0;color:var(--c);opacity:.8;display:grid}.oc svg{width:18px;height:18px}
+.opt.cur{border-color:var(--c);background:color-mix(in srgb,var(--c) 10%,rgba(3,15,30,.6));box-shadow:0 0 0 1px var(--c),0 8px 22px -12px var(--c)}
+.ps-x{display:block;width:100%;margin-top:12px;padding:11px;border-radius:12px;background:transparent;border:1px solid rgba(120,180,255,.2);
+  color:#cfe2f5;font:700 14px Rubik,sans-serif;cursor:pointer}.ps-x:hover{background:rgba(255,255,255,.05)}
 </style>
 </head>
 <body>
@@ -387,26 +529,32 @@ a.btn{text-decoration:none;display:inline-block}
 
   <!-- ===== MAIN MENU ===== -->
   <section class="screen show" id="menu">
-    <button class="menu-prof" id="menuProf"></button>
+    <div class="mtop">
+      <button class="menu-prof" id="menuProf"></button>
+      <div class="mtop-r">
+        <button class="sqbtn" id="langBtn" title="Dil / Language">TR</button>
+        <button class="sqbtn" id="menuSound" title="Ses"></button>
+      </div>
+    </div>
     <div class="logo">
-      <h1>AMİRAL<br>BATTI</h1>
-      <div class="tag">⚓ DENİZ SAVAŞI ⚓</div>
+      <h1>AMİRAL BATTI</h1>
+      <div class="tag"><i></i><span>DENİZ SAVAŞI</span><i></i></div>
     </div>
     <div class="hero">
       <div class="wake"></div>
-      <img class="ship" src="ship.png" alt="">
+      <img class="ship" src="ship4.webp" alt="">
       <div class="ex a"></div><div class="ex b"></div>
     </div>
     <div class="menu-buttons">
       <button class="mbtn gold" id="playBtn"><span class="mi"><svg class="f" viewBox="0 0 24 24"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.6-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg></span><span class="mt"><b>Bilgisayara Karşı</b><small id="playSub">Zorluk: Normal</small></span><span class="mc">›</span></button>
-      <button class="mbtn green" id="onlineMenuBtn"><span class="mi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.8 3 2.8 15 0 18M12 3c-2.8 3-2.8 15 0 18"/></svg></span><span class="mt"><b>Online Oyna</b><small>Rastgele rakip ya da arkadaşınla</small></span><span class="mc">›</span></button>
-      <div class="menu-foot">
-        <button class="btn sm ic" id="boardBtn" title="Haftalık sıralama">🏆</button>
-        <button class="btn sm ic" id="howBtn" title="Nasıl oynanır">❓</button>
-        <button class="btn sm ic" id="menuSound" title="Ses">🔊</button>
+      <button class="mbtn navy" id="onlineMenuBtn"><span class="mi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.8 3 2.8 15 0 18M12 3c-2.8 3-2.8 15 0 18"/></svg></span><span class="mt"><b>Online Oyna</b><small>Rastgele rakip ya da arkadaşınla</small></span><span class="mc">›</span></button>
+      <div class="pillrow">
+        <button class="pillbtn" id="boardBtn"><svg viewBox="0 0 24 24" fill="none" stroke="#ffc94a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg><span>Skor Tablosu</span></button>
+        <button class="pillbtn" id="howBtn"><svg viewBox="0 0 24 24" fill="none" stroke="#7cc4ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17.5v.01"/></svg><span>Nasıl Oynanır</span></button>
       </div>
-      <div class="best" id="bestLine"></div>
     </div>
+    <div class="dmpanel" id="menuTasks"></div>
+    <div class="best" id="bestLine"></div>
   </section>
 
   <!-- ===== GAME ===== -->
@@ -423,7 +571,7 @@ a.btn{text-decoration:none;display:inline-block}
     </div>
     <div class="queue" id="queue"></div>
     <div class="msg" id="msg"></div>
-    <div class="howto-pill" id="setupHelp">👆 Gemiye dokun: <b>döner</b> &nbsp;·&nbsp; ✋ Basılı tutup sürükle: <b>taşınır</b></div>
+    <div class="howto-pill" id="setupHelp">👆 Gemiye dokun: <b>döner</b> · ✋ Basılı tutup sürükle: <b>taşınır</b></div>
     <div id="stage" class="solo">
       <div class="panel" id="playerPanel"><div class="ptag">🛡️ FİLON</div><div class="board" id="player"></div></div>
       <div class="panel hidden" id="enemyPanel"><div class="ptag">🎯 DÜŞMAN</div><div class="board" id="enemy"></div></div>
@@ -475,25 +623,25 @@ a.btn{text-decoration:none;display:inline-block}
 </div>
 
 <div class="overlay sheet" id="diffPick">
-  <div class="card wide">
-    <h2 style="font-size:28px">ZORLUK SEÇ</h2>
-    <div class="pick">
-      <button class="mbtn blue" data-d="easy"><span class="mi">🙂</span><span class="mt"><b>Kolay</b><small>Düşman çoğunlukla rastgele ateş eder</small></span><span class="mc">›</span></button>
-      <button class="mbtn green" data-d="normal"><span class="mi">🎯</span><span class="mt"><b>Normal</b><small>Akıllıca arar, vurduğunu bırakmaz</small></span><span class="mc">›</span></button>
-      <button class="mbtn red" data-d="hard"><span class="mi">🔥</span><span class="mt"><b>Zor</b><small>Her atışı hesaplar, kolay kolay ıskalamaz</small></span><span class="mc">›</span></button>
+  <div class="psheet">
+    <div class="ps-h"><h3>ZORLUK SEÇ</h3><p>Bilgisayar amiralinin seviyesi</p></div>
+    <div class="olist">
+      <button class="opt e" data-d="easy"><span class="oi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v6M12 22v-4M5 10l7-2 7 2-2 8H7z"/><path d="M3 20c2 1.5 4 1.5 6 0s4-1.5 6 0 4 1.5 6 0"/></svg></span><span class="ot"><b>Kolay</b><small>Düşman çoğunlukla rastgele ateş eder</small></span><span class="pips"><i class="on"></i><i class=""></i><i class=""></i></span><span class="oc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span></button>
+      <button class="opt n" data-d="normal"><span class="oi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/><path d="M12 1v4M12 19v4M1 12h4M19 12h4"/></svg></span><span class="ot"><b>Normal</b><small>Akıllıca arar, vurduğunu bırakmaz</small></span><span class="pips"><i class="on"></i><i class="on"></i><i class=""></i></span><span class="oc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span></button>
+      <button class="opt h" data-d="hard"><span class="oi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c1 3.5 5 5.5 5 10a5 5 0 0 1-10 0c0-2.2 1-3.6 2-4.6.2 1.6 1 2.6 2 2.6 0-3 0-5.5 1-8z"/></svg></span><span class="ot"><b>Zor</b><small>Her atışı hesaplar, kolay kolay ıskalamaz</small></span><span class="pips"><i class="on"></i><i class="on"></i><i class="on"></i></span><span class="oc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span></button>
     </div>
-    <button class="btn sm closeb" data-close>Vazgeç</button>
+    <button class="ps-x" data-close>Vazgeç</button>
   </div>
 </div>
 
 <div class="overlay sheet" id="onlineSheet">
-  <div class="card wide">
-    <h2 style="font-size:28px">ONLINE OYNA</h2>
-    <div class="pick">
-      <button class="mbtn green" id="onlineBtn"><span class="mi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.8 3 2.8 15 0 18M12 3c-2.8 3-2.8 15 0 18"/></svg></span><span class="mt"><b>Online Rakip Bul</b><small>Anında gerçek rakiple eşleş</small></span><span class="mc">›</span></button>
-      <button class="mbtn blue" id="friendBtn"><span class="mi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><circle cx="17" cy="9" r="2.8"/><path d="M16.5 14.6c2.6.2 4.4 1.9 5 5.4"/></svg></span><span class="mt"><b>Arkadaşla Oyna</b><small>Oda kur, kodu gönder</small></span><span class="mc">›</span></button>
+  <div class="psheet">
+    <div class="ps-h"><h3>ONLINE OYNA</h3><p>Gerçek bir kaptana karşı savaş</p></div>
+    <div class="olist">
+      <button class="opt g" id="onlineBtn"><span class="oi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.8 3 2.8 15 0 18M12 3c-2.8 3-2.8 15 0 18"/></svg></span><span class="ot"><b>Online Rakip Bul</b><small>Anında gerçek rakiple eşleş</small></span><span class="oc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span></button>
+      <button class="opt b" id="friendBtn"><span class="oi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><circle cx="17" cy="9" r="2.8"/><path d="M16.5 14.6c2.6.2 4.4 1.9 5 5.4"/></svg></span><span class="ot"><b>Arkadaşla Oyna</b><small>Oda kur, kodu gönder</small></span><span class="oc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span></button>
     </div>
-    <button class="btn sm closeb" data-close>Vazgeç</button>
+    <button class="ps-x" data-close>Vazgeç</button>
   </div>
 </div>
 
@@ -508,20 +656,39 @@ a.btn{text-decoration:none;display:inline-block}
 <div id="bubbles"></div>
 
 <div class="overlay" id="profile">
-  <div class="card wide">
-    <h2 style="font-size:30px">PROFİL</h2>
-    <div class="pf-rank" id="pfRank"></div>
-    <div class="pf-sec">İsmin (rakiplerin görür)</div>
-    <div class="codein"><input id="pfName" maxlength="14" autocomplete="off" spellcheck="false"><button class="btn green sm" id="pfSave">Kaydet</button></div>
-    <div class="roommsg" id="pfNameMsg"></div>
+  <div class="card wide pfcard">
+    <div class="pf-head">
+      <img id="pfAv" class="pf-av" src="av_admiral.jpg" alt="">
+      <div class="pf-hi"><div class="pf-nm" id="pfHeadName"></div><div class="pf-motto" id="pfHeadMotto"></div><div id="pfRank"></div></div>
+      <div class="gold-pill" id="pfGold">🪙 0</div>
+    </div>
+    <div id="pfXp"></div>
     <div class="statgrid" id="pfStats"></div>
-    <div class="pf-sec">📅 Bugünün görevleri <small>(her gün yenilenir)</small></div>
+    <div class="pf-sec">📅 Günlük Görevler <small id="pfReset"></small></div>
     <div id="pfTasks"></div>
-    <div class="pf-sec">💾 Kayıt</div>
+    <div class="pf-sec">⚓ Kaptan Profili</div>
+    <label class="pf-lb" for="pfName">Kaptan Adı</label>
+    <input class="pf-in" id="pfName" maxlength="14" autocomplete="off" spellcheck="false">
+    <label class="pf-lb" for="pfMotto">Savaş Sloganı</label>
+    <input class="pf-in" id="pfMotto" maxlength="40" autocomplete="off" placeholder="Denizler bizimdir!">
+    <button class="btn green sm" id="pfSave" style="width:100%;margin-top:10px">💾 Kaydet</button>
+    <div class="roommsg" id="pfNameMsg"></div>
+    <div class="pf-lb">Komutan Arması</div>
+    <div class="pick4" id="pkAv"></div>
+    <div class="pf-lb">Filo Zırh Teması</div>
+    <div class="pick4" id="pkHull"></div>
+    <div class="pf-lb">Deniz Teması</div>
+    <div class="pick4" id="pkSea"></div>
+    <div class="roommsg" id="shopMsg"></div>
+    <div class="pf-sec">☁️ Bulut Senkronizasyonu</div>
     <div id="gBox"></div><div class="roommsg" id="gMsg"></div>
-    <button class="btn gold" id="pfClose" style="width:100%">TAMAM</button>
+    <div class="pf-sec">🌐 Dil / Language</div>
+    <div class="langsw" id="langSw"><button data-lang="tr">Türkçe</button><button data-lang="en">English</button></div>
+    <button class="btn gold" id="pfClose" style="width:100%;margin-top:16px">TAMAM</button>
   </div>
 </div>
+
+<div class="vscard" id="vsCard"><img id="vsAv" alt=""><div><div class="vs-n" id="vsName"></div><div class="vs-m" id="vsMotto"></div></div></div>
 
 <div class="overlay" id="board">
   <div class="card wide">
@@ -581,6 +748,141 @@ a.btn{text-decoration:none;display:inline-block}
 ===================================================================== */
 const store={get(k,d){try{const v=localStorage.getItem("amiral_"+k);return v===null?d:JSON.parse(v);}catch(e){return d;}},
              set(k,v){try{localStorage.setItem("amiral_"+k,JSON.stringify(v));}catch(e){}}};
+
+/* =====================================================================
+   DİL (TR/EN): Türkçe metin anahtardır; İngilizce bu sözlükten gelir.
+   Sabit yazılar ve sonradan eklenen yazılar otomatik çevrilir; {} = değişken kısım.
+===================================================================== */
+let LANG=store.get("lang",null)||(((navigator.languages&&navigator.languages[0])||navigator.language||"tr").toLowerCase().startsWith("tr")?"tr":"en");
+const EN={
+// --- menü / genel
+"AMİRAL BATTI":"BATTLESHIP","DENİZ SAVAŞI":"NAVAL WARFARE","Skor Tablosu":"Leaderboard","Profil":"Profile","Nasıl Oynanır":"How to Play","Dil / Language":"Language / Dil","⚓ DENİZ SAVAŞI ⚓":"⚓ NAVAL WARFARE ⚓","Bilgisayara Karşı":"Vs Computer","Zorluk":"Difficulty",
+"Online Oyna":"Play Online","Rastgele rakip ya da arkadaşınla":"Random opponent or a friend","Haftalık sıralama":"Weekly leaderboard","Nasıl oynanır":"How to play",
+"Ses":"Sound","Ana menü":"Main menu","Mesaj gönder":"Send message","Kod":"Code","zafer":"wins","online zafer":"online wins","rekoru":"record","atış":"shots",
+"Kolay":"Easy","Normal":"Normal","Zor":"Hard","ZORLUK SEÇ":"CHOOSE DIFFICULTY","Düşman çoğunlukla rastgele ateş eder":"The enemy mostly fires at random",
+"Akıllıca arar, vurduğunu bırakmaz":"Searches smartly, never lets a hit go","Her atışı hesaplar, kolay kolay ıskalamaz":"Calculates every shot, rarely misses","Vazgeç":"Cancel","Bilgisayar amiralinin seviyesi":"The computer admiral's skill level","Gerçek bir kaptana karşı savaş":"Battle a real captain",
+"ONLINE OYNA":"PLAY ONLINE","Online Rakip Bul":"Find Online Opponent","Anında gerçek rakiple eşleş":"Get matched with a real player instantly","Arkadaşla Oyna":"Play with a Friend",
+"Oda kur, kodu gönder":"Create a room, send the code","Kapat":"Close","TAMAM":"OK","ANLADIM":"GOT IT","ya da":"or","Katıl":"Join",
+// --- oyun ekranı
+"FİLONU YERLEŞTİR":"DEPLOY YOUR FLEET","🌐 FİLONU YERLEŞTİR":"🌐 DEPLOY YOUR FLEET","🛡️ FİLON":"🛡️ YOUR FLEET","DÜŞMAN 🎯":"ENEMY 🎯","🎯 DÜŞMAN":"🎯 ENEMY","RAKİP 🎯":"OPPONENT 🎯",
+"👆 Gemiye dokun:":"👆 Tap a ship:","döner":"rotates","· ✋ Basılı tutup sürükle:":"· ✋ Hold & drag:","taşınır":"moves",
+"🎲 Rastgele":"🎲 Random","✕ Temizle":"✕ Clear","⚓ SAVAŞ!":"⚓ BATTLE!","✔ HAZIRIM":"✔ I'M READY","BATTI!":"SUNK!","BATTIN!":"YOU'RE HIT!",
+"Uçak Gemisi":"Carrier","Zırhlı":"Battleship","Kruvazör":"Cruiser","Denizaltı":"Submarine","Muhrip":"Destroyer","↻ Dokun":"↻ Tap",
+"yatay":"horizontal","dikey":"vertical",
+"Gemiyi tahtadaki boş bir kareye bırak.":"Drop the ship on an empty square.",
+"Filo hazır! <b style='color:#ffc94a'>⚓ SAVAŞ!</b> düğmesine bas.":"Fleet ready! Press <b style='color:#ffc94a'>⚓ BATTLE!</b>",
+"Köşedeki küçük tahtaya dokunarak filona bakabilirsin.":"Tap the small board in the corner to check your fleet.",
+"Köşedeki küçük tahtaya dokunarak öbür tahtaya bakabilirsin.":"Tap the small board in the corner to switch boards.",
+"SAVAŞ!":"BATTLE!","Düşman filosu ufukta":"Enemy fleet on the horizon","🎯 SIRA SENDE":"🎯 YOUR TURN",
+"Düşman sularında bir kareye dokun ve ateş et!":"Tap a square in enemy waters to fire!",
+"Filonun durumu. Ateş etmek için küçük düşman tahtasına dokun.":"Your fleet's status. Tap the small enemy board to fire.",
+"⚠️ DÜŞMAN ATEŞ EDİYOR":"⚠️ ENEMY FIRING","Düşman nişan alıyor...":"The enemy is taking aim...","🏆 ZAFER":"🏆 VICTORY","💀 YENİLGİ":"💀 DEFEAT",
+"Rakip oyundan ayrıldı — kazandın!":"Opponent left the game — you win!","Oyundan ayrıldın.":"You left the game.",
+"Tüm düşman filosu sulara gömüldü!":"The entire enemy fleet is at the bottom of the sea!","Düşman gemilerinin yerleri açıldı.":"Enemy ship positions revealed.",
+"RAKİP AYRILDI":"OPPONENT LEFT","ONLINE ZAFER! 🌐":"ONLINE VICTORY! 🌐","İLK ZAFER! 🎉":"FIRST VICTORY! 🎉","🎉 YENİ REKOR!":"🎉 NEW RECORD!",
+"🌐 Yeni Rakip":"🌐 New Opponent","↻ Tekrar":"↻ Again","ZAFER!":"VICTORY!","YENİLGİ":"DEFEAT","Atış":"Shots","İsabet":"Hits","Kalan Gemi":"Ships Left",
+"🔁 RÖVANŞ":"🔁 REMATCH","⌂ Menü":"⌂ Menu","Görev tamam":"Mission complete","ödülünü profilden al":"claim it in your profile","TERFİ!":"PROMOTED!","Yeni rütben":"New rank",
+"🔥 Bir atış daha!":"🔥 One more shot!","⏱️ Süre doldu, rastgele ateş edildi!":"⏱️ Time's up, fired at random!","Bağlantı sorunu, tekrar dene.":"Connection problem, try again.",
+"💥 ATEŞ!":"💥 FIRE!","Sonuç bekleniyor...":"Waiting for result...","⚠️ RAKİP ATEŞ ETTİ":"⚠️ OPPONENT FIRED","⚠️ RAKİP NİŞAN ALIYOR":"⚠️ OPPONENT AIMING",
+"Rakip hedef seçiyor...":"Opponent is choosing a target...","⏳ RAKİP BEKLENİYOR":"⏳ WAITING FOR OPPONENT","Filon hazır! Rakibin yerleştirmesi bekleniyor...":"Fleet ready! Waiting for your opponent to deploy...",
+"İlk atış senin!":"You fire first!","İlk atış rakibin":"Opponent fires first","RAKİBİN HAZIR!":"OPPONENT READY!","Seni bekliyor ⏳":"Waiting for you ⏳",
+"⚓ Hazır, seni bekliyor! Gemilerini yerleştir.":"⚓ Ready and waiting! Deploy your ships.","RAKİP BULUNDU!":"OPPONENT FOUND!","Rakip":"Opponent","Rakibin":"Your opponent",
+"RÖVANŞ!":"REMATCH!","Aynı rakip, yeni savaş":"Same opponent, new battle","Rakip oyundan ayrıldı.":"Opponent left the game.","Rövanş başlıyor…":"Rematch starting…",
+"Rakibin cevabı bekleniyor…":"Waiting for opponent's answer…","⚡ Rakip rövanş istiyor!":"⚡ Opponent wants a rematch!",
+// --- nasıl oynanır / çıkış
+"NASIL?":"HOW TO PLAY","Filonu yerleştir:":"Deploy your fleet:","Tahtaya dokun, gemi oraya konur. ↻ ile yatay/dikey çevir ya da 🎲 ile rastgele diz.":"Tap the board to place a ship. Tap a placed ship to rotate it, or use 🎲 for random.",
+"Ateş et:":"Fire:","Düşman sularında bir kareye dokun. Vurursan":"Tap a square in enemy waters. If you hit, you get","bir atış daha":"another shot","hakkın olur!":"right away!",
+"💥 Tüm düşman gemilerini önce sen batırırsan kazanırsın. Ne kadar az atış, o kadar çok ⭐.":"💥 Sink all enemy ships first to win. Fewer shots, more ⭐.",
+"👀 Savaş sırasında köşedeki küçük tahtaya dokunarak kendi filona göz atabilirsin.":"👀 During battle, tap the small board in the corner to look at your own fleet.",
+"ÇIKIŞ?":"QUIT?","Savaş yarıda kalacak. Ana menüye dönmek istiyor musun?":"The battle will be abandoned. Return to the main menu?","Devam Et":"Continue","Ana Menü":"Main Menu",
+// --- eşleşme / oda
+"ONLINE":"ONLINE","Rakip aranıyor...":"Searching for an opponent...","Bağlanıyor...":"Connecting...","Bağlantı kurulamadı. İnternetini kontrol edip tekrar dene.":"Couldn't connect. Check your internet and try again.",
+"Şu an rakip yok gibi görünüyor 🤔 Aramaya devam ediyorum, istersen:":"No opponents right now 🤔 I'll keep searching, or you can:","🤖 Bilgisayara karşı":"🤖 Vs computer",
+"👥 Arkadaşını davet et":"👥 Invite a friend","✕ Vazgeç":"✕ Cancel","ARKADAŞLA OYNA":"PLAY WITH A FRIEND","Oda kur ve kodu arkadaşına gönder, ya da arkadaşının kodunu gir.":"Create a room and send the code to your friend, or enter your friend's code.",
+"➕ ODA KUR":"➕ CREATE ROOM","Oda kodun:":"Your room code:","Arkadaşın":"Your friend should enter this code in","Arkadaşla Oyna → Katıl":"Play with a Friend → Join",
+"kısmına bu kodu girsin ya da linke tıklasın.":"or tap the link.","💬 WhatsApp'ta gönder":"💬 Send on WhatsApp","🔗 Linki kopyala":"🔗 Copy link","✅ Kopyalandı":"✅ Copied",
+"Arkadaşın bekleniyor…":"Waiting for your friend…","Oda kuruluyor...":"Creating room...","Oda kurulamadı. İnternetini kontrol edip tekrar dene.":"Couldn't create the room. Check your internet and try again.",
+"Odaya bağlanılıyor...":"Joining room...","Bu kodla bir oda yok. Kodu kontrol et.":"No room with this code. Check the code.","Bu odanın süresi dolmuş. Arkadaşın yeni oda kursun.":"This room has expired. Ask your friend to create a new one.",
+"Bu senin kendi odan 🙂 Kodu arkadaşına gönder.":"This is your own room 🙂 Send the code to your friend.","Bu oda dolu ya da kapanmış.":"This room is full or closed.","Bağlanılamadı. İnternetini kontrol edip tekrar dene.":"Couldn't connect. Check your internet and try again.",
+"Amiral Battı oynayalım mı? ⚓ Oda kodum: {}":"Want to play Battleship? ⚓ My room code: {}",
+// --- sohbet
+"Rakibin mesajlarını gösterme":"Hide opponent's messages","YERLEŞTİRME":"DEPLOYMENT","DOSTÇA":"FRIENDLY","Sen":"You","🤖 Düşman Amiral":"🤖 Enemy Admiral",
+"Bir gemiyi yerleştiremedin 😅":"Still can't place a ship? 😅","Hadi, daha yerleştiremedin mi? 😴":"Come on, not deployed yet? 😴","Gemilerini iyi sakla 👀":"Hide your ships well 👀",
+"Bu sefer bulamayacaksın 😏":"You won't find them this time 😏","Hazırım, sen? ⚓":"I'm ready, you? ⚓","Nasıl koydum ama! 💥":"What a shot! 💥","Nasıl batırdım ama! 🔥":"Sunk it like a pro! 🔥",
+"Ballı! 🍯":"Lucky! 🍯","Bu kadar şans olmaz 🙄":"Nobody's that lucky 🙄","Hadi artık oyna ⏳":"Come on, play already ⏳","Iskaladın 😂":"You missed 😂","Radarımdan kaçamazsın 📡":"You can't escape my radar 📡",
+"Sıra bende, hazır ol 🎯":"My turn, get ready 🎯","Filon dağılıyor 🌊":"Your fleet is falling apart 🌊","Su aldın galiba 💦":"Taking on water? 💦","Bir tane daha geliyor 🚀":"Another one's coming 🚀",
+"İyi atış 👏":"Nice shot 👏","Vay be! 😮":"Wow! 😮","Off, çok yakındı 😬":"Ugh, so close 😬","İyi oyun 🤝":"Good game 🤝","Rövanş? 🔁":"Rematch? 🔁",
+// --- profil / görevler / mağaza
+"Kaptan Profili":"Captain Profile","Kaptan Adı":"Captain Name","Savaş Sloganı":"Battle Motto","Denizler bizimdir!":"The seas are ours!","Komutan Arması":"Commander Emblem",
+"Filo Zırh Teması":"Fleet Hull Theme","Deniz Teması":"Sea Theme","💾 Kaydet":"💾 Save","Kaydedildi ✓":"Saved ✓","Günlük Görevler":"Daily Missions","📅 Günlük Görevler":"📅 Daily Missions",
+"⚓ Kaptan Profili":"⚓ Captain Profile","☁️ Bulut Senkronizasyonu":"☁️ Cloud Sync","Yenilenme":"Resets in","sa":"h","dk":"m","Ödülü Al":"Claim","Alındı":"Claimed",
+"Maç":"Matches","Galibiyet":"Wins","Online G.":"Online W.","sonraki rütbe":"next rank","En yüksek rütbedesin! ⚓":"You've reached the highest rank! ⚓",
+"Aç":"Unlock","Açmak için bir kez daha dokun.":"Tap again to unlock.","Açıldı! 🎉":"Unlocked! 🎉","Yetersiz altın: {} 🪙 lazım. Günlük görevleri tamamla!":"Not enough gold: you need {} 🪙. Complete daily missions!",
+"2 Maç Kazan":"Win 2 Games","20 İsabetli Atış Yap":"Hit 20 Shots","6 Düşman Gemisi Batır":"Sink 6 Enemy Ships","3 Deniz Savaşı Tamamla":"Complete 3 Matches","45 Top Atışı Yap":"Fire 45 Cannon Shots",
+"%50+ İsabetle Maç Kazan":"Win with 50%+ Accuracy","Normal, Zor veya Online Maç Kazan":"Win a Normal, Hard, or Online Match","En Az 2 Gemin Ayakta Kazan":"Win with 2+ Ships Afloat",
+"Amiral Arması":"Admiral Crest","Muhrip Radarı":"Destroyer Radar","Altın Çapa":"Golden Anchor","Kuzey Pusulası":"North Compass",
+"Çelik Zırh":"Armored Steel","Kuzey Buzul":"Arctic Frost","Gece Hayaleti":"Night Stealth","Kraliyet Pirinç":"Royal Brass",
+"Klasik Okyanus":"Classic Ocean","Arktik Buz Denizi":"Arctic Sea","Tropikal Lagün":"Tropical Lagoon","Gece Denizi":"Night Sea",
+"İsim 3–14 karakter olmalı.":"Name must be 3–14 characters.","Sadece harf, rakam, boşluk ve _ . - kullan.":"Use only letters, digits, spaces and _ . -",
+"Bu isim uygun değil, başka bir isim seç.":"This name isn't allowed, choose another.","Bu slogan uygun değil.":"This motto isn't allowed.",
+"İlerlemen Google hesabına kayıtlı":"Your progress is saved to your Google account","İlerlememi Google ile kaydet":"Save my progress with Google",
+"Kaydetmezsen uygulamayı silince rütben kaybolur. Yeni telefonda aynı hesapla girersen geri gelir.":"If you don't save, your rank is lost when you delete the app. Sign in with the same account on a new phone to get it back.",
+"Google'a bağlanılıyor...":"Connecting to Google...","Kaydedildi! 🎉":"Saved! 🎉","Pencere kapatıldı.":"The window was closed.","Bu site henüz Google girişine açılmadı.":"Google sign-in isn't enabled for this site yet.",
+"Google'a bağlanılamadı, tekrar dene.":"Couldn't connect to Google, try again.","En yüksek rütbe!":"Top rank!",
+// --- sıralama
+"🏆 SIRALAMA":"🏆 LEADERBOARD","Sadece online maçta rakibin tüm filosunu batırarak kazandığın maçlar sayılır.":"Only online wins where you sank the whole enemy fleet count.",
+"Yükleniyor…":"Loading…","Bu hafta henüz kimse kazanmadı. İlk sen ol! 🌐":"No one has won this week yet. Be the first! 🌐","Sıralama yüklenemedi. İnternetini kontrol et.":"Couldn't load the leaderboard. Check your internet.",
+"Kaptan":"Captain",
+// --- rütbeler
+"Er":"Seaman","Onbaşı":"Corporal","Çavuş":"Sergeant","Astsubay":"Petty Officer","Asteğmen":"Midshipman","Teğmen":"Ensign","Üsteğmen":"Lieutenant (jg)","Yüzbaşı":"Lieutenant",
+"Binbaşı":"Lt. Commander","Yarbay":"Commander","Albay":"Captain","Tuğamiral":"Rear Admiral (LH)","Tümamiral":"Rear Admiral","Koramiral":"Vice Admiral","Oramiral":"Admiral",
+// --- kalıplar ({} değişken)
+"<b>{}</b> taşındı.":"<b>{}</b> moved.",
+"<span style=\"color:#ff8f75\">Oraya sığmıyor,</span> gemi eski yerine döndü.":"<span style=\"color:#ff8f75\">Doesn't fit there,</span> the ship went back.",
+"<b>{}</b> {} çevrildi. Sürükleyerek taşıyabilirsin.":"<b>{}</b> turned {}. Drag it to move.",
+"<span style=\"color:#ff8f75\">Burada dönemiyor,</span> önce boş bir yere sürükle.":"<span style=\"color:#ff8f75\">Can't rotate here,</span> drag it to open water first.",
+"<b>{}</b> zaten tahtada. Taşımak için tahtadaki gemiyi sürükle.":"<b>{}</b> is already on the board. Drag it on the board to move it.",
+"<span style=\"color:#ff8f75\">Oraya sığmıyor!</span> Başka bir boş kareye dokun.":"<span style=\"color:#ff8f75\">Doesn't fit there!</span> Tap another empty square.",
+"<b>{}</b> seçili: tahtada boş bir kareye dokun ya da resmini tahtaya sürükle.":"<b>{}</b> selected: tap an empty square or drag its picture onto the board.",
+"İstersen az önce koyduğun gemiye dokunup <b>döndür</b>. Sıradaki: <b>{}</b>":"Tap the ship you just placed to <b>rotate</b> it. Next: <b>{}</b>",
+"{} YOK EDİLDİ":"{} DESTROYED","{} KAYBEDİLDİ":"{} LOST",
+"💥 <b>{}</b> battı! Bir atış daha!":"💥 <b>{}</b> sunk! One more shot!","🔥 <b>{}</b> İSABET! Bir atış daha!":"🔥 <b>{}</b> HIT! One more shot!","🌊 <b>{}</b> ıska...":"🌊 <b>{}</b> miss...",
+"Düşman <b>{}</b>'yi ıskaladı! 😮‍💨":"The enemy missed <b>{}</b>! 😮‍💨","☠️ <b>{}</b>'ın battı!":"☠️ Your <b>{}</b> was sunk!","💢 Düşman <b>{}</b>'den vurdu!":"💢 The enemy hit <b>{}</b>!",
+"Rakip <b>{}</b>'yi ıskaladı! 😮‍💨":"Opponent missed <b>{}</b>! 😮‍💨","💢 Rakip <b>{}</b>'den vurdu!":"💢 Opponent hit <b>{}</b>!",
+"{} · {} ile karşılaşıyorsun":"You're facing {} · {}","{} ile karşılaşıyorsun":"You're facing {}",
+"⏱️ {} sn · Arkadaşına linki atarsan anında eşleşirsiniz":"⏱️ {} s · Send your friend the link to match instantly",
+"📶 Rakip yanıt vermiyor (uygulamadan çıkmış olabilir)… {} sn sonra galip sayılacaksın":"📶 Opponent isn't responding (may have left the app)… you'll win in {} s",
+"📶 Rakip ateş etmiyor… {} sn sonra galip sayılacaksın":"📶 Opponent isn't firing… you'll win in {} s","📶 Rakip hazırlanmıyor… {} sn":"📶 Opponent isn't deploying… {} s",
+"✅ Rakibin hazır, seni bekliyor! ⏱️ {} sn":"✅ Your opponent is ready and waiting! ⏱️ {} s","Rakip de filosunu yerleştiriyor · ⏱️ {} sn":"Opponent is deploying too · ⏱️ {} s",
+"Davet kodu: {} — \"Katıl\"a bas.":"Invite code: {} — press \"Join\".",
+"Bu haftanın online galibiyetleri · {} pazartesi sıfırlanır":"This week's online wins · resets Monday, {}","{} (sen)":"{} (you)"
+};
+// gemi adlarının büyük harf hâlleri (BATTI! … YOK EDİLDİ)
+["Uçak Gemisi","Zırhlı","Kruvazör","Denizaltı","Muhrip","Er","Onbaşı","Çavuş","Astsubay","Asteğmen","Teğmen","Üsteğmen","Yüzbaşı","Binbaşı","Yarbay","Albay","Tuğamiral","Tümamiral","Koramiral","Oramiral"].forEach(k=>{
+  EN[k.toUpperCase()]=EN[k].toUpperCase(); EN[k.toLocaleUpperCase("tr")]=EN[k].toUpperCase(); });
+const PAT=Object.keys(EN).filter(k=>k.includes("{}")).sort((a,b)=>b.replace(/\{\}/g,"").length-a.replace(/\{\}/g,"").length)
+  .map(k=>[new RegExp("^"+k.split("{}").map(x=>x.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")).join("([\\s\\S]+?)")+"$"),EN[k]]);
+function T(s){
+  if(LANG==="tr"||s==null) return s; s=String(s); if(Object.prototype.hasOwnProperty.call(EN,s)) return EN[s];
+  const tr=s.trim(); if(tr!==s&&tr&&Object.prototype.hasOwnProperty.call(EN,tr)) return s.replace(tr,EN[tr]);
+  for(const [re,out] of PAT){ const m=tr.match(re); if(m){ let i=1; const r=out.replace(/\{\}/g,()=>T(m[i++])); return tr===s?r:s.replace(tr,r); } }
+  return s;
+}
+const I18N_ATTR=["placeholder","title","aria-label"];
+function trNode(n){
+  if(n.nodeType===3){ const v=n.nodeValue; if(!v||!/[A-Za-zÇĞİÖŞÜçğıöşü]/.test(v)) return; const p=n.parentNode; if(p&&(p.nodeName==="SCRIPT"||p.nodeName==="STYLE")) return;
+    const r=T(v.replace(/ /g," ")); if(r!==v.replace(/ /g," ")) n.nodeValue=r; return; }
+  if(n.nodeType!==1||n.nodeName==="SCRIPT"||n.nodeName==="STYLE") return;
+  for(const a of I18N_ATTR){ const v=n.getAttribute&&n.getAttribute(a); if(v){ const r=T(v); if(r!==v) n.setAttribute(a,r); } }
+  for(let c=n.firstChild;c;c=c.nextSibling) trNode(c);
+}
+function i18nStart(){
+  document.documentElement.lang=LANG; if(LANG==="tr") return;
+  document.title=LANG==="en"?"Battleship — Naval Warfare":document.title; trNode(document.body);
+  new MutationObserver(ms=>{ for(const m of ms){ if(m.type==="characterData") trNode(m.target); else m.addedNodes.forEach(trNode); } })
+    .observe(document.body,{childList:true,subtree:true,characterData:true});
+}
+function setLang(l){ if(l===LANG) return; store.set("lang",l); Sound.click(); location.reload(); }
 
 /* =====================================================================
    SOUND (Web Audio synthesis — no files)
@@ -665,7 +967,7 @@ const vibrate=p=>{try{navigator.vibrate&&navigator.vibrate(p);}catch(e){}};
 /* =====================================================================
    FX ENGINE (canvas particles)
 ===================================================================== */
-const IMG={}; ["boom","splash"].forEach(k=>{IMG[k]=new Image(); IMG[k].src=k+".png";});
+const IMG={}; ["fireball","splash","ripple","shell","smoke","breach","damage"].forEach(k=>{IMG[k]=new Image(); IMG[k].src="fx_"+k+".webp";});
 const SPR={};
 function sprite(key,stops){ if(SPR[key]) return SPR[key]; const cv=document.createElement("canvas"); cv.width=cv.height=64; const x=cv.getContext("2d");
   const g=x.createRadialGradient(32,32,0,32,32,32); stops.forEach(([o,col])=>g.addColorStop(o,col)); x.fillStyle=g; x.fillRect(0,0,64,64); return SPR[key]=cv; }
@@ -689,15 +991,16 @@ const FX={
           c.fillStyle=`rgba(255,${150+a*80|0},60,${a*.5})`; c.beginPath(); c.arc(tx,ty,s*.55*a,0,7); c.fill(); }
         // target shadow
         c.fillStyle=`rgba(0,0,0,${.15+e*.35})`; c.beginPath(); c.ellipse(p.x1,p.y1,4+e*8,2+e*4,0,0,7); c.fill();
-        const g=c.createRadialGradient(x-s*.3,y-s*.3,1,x,y,s); g.addColorStop(0,"#fff4c0"); g.addColorStop(.35,"#555"); g.addColorStop(1,"#111");
-        c.fillStyle=g; c.beginPath(); c.arc(x,y,s,0,7); c.fill();
+        const pv=p.trail.length>1?p.trail[p.trail.length-2]:[p.x0,p.y0], ang=Math.atan2(y-pv[1],x-pv[0]), im=IMG.shell;
+        if(im.complete&&im.naturalWidth){ const w=s*7.5, h=w*im.naturalHeight/im.naturalWidth; c.save(); c.translate(x,y); c.rotate(ang+Math.PI); c.drawImage(im,-w*.18,-h/2,w,h); c.restore(); }
+        else { const g=c.createRadialGradient(x-s*.3,y-s*.3,1,x,y,s); g.addColorStop(0,"#fff4c0"); g.addColorStop(.35,"#555"); g.addColorStop(1,"#111"); c.fillStyle=g; c.beginPath(); c.arc(x,y,s,0,7); c.fill(); }
         if(k>=1&&!p.done){ p.done=true; p.onHit&&p.onHit(); }
         continue;
       }
       if(p.type==="sprite"){
         const e=k, sc=p.s0+(p.s1-p.s0)*(1-Math.pow(1-e,3)), a=e<.15?e/.15:Math.max(0,1-(e-.15)/.85);
         c.save(); c.globalAlpha=a*(p.alpha||1); c.translate(p.x,p.y); c.rotate(p.rot+e*p.spin);
-        const im=IMG[p.img]; if(im.complete) c.drawImage(im,-sc/2,-sc/2,sc,sc); c.restore(); continue;
+        const im=IMG[p.img]; if(im.complete&&im.naturalWidth){ if(p.add) c.globalCompositeOperation="lighter"; c.drawImage(im,-sc/2,-sc/2,sc,sc*im.naturalHeight/im.naturalWidth); } c.restore(); continue;
       }
       if(p.type==="glow"){
         const r=p.r0+(p.r1-p.r0)*(1-Math.pow(1-Math.min(k,1),2)), a=Math.max(0,1-k);
@@ -722,7 +1025,9 @@ const FX={
         c.strokeStyle=`rgba(210,240,255,${a*.85})`; c.lineWidth=1.2; c.beginPath(); c.arc(p.x,p.y,p.size,0,7); c.stroke();
         c.fillStyle=`rgba(255,255,255,${a*.5})`; c.beginPath(); c.arc(p.x-p.size*.35,p.y-p.size*.35,p.size*.3,0,7); c.fill();
       } else if(p.type==="smoke"){
-        const r=p.size*(1+k*1.6); c.fillStyle=`rgba(${p.col},${a*.45})`; c.beginPath(); c.arc(p.x,p.y,r,0,7); c.fill();
+        const r=p.size*(1+k*1.6), im=IMG.smoke;
+        if(p.dark&&im.complete&&im.naturalWidth){ c.save(); c.globalAlpha=a*.55; c.translate(p.x,p.y); c.rotate(p.ph||0); c.drawImage(im,-r*1.3,-r*1.3,r*2.6,r*2.6); c.restore(); }
+        else { c.fillStyle=`rgba(${p.col},${a*.45})`; c.beginPath(); c.arc(p.x,p.y,r,0,7); c.fill(); }
       } else if(p.type==="drop"){
         c.fillStyle=`rgba(200,235,255,${a})`; c.beginPath(); c.arc(p.x,p.y,p.size*(.6+a*.4),0,7); c.fill();
       } else if(p.type==="debris"){
@@ -737,21 +1042,23 @@ const FX={
     const S=size*Math.max(40,cellPx()*1.6);
     this.add({type:"glow",x,y,r0:S*.4,r1:S*2.6,life:.55,col:"255,170,60",a:.9});
     this.add({type:"glow",x,y,r0:S*.2,r1:S*.9,life:.25,col:"255,250,220",a:1});
-    this.add({type:"sprite",img:"boom",x,y,s0:S*.3,s1:S*2.1,life:.65,rot:Math.random()*6,spin:.8});
+    this.add({type:"sprite",img:"fireball",x,y,s0:S*.35,s1:S*2.3,life:.7,rot:Math.random()*6,spin:.6});
+    this.add({type:"sprite",img:"fireball",x,y,s0:S*.2,s1:S*1.3,life:.45,rot:Math.random()*6,spin:-1.2,add:1,alpha:.7});
     for(let i=0;i<5*size;i++){ const a=Math.random()*7,v=60+Math.random()*120;
       this.add({type:"flame",x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-30,drag:3,g:-60,size:S*.18+Math.random()*S*.15,life:.4+Math.random()*.35}); }
     this.add({type:"ring",x,y,r0:4,r1:S*1.6,life:.5,color:"rgba(255,220,150,A)",a:.9,w:6});
     for(let i=0;i<30*size;i++){ const a=Math.random()*7,v=(120+Math.random()*380)*size;
       this.add({type:"spark",x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-80,g:420,drag:1.5,size:2+Math.random()*2.5,h:20+Math.random()*35,life:.5+Math.random()*.6}); }
     for(let i=0;i<12*size;i++){ const a=Math.random()*7,v=20+Math.random()*70;
-      this.add({type:"smoke",x:x+Math.cos(a)*6,y:y+Math.sin(a)*6,vx:Math.cos(a)*v,vy:Math.sin(a)*v-40,g:-30,drag:1,size:S*.12+Math.random()*S*.1,col:Math.random()<.4?"90,50,30":"40,40,46",life:1.1+Math.random()*.8}); }
+      this.add({type:"smoke",dark:1,ph:Math.random()*6,x:x+Math.cos(a)*6,y:y+Math.sin(a)*6,vx:Math.cos(a)*v,vy:Math.sin(a)*v-40,g:-30,drag:1,size:S*.12+Math.random()*S*.1,col:Math.random()<.4?"90,50,30":"40,40,46",life:1.1+Math.random()*.8}); }
     for(let i=0;i<8*size;i++){ const a=Math.random()*7,v=150+Math.random()*250;
       this.add({type:"debris",x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-160,g:700,size:3+Math.random()*5,spin:10*(Math.random()-.5),life:.8+Math.random()*.4}); }
   },
   splash(x,y){
     const S=Math.max(34,cellPx()*1.4);
     this.add({type:"glow",x,y,r0:S*.3,r1:S*1.6,life:.45,col:"150,210,255",a:.45});
-    this.add({type:"sprite",img:"splash",x,y,s0:S*.3,s1:S*1.7,life:.6,rot:Math.random()*6,spin:.4});
+    this.add({type:"sprite",img:"splash",x,y,s0:S*.3,s1:S*1.8,life:.65,rot:Math.random()*6,spin:.4});
+    this.add({type:"sprite",img:"ripple",x,y,s0:S*.4,s1:S*1.9,life:1.1,rot:Math.random()*6,spin:.2,alpha:.8});
     for(let i=0;i<6;i++){ const a=Math.random()*7,v=15+Math.random()*30;
       this.add({type:"smoke",x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-10,drag:1.5,size:S*.12+Math.random()*S*.08,col:"225,240,255",life:.7+Math.random()*.4}); }
     [0,.12,.26].forEach((d,i)=>setTimeout(()=>this.add({type:"ring",x,y,r0:4,r1:S*(1+i*.4),life:.8,color:"rgba(200,235,255,A)",a:.8,w:3,flat:.75}),d*1000));
@@ -760,7 +1067,7 @@ const FX={
   },
   bubbles(x,y,n){ for(let i=0;i<n;i++) this.add({type:"bubble",x:x+(Math.random()-.5)*14,y:y+(Math.random()-.5)*10,vx:0,vy:-(20+Math.random()*40),drag:.5,size:1.5+Math.random()*3,ph:Math.random()*6,life:.8+Math.random()*1}); },
   burn(x,y,cs){ this.add({type:"flame",x:x+(Math.random()-.5)*cs*.35,y:y+(Math.random()-.5)*cs*.2,vx:(Math.random()-.5)*8,vy:-(18+Math.random()*22),g:-20,size:cs*(.16+Math.random()*.12),life:.35+Math.random()*.3});
-    if(Math.random()<.5) this.add({type:"smoke",x:x+(Math.random()-.5)*cs*.3,y:y-cs*.15,vx:(Math.random()-.5)*6+6,vy:-(14+Math.random()*16),g:-10,drag:.6,size:cs*(.08+Math.random()*.08),col:"45,45,52",life:1.1+Math.random()*.7}); },
+    if(Math.random()<.5) this.add({type:"smoke",dark:1,ph:Math.random()*6,x:x+(Math.random()-.5)*cs*.3,y:y-cs*.15,vx:(Math.random()-.5)*6+6,vy:-(14+Math.random()*16),g:-10,drag:.6,size:cs*(.08+Math.random()*.08),col:"45,45,52",life:1.1+Math.random()*.7}); },
   shell(x0,y0,x1,y1,dur,onHit){
     this.add({type:"shell",x0,y0,x1,y1,life:dur,arc:Math.min(220,Math.hypot(x1-x0,y1-y0)*.45),s0:9,s1:4,trail:[],onHit});
   }
@@ -787,7 +1094,7 @@ function banner(text,sub,foe){ const b=document.getElementById("banner"); b.quer
    GAME LOGIC
 ===================================================================== */
 const N=10, LETTERS="ABCDEFGHIJ";
-const SHIP_FILES={"Uçak Gemisi":"ship5.png","Zırhlı":"ship4.png","Kruvazör":"ship3.png","Denizaltı":"sub3.png","Muhrip":"ship2.png"};
+const SHIP_FILES={"Uçak Gemisi":"ship5.webp","Zırhlı":"ship4.webp","Kruvazör":"ship3.webp","Denizaltı":"sub3.webp","Muhrip":"ship2.webp"};
 const SHIP_IMG={};   // yalnızca gerçekten yüklenebilen gemi görselleri (yoksa ortak ship.png)
 Object.entries(SHIP_FILES).forEach(([n,f])=>{ const im=new Image(); im.onload=()=>{ SHIP_IMG[n]=f; if(typeof state!=="undefined"&&state) render(); }; im.src=f; });
 const FLEET=[{name:"Uçak Gemisi",size:5},{name:"Zırhlı",size:4},{name:"Kruvazör",size:3},{name:"Denizaltı",size:3},{name:"Muhrip",size:2}];
@@ -805,7 +1112,7 @@ const allSunk=b=>b.ships.every(s=>s.hits===s.size);
 const coord=(r,c)=>LETTERS[r]+(c+1);
 
 function newGame(online){
-  online=!!online; $("chatBtn").style.display=online?"":"none"; $("hint").classList.remove("hot"); if(!online) $("foeLabel").textContent="DÜŞMAN 🎯";
+  online=!!online; $("chatBtn").style.display=online?"":"none"; $("hint").classList.remove("hot"); if(!online){ $("foeLabel").textContent="DÜŞMAN 🎯"; $("enemyPanel").style.removeProperty("--hullF"); }
   state={online,phase:"setup",horizontal:true,placeIdx:0,sel:0,player:newBoard(),enemy:newBoard(),busy:false,view:"player",
          ai:{targets:[]},shotsP:0,hitsP:0,shotsE:0,lastE:null,lastP:null,reveal:false,newShip:-1};
   if(!online) randomPlace(state.enemy);
@@ -880,10 +1187,10 @@ function renderBars(){
   if(state.phase==="setup"&&!TRAY) { const cur=curShip();
     $("queue").innerHTML=FLEET.map((f,i)=>{ const done=isPlaced(i);
       return `<div class="q ${done?"done":""} ${i===cur&&!done?"cur":""}" data-fi="${i}">
-        <img src="${SHIP_IMG[f.name]||"ship.png"}" alt="" style="--n:${f.size}" draggable="false"><span>${done?"✓ ":""}${f.name}</span></div>`; }).join(""); }
+        <img src="${SHIP_IMG[f.name]||"ship.png"}" alt="" style="--n:${f.size}" draggable="false"><span>${done?"✓ ":""}${T(f.name)}</span></div>`; }).join(""); }
 }
 function setTurn(kind,text){ const t=$("turn"); t.className="turn "+kind; t.textContent=text; }
-function msg(html){ $("msg").innerHTML=html; }
+function msg(html){ $("msg").innerHTML=T(html); }
 
 /* ---------- setup ---------- */
 function clearPreview(){ $("player").querySelectorAll(".preview-ok,.preview-bad").forEach(e=>e.classList.remove("preview-ok","preview-bad")); }
@@ -1133,9 +1440,9 @@ function endGame(won,opt){
   const lost=state.player.ships.filter(s=>s.hits===s.size).length, sunk=state.enemy.ships.filter(s=>s.hits===s.size).length;
   const xr=PROF.onGameEnd({won,online:!!opt.online,why:opt.why||"",diff:difficulty,shots:state.shotsP,hits:state.hitsP,acc,lost,sunk,stars});
   if(opt.online&&won&&opt.why==="sunk"&&ON.gid) PROF.creditWin(ON.gid);
-  let xh=xr.gain?`<span class="gain">+${xr.gain} XP</span>`:"";
-  xr.done.forEach(T=>{ xh+=`<span class="tdone">✅ Görev tamam: ${T.t} (+${T.xp})</span>`; });
-  if(xr.r1>xr.r0){ xh+=`<span class="promo">🎖️ TERFİ! Artık ${RANKS[xr.r1][1]}sın!</span>`; setTimeout(()=>{ banner("TERFİ!",RANKS[xr.r1][1].toUpperCase(),false); Sound.win(); },won?3400:3800); }
+  let xh=xr.gain?`<span class="gain">+${xr.gain} XP</span>`:""; if(xr.gold) xh+=` <span class="gain gold">+${xr.gold} 🪙</span>`;
+  xr.done.forEach(K=>{ xh+=`<span class="tdone">✅ ${T("Görev tamam")}: ${T(K.t)} — ${T("ödülünü profilden al")} 🎁</span>`; });
+  if(xr.r1>xr.r0){ xh+=`<span class="promo">🎖️ ${T("TERFİ!")} ${T("Yeni rütben")}: ${T(RANKS[xr.r1][1])}</span>`; setTimeout(()=>{ banner(T("TERFİ!"),T(RANKS[xr.r1][1]).toLocaleUpperCase(LANG==="tr"?"tr":"en"),false); Sound.win(); },won?3400:3800); }
   $("xpRes").innerHTML=xh;
   $("resAgain").textContent=opt.online?"🌐 Yeni Rakip":"↻ Tekrar";
   $("rematchBox").style.display="none"; if(opt.online) setTimeout(()=>rematchUI(ON.g),0);
@@ -1176,6 +1483,11 @@ function fbInit(){ if(ON.db) return true; if(!window.firebase) return false;
   try{ ON.db.settings({experimentalAutoDetectLongPolling:true,merge:true}); }catch(e){} ON.FV=firebase.firestore.FieldValue; return true; }
 async function fbUser(){ if(ON.auth.currentUser) return ON.auth.currentUser.uid; const c=await ON.auth.signInAnonymously(); return c.user.uid; }
 const myName=()=>PROF.name();
+const myLook=()=>({av:PROF.d.av,hull:PROF.d.hull,motto:String(PROF.d.motto||"").slice(0,40)});
+function oppLook(){ const g=ON.g; return (g&&g.looks&&g.looks[ON.opp])||{}; }
+function showVs(){ const g=ON.g; if(!g||!ON.opp) return; const lk=oppLook(), n=(g.names&&g.names[ON.opp])||T("Rakip"), rk=g.ranks?g.ranks[ON.opp]:null;
+  $("vsAv").src=avSrc(lk.av); $("vsName").innerHTML=esc(n)+(rk!=null?rankBadge(rk,true):""); $("vsMotto").textContent=lk.motto?`“${lk.motto}”`:"";
+  const c=$("vsCard"); c.classList.add("show"); clearTimeout(showVs.t); showVs.t=setTimeout(()=>c.classList.remove("show"),4200); }
 const tset=(k,fn,ms,rep)=>{ tclr(k); ON.timers[k]=rep?setInterval(fn,ms):setTimeout(fn,ms); };
 const tclr=k=>{ if(ON.timers[k]){ clearInterval(ON.timers[k]); clearTimeout(ON.timers[k]); delete ON.timers[k]; } };
 const packShip=s=>({name:s.name,size:s.size,hor:!!s.hor,cells:s.cells.map(([r,c])=>r*10+c).join(",")});
@@ -1205,11 +1517,11 @@ async function joinLobby(){
     const fresh=L&&L.uid&&L.uid!==ON.uid&&L.gid&&L.t&&(Date.now()-L.t.toMillis())<LOBBY_FRESH;
     if(fresh){
       tx.set(lob,{uid:null,gid:null,t:null});
-      tx.update(db.collection("ab_games").doc(L.gid),{p2:ON.uid,status:"setup",["names."+ON.uid]:myName(),["ranks."+ON.uid]:PROF.rank(),["hb."+ON.uid]:FV.serverTimestamp()});
+      tx.update(db.collection("ab_games").doc(L.gid),{p2:ON.uid,status:"setup",["names."+ON.uid]:myName(),["ranks."+ON.uid]:PROF.rank(),["looks."+ON.uid]:myLook(),["hb."+ON.uid]:FV.serverTimestamp()});
       return {gid:L.gid,opp:L.uid};
     }
     const g=db.collection("ab_games").doc();
-    tx.set(g,{p1:ON.uid,p2:null,status:"wait",created:FV.serverTimestamp(),names:{[ON.uid]:myName()},ranks:{[ON.uid]:PROF.rank()},ready:{},res:[],turn:null,pending:null,
+    tx.set(g,{p1:ON.uid,p2:null,status:"wait",created:FV.serverTimestamp(),names:{[ON.uid]:myName()},ranks:{[ON.uid]:PROF.rank()},looks:{[ON.uid]:myLook()},ready:{},res:[],turn:null,pending:null,
               hb:{[ON.uid]:FV.serverTimestamp()},fleet:{},winner:null,why:null});
     tx.set(lob,{uid:ON.uid,gid:g.id,t:FV.serverTimestamp()});
     return {gid:g.id,opp:null};
@@ -1330,7 +1642,9 @@ function onGame(s){
   if(ver!==ON.ver) L("snap v"+ver,g.status,"turn="+(g.turn===ON.uid?"ben":"rakip"),"pend="+(g.pending?(g.pending.by===ON.uid?"ben":"rakip")+"#"+g.pending.n:"-"),"res="+(g.res||[]).length,s.metadata&&s.metadata.fromCache?"cache":"srv");
   ON.ver=ver; ON.g=g; ON.snapAt=Date.now();
   onChat(g);
-  if(!ON.labeled&&g.names&&g.names[ON.opp]){ ON.labeled=true; $("foeLabel").innerHTML=esc(g.names[ON.opp])+(g.ranks&&g.ranks[ON.opp]!=null?" "+rankBadge(g.ranks[ON.opp],true):""); }
+  if(!ON.labeled&&g.names&&g.names[ON.opp]){ ON.labeled=true; const lk=(g.looks&&g.looks[ON.opp])||{};
+    $("foeLabel").innerHTML=`<img class="fav" src="${avSrc(lk.av)}" alt="">`+esc(g.names[ON.opp])+(g.ranks&&g.ranks[ON.opp]!=null?" "+rankBadge(g.ranks[ON.opp],true):"");
+    $("enemyPanel").style.setProperty("--hullF",hullF(lk.hull)); setTimeout(showVs,1700); }
   if(state.phase==="battle"){ const res=g.res||[]; while(ON.seen<res.length){ const e=res[ON.seen++]; if(e.by===ON.uid) myResult(e); } }
   if(g.status==="over"){
     if(state.phase==="over"){ rematchUI(g); if(g.next&&!ON.switching){ ON.switching=true; Sound.alarm(); return goRematch(g.next); } }
@@ -1532,7 +1846,7 @@ async function createRoom(){
         const d=await tx.get(rref); const R=d.exists?d.data():null;
         if(R&&R.t&&Date.now()-R.t.toMillis()<ROOM_TTL) return false;      // kod dolu, başka kod dene
         const g=db.collection("ab_games").doc();
-        tx.set(g,{p1:ON.uid,p2:null,status:"wait",room:c,created:FV.serverTimestamp(),names:{[ON.uid]:myName()},ranks:{[ON.uid]:PROF.rank()},ready:{},res:[],turn:null,pending:null,
+        tx.set(g,{p1:ON.uid,p2:null,status:"wait",room:c,created:FV.serverTimestamp(),names:{[ON.uid]:myName()},ranks:{[ON.uid]:PROF.rank()},looks:{[ON.uid]:myLook()},ready:{},res:[],turn:null,pending:null,
                   hb:{[ON.uid]:FV.serverTimestamp()},fleet:{},winner:null,why:null});
         tx.set(rref,{gid:g.id,uid:ON.uid,t:FV.serverTimestamp()}); gref=g; return true; });
       if(ok) code=c;
@@ -1540,7 +1854,7 @@ async function createRoom(){
     if(!code) throw new Error("kod bulunamadı");
     ON.room=code; ON.gid=gref.id; ON.ref=gref; ON.opp=null; ON.hosting=true;
     $("roomCodeBig").textContent=code;
-    $("roomWa").href="https://wa.me/?text="+encodeURIComponent(`Amiral Battı oynayalım mı? ⚓ Oda kodum: ${code}\n${roomLink(code)}`);
+    $("roomWa").href="https://wa.me/?text="+encodeURIComponent(T("Amiral Battı oynayalım mı? ⚓ Oda kodum: {}").replace("{}",code)+"\n"+roomLink(code));
     showRoom("host"); Sound.yourTurn();
     // oda kaydını taze tut; biri gelince başla
     tset("roomhb",()=>{ db.collection("ab_rooms").doc(code).update({t:FV.serverTimestamp()}).catch(()=>{}); },60000,true);
@@ -1560,7 +1874,7 @@ async function joinRoom(code){
       if(R.uid===ON.uid) return {err:"Bu senin kendi odan 🙂 Kodu arkadaşına gönder."};
       const gref=db.collection("ab_games").doc(R.gid), gd=await tx.get(gref);
       if(!gd.exists||gd.data().p2||gd.data().status!=="wait") return {err:"Bu oda dolu ya da kapanmış."};
-      tx.update(gref,{p2:ON.uid,status:"setup",["names."+ON.uid]:myName(),["ranks."+ON.uid]:PROF.rank(),["hb."+ON.uid]:FV.serverTimestamp()});
+      tx.update(gref,{p2:ON.uid,status:"setup",["names."+ON.uid]:myName(),["ranks."+ON.uid]:PROF.rank(),["looks."+ON.uid]:myLook(),["hb."+ON.uid]:FV.serverTimestamp()});
       tx.delete(rref);
       return {gid:R.gid,opp:R.uid};
     });
@@ -1605,7 +1919,7 @@ async function askRematch(){
     const rm=Object.assign({},g.rematch||{}); rm[ON.uid]=true;
     if(rm[ON.opp]){   // ikimiz de istedik: yeni maçı aç
       const n=db.collection("ab_games").doc();
-      tx.set(n,{p1:g.p1,p2:g.p2,status:"setup",created:FV.serverTimestamp(),names:g.names||{},ranks:g.ranks||{},ready:{},res:[],turn:null,pending:null,
+      tx.set(n,{p1:g.p1,p2:g.p2,status:"setup",created:FV.serverTimestamp(),names:g.names||{},ranks:g.ranks||{},looks:g.looks||{},ready:{},res:[],turn:null,pending:null,
                 hb:{[ON.uid]:FV.serverTimestamp()},fleet:{},winner:null,why:null,rematchOf:old.id});
       tx.update(old,{["rematch."+ON.uid]:true,next:n.id});
     } else tx.update(old,{["rematch."+ON.uid]:true});
@@ -1642,21 +1956,29 @@ const esc=t=>String(t).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"
 const weekNo=ms=>Math.floor((ms+3*3600e3-345600000)/604800000);   // hafta pazartesi 00:00 (İstanbul) başlar
 const dayKey=()=>{ const d=new Date(Date.now()+3*3600e3); return d.toISOString().slice(0,10); };  // İstanbul günü
 
+// amiralbattik günlük görev havuzu: her gün 3 görev; tamamlanınca "Ödülü al" ile XP + altın
 const TASKS={
-  w_any:{t:"Herhangi bir maç kazan",n:1,xp:40,f:e=>e.won},
-  w_2:{t:"2 maç kazan",n:2,xp:70,f:e=>e.won},
-  w_norm:{t:"Normal'de bir maç kazan",n:1,xp:60,f:e=>e.won&&!e.online&&e.diff==="normal"},
-  w_hard:{t:"Zor'da bir maç kazan",n:1,xp:120,f:e=>e.won&&!e.online&&e.diff==="hard"},
-  w_30:{t:"30 atıştan az atışla kazan",n:1,xp:90,f:e=>e.won&&e.shots<30&&e.why!=="left"},
-  w_acc:{t:"%60 isabetle bir maç kazan",n:1,xp:80,f:e=>e.won&&e.acc>=60&&e.why!=="left"},
-  w_clean:{t:"Hiç gemi kaybetmeden kazan",n:1,xp:110,f:e=>e.won&&e.lost===0&&e.why!=="left"},
-  o_play:{t:"1 online maç oyna",n:1,xp:60,f:e=>e.online&&e.why!=="left"},
-  o_win:{t:"1 online maç kazan",n:1,xp:120,f:e=>e.online&&e.won},
-  sink10:{t:"Toplam 10 gemi batır",n:10,xp:60,f:e=>e.sunk},
-  hit40:{t:"Toplam 40 isabet yap",n:40,xp:50,f:e=>e.hits}
+  win_2_games:{t:"2 Maç Kazan",n:2,xp:120,g:75,ic:"🏆",f:e=>e.won},
+  hit_20_shots:{t:"20 İsabetli Atış Yap",n:20,xp:90,g:60,ic:"🎯",f:e=>e.hits},
+  sink_6_ships:{t:"6 Düşman Gemisi Batır",n:6,xp:110,g:70,ic:"🔥",f:e=>e.sunk},
+  play_3_matches:{t:"3 Deniz Savaşı Tamamla",n:3,xp:85,g:50,ic:"⚓",f:e=>e.won||e.why!=="left"},
+  fire_45_shots:{t:"45 Top Atışı Yap",n:45,xp:75,g:45,ic:"💣",f:e=>e.shots},
+  accurate_victory:{t:"%50+ İsabetle Maç Kazan",n:1,xp:140,g:90,ic:"⚡",f:e=>e.won&&e.acc>=50&&e.why!=="left"},
+  tough_victory:{t:"Normal, Zor veya Online Maç Kazan",n:1,xp:130,g:80,ic:"⚔️",f:e=>e.won&&(e.online||e.diff!=="easy")},
+  strong_defense_win:{t:"En Az 2 Gemin Ayakta Kazan",n:1,xp:125,g:85,ic:"🛡️",f:e=>e.won&&e.lost<=3&&e.why!=="left"}
 };
-function dailyIds(day){ let h=0; for(const ch of day) h=(h*31+ch.charCodeAt(0))>>>0;
-  const ids=Object.keys(TASKS), out=[]; while(out.length<3){ h=(h*1103515245+12345)>>>0; const id=ids[h%ids.length]; if(!out.includes(id)) out.push(id); } return out; }
+function dailyIds(day){ let h=2166136261; for(const ch of day){ h^=ch.charCodeAt(0); h=Math.imul(h,16777619)>>>0; }
+  const ids=Object.keys(TASKS), out=[]; for(let k=0;out.length<3&&k<200;k++){ h=(Math.imul(h,1103515245)+12345)>>>0; const id=ids[(h>>>16)%ids.length]; if(!out.includes(id)) out.push(id); }
+  for(const id of ids) if(out.length<3&&!out.includes(id)) out.push(id); return out; }
+// ---- altınla açılan arma / zırh / deniz temaları (ilki her zaman açık) ----
+const AVATARS={admiral:{t:"Amiral Arması",p:0},destroyer:{t:"Muhrip Radarı",p:200},anchor:{t:"Altın Çapa",p:300},compass:{t:"Kuzey Pusulası",p:450}};
+const HULLS={steel:{t:"Çelik Zırh",p:0,f:"contrast(1.06) brightness(1.05)"},arctic:{t:"Kuzey Buzul",p:250,f:"brightness(1.24) saturate(.75) hue-rotate(175deg) contrast(1.05)"},
+  stealth:{t:"Gece Hayaleti",p:400,f:"brightness(.76) contrast(1.22) saturate(.65)"},brass:{t:"Kraliyet Pirinç",p:600,f:"sepia(.55) saturate(1.45) brightness(1.04) contrast(1.08)"}};
+const SEAS={classic:{t:"Klasik Okyanus",p:0},arctic:{t:"Arktik Buz Denizi",p:200},tropical:{t:"Tropikal Lagün",p:300},night:{t:"Gece Denizi",p:450}};
+const avSrc=k=>"av_"+(AVATARS[k]?k:"admiral")+".jpg";
+const hullF=k=>(HULLS[k]||HULLS.steel).f;
+function applyLook(){ const d=PROF.d, R=document.documentElement.style;
+  R.setProperty("--hullF",hullF(d.hull)); R.setProperty("--seaImg",`url(sea_${SEAS[d.sea]?d.sea:"classic"}.jpg)`); }
 
 const BAD=["amk","aq","orospu","oc","pic","sik","yarak","yarrak","got","amcik","amina","ibne","pezevenk","kahpe","gavat","sikis","fuck","shit","bitch","porn","nazi","hitler"];
 function nameError(n){
@@ -1672,15 +1994,21 @@ function nameError(n){
 const PROF={
   d:null,
   load(){
-    const def={name:"Kaptan "+(1000+Math.random()*9000|0),xp:0,games:0,wins:0,losses:0,onlineWins:0,onlineGames:0,day:"",tasks:[]};
+    const def={name:T("Kaptan")+" "+(1000+Math.random()*9000|0),motto:"",av:"admiral",hull:"steel",sea:"classic",gold:0,unl:[],xp:0,games:0,wins:0,losses:0,onlineWins:0,onlineGames:0,day:"",tasks:[]};
     let d=store.get("prof",null);
     if(!d){ d=def; const old=store.get("name",null); if(old) d.name=old; d.wins=store.get("wins",0); d.onlineWins=store.get("onwins",0); }
     this.d=Object.assign(def,d); this.daily(); this.save(false);
   },
   save(remote=true){ store.set("prof",this.d); store.set("name",this.d.name); if(remote) this.push(); updateMenuProfile(); },
   name(){ return this.d.name; }, rank(){ return rankOf(this.d.xp); },
-  daily(){ const day=dayKey(); if(this.d.day!==day){ this.d.day=day; this.d.tasks=dailyIds(day).map(id=>({id,p:0,done:false})); } },
-  // maç sonu: XP + görevler. Dönüş: {gain, before, after, doneTasks[]}
+  owns(kind,id){ const T={av:AVATARS,hull:HULLS,sea:SEAS}[kind]; return !!T[id]&&(T[id].p===0||this.d.unl.includes(kind+":"+id)); },
+  buy(kind,id){ const T={av:AVATARS,hull:HULLS,sea:SEAS}[kind], it=T[id]; if(!it||this.owns(kind,id)) return true;
+    if(this.d.gold<it.p) return false; this.d.gold-=it.p; this.d.unl.push(kind+":"+id); this.d[kind]=id; this.save(); return true; },
+  daily(){ const day=dayKey(); if(this.d.day!==day||!Array.isArray(this.d.tasks)||this.d.tasks.some(t=>!TASKS[t.id])){ this.d.day=day; this.d.tasks=dailyIds(day).map(id=>({id,p:0,done:false,cl:false})); } },
+  claimable(){ return this.d.tasks.filter(t=>t.done&&!t.cl).length; },
+  claim(id){ this.daily(); const t=this.d.tasks.find(x=>x.id===id); if(!t||!t.done||t.cl) return null; const T=TASKS[id];
+    t.cl=true; const r0=rankOf(this.d.xp); this.d.xp+=T.xp; this.d.gold+=T.g; this.save(); return {xp:T.xp,g:T.g,r0,r1:rankOf(this.d.xp)}; },
+  // maç sonu: XP + altın + görev ilerlemesi. Dönüş: {gain, gold, before, after, doneTasks[]}
   onGameEnd(e){
     this.daily();
     const before=this.d.xp, r0=rankOf(before);
@@ -1688,26 +2016,30 @@ const PROF={
     if(e.online) gain+=e.won?80:(e.why==="left"?0:20);
     else gain+=e.won?({easy:20,normal:40,hard:70})[e.diff]:({easy:5,normal:10,hard:15})[e.diff];
     if(e.stars===3) gain+=15;
+    const gold=e.won?(e.online?20:({easy:5,normal:10,hard:15})[e.diff]):(e.why==="left"?0:3);
     const done=[];
     for(const t of this.d.tasks){ if(t.done) continue; const T=TASKS[t.id], v=T.f(e); if(!v) continue;
-      t.p=Math.min(T.n,t.p+(v===true?1:v)); if(t.p>=T.n){ t.done=true; gain+=T.xp; done.push(T); } }
-    this.d.xp+=gain; this.d.games++; if(e.won) this.d.wins++; else this.d.losses++;
+      t.p=Math.min(T.n,t.p+(v===true?1:v)); if(t.p>=T.n){ t.done=true; done.push(T); } }
+    this.d.xp+=gain; this.d.gold+=gold; this.d.games++; if(e.won) this.d.wins++; else this.d.losses++;
     if(e.online){ this.d.onlineGames++; if(e.won) this.d.onlineWins++; }
     this.save();
-    return {gain,before,after:this.d.xp,r0,r1:rankOf(this.d.xp),done};
+    return {gain,gold,before,after:this.d.xp,r0,r1:rankOf(this.d.xp),done};
   },
   // ---- sunucu eşitleme (ab_players/{uid}) ----
   async push(){ try{ if(!ON.db||!ON.uid) return; const d=this.d;
-      await ON.db.collection("ab_players").doc(ON.uid).set({name:d.name,xp:d.xp|0,games:d.games|0,wins:d.wins|0,losses:d.losses|0,onlineWins:d.onlineWins|0,
-        onlineGames:d.onlineGames|0,day:d.day,tasks:d.tasks,up:ON.FV.serverTimestamp()});
+      await ON.db.collection("ab_players").doc(ON.uid).set({name:d.name,motto:String(d.motto||"").slice(0,40),av:d.av,hull:d.hull,sea:d.sea,gold:d.gold|0,unl:d.unl.slice(0,20),
+        xp:d.xp|0,games:d.games|0,wins:d.wins|0,losses:d.losses|0,onlineWins:d.onlineWins|0,onlineGames:d.onlineGames|0,day:d.day,tasks:d.tasks,up:ON.FV.serverTimestamp()});
     }catch(e){ L("profil yazılamadı",e&&e.code); } },
   async pull(){ try{ if(!ON.db||!ON.uid) return; const s=await ON.db.collection("ab_players").doc(ON.uid).get(); if(!s.exists){ this.push(); return; }
       const r=s.data(), d=this.d;
       if((r.xp|0)>(d.xp|0)){ // sunucudaki ilerleme daha ileri (ör. yeni cihaz + Google): onu al
         Object.assign(d,{name:r.name||d.name,xp:r.xp|0,games:r.games|0,wins:r.wins|0,losses:r.losses|0,onlineWins:r.onlineWins|0,onlineGames:r.onlineGames|0});
-        if(r.day===d.day&&Array.isArray(r.tasks)) d.tasks=r.tasks;
-        this.save(false);
-      } else if((r.xp|0)<(d.xp|0)||r.name!==d.name) this.push();
+        if(typeof r.motto==="string") d.motto=r.motto; if(r.gold!=null) d.gold=r.gold|0;
+        if(Array.isArray(r.unl)) d.unl=[...new Set([...d.unl,...r.unl])];
+        ["av","hull","sea"].forEach(k=>{ if(r[k]&&this.owns(k,r[k])) d[k]=r[k]; });
+        if(r.day===d.day&&Array.isArray(r.tasks)&&r.tasks.every(t=>TASKS[t.id])) d.tasks=r.tasks;
+        this.save(false); applyLook();
+      } else if((r.xp|0)<(d.xp|0)||r.name!==d.name||(r.gold|0)!==(d.gold|0)||r.motto!==d.motto||r.av!==d.av) this.push();
     }catch(e){ L("profil okunamadı",e&&e.code); } },
   // ---- haftalık sıralama: yalnızca rakibin filosunu batırarak kazanılan online maçlar ----
   async creditWin(gid){
@@ -1758,35 +2090,88 @@ async function googleLink(){
     note.textContent=e&&e.code==="auth/popup-closed-by-user"?"Pencere kapatıldı.":e&&e.code==="auth/unauthorized-domain"?"Bu site henüz Google girişine açılmadı.":"Google'a bağlanılamadı, tekrar dene."; }
 }
 
-/* ---------- Menü profil kartı ---------- */
+/* ---------- Menü profil kartı + günlük görev paneli ---------- */
 function updateMenuProfile(){
   const el=$("menuProf"); if(!el||!PROF.d) return; const d=PROF.d, i=rankOf(d.xp);
-  const next=RANKS[i+1], pct=next?Math.round(100*(d.xp-RANKS[i][0])/(next[0]-RANKS[i][0])):100;
-  const left=PROF.d.tasks.filter(t=>!t.done).length;
-  el.innerHTML=`<div class="mp-name">${esc(d.name)}</div><div class="mp-rank">${rankBadge(i)}</div>
-    <div class="xpbar"><b style="width:${pct}%"></b></div><div class="mp-xp">${d.xp} XP${next?` · ${next[1]}: ${next[0]}`:" · En yüksek rütbe!"}</div>
-    ${left?`<span class="mp-task">📅 ${left}</span>`:""}`;
+  const next=RANKS[i+1], pct=next?Math.round(100*(d.xp-RANKS[i][0])/(next[0]-RANKS[i][0])):100, cl=PROF.claimable();
+  el.innerHTML=`<div class="mp-top"><img src="${avSrc(d.av)}" alt=""><div style="min-width:0;flex:1"><div class="mp-name">${esc(d.name)}</div>
+    <div class="mp-sub">${T(RANKS[i][1])} · <b>🪙 ${d.gold|0}</b></div></div></div>
+    <div class="xpbar"><b style="width:${pct}%"></b></div><div class="mp-xp">${d.xp} XP${next?` · ${T(next[1])}: ${next[0]}`:" · "+T("En yüksek rütbe!")}</div>
+    ${cl?`<span class="mp-task rdy">🎁 ${cl}</span>`:""}`;
+  renderMenuTasks();
 }
+function renderMenuTasks(){
+  const el=$("menuTasks"); if(!el||!PROF.d) return; PROF.daily(); const ts=PROF.d.tasks, done=ts.filter(t=>t.done).length;
+  el.innerHTML=`<div class="dm-h"><div class="t"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/></svg>${T("Günlük Görevler")} <small>${done}/${ts.length}</small></div>
+    <div class="rs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>${T("Yenilenme")} ${fmtDur(msToMidnight())}</div></div>
+    <div class="dm-list">${ts.map(t=>{ const K=TASKS[t.id], rdy=t.done&&!t.cl, pc=Math.round(100*t.p/K.n);
+      return `<div class="dm ${rdy?"rdy":""} ${t.cl?"cl":""}"><div class="dm-top"><span class="dm-ic">${K.ic}</span><span class="dm-ti">${T(K.t)}</span><span class="dm-n">${t.p}/${K.n}</span></div>
+        <div class="dm-bar"><i style="width:${pc}%"></i></div>
+        <div class="dm-bot"><span><span class="xp">+${K.xp} XP</span><span class="gd">🪙+${K.g}</span></span>${rdy?`<button class="claim" data-claim="${t.id}">🎁 ${T("Ödülü Al")}</button>`:`<span class="pc">${t.cl?"✓ "+T("Alındı"):pc+"%"}</span>`}</div></div>`; }).join("")}</div>`;
+  el.querySelectorAll("[data-claim]").forEach(b=>b.onclick=()=>{ Sound.init(); const r=PROF.claim(b.dataset.claim); if(!r) return;
+    Sound.win(); vibrate([30,30,60]); const bb=b.getBoundingClientRect(); FX.explosion(bb.left+bb.width/2,bb.top+bb.height/2,.5);
+    if(r.r1>r.r0) setTimeout(()=>banner(T("TERFİ!"),T(RANKS[r.r1][1]).toLocaleUpperCase(LANG==="tr"?"tr":"en"),false),400); });
+}
+setInterval(()=>{ if($("menu").classList.contains("show")&&!document.hidden) renderMenuTasks(); },30000);
 /* ---------- Profil penceresi ---------- */
+function msToMidnight(){ const n=Date.now()+3*3600e3; return 86400000-(n%86400000); }
+function fmtDur(ms){ const h=Math.floor(ms/3600e3), m=Math.floor(ms%3600e3/60e3); return h?`${h}${T("sa")} ${m}${T("dk")}`:`${m}${T("dk")}`; }
 function renderProfile(){
   const d=PROF.d; PROF.daily(); const i=rankOf(d.xp), next=RANKS[i+1];
   const pct=next?Math.round(100*(d.xp-RANKS[i][0])/(next[0]-RANKS[i][0])):100;
-  $("pfRank").innerHTML=rankBadge(i)+`<div class="xpbar big"><b style="width:${pct}%"></b></div><div class="mp-xp">${d.xp} XP${next?` — sonraki rütbe <b>${next[1]}</b>: ${next[0]} XP`:" — En yüksek rütbedesin! ⚓"}</div>`;
-  $("pfName").value=d.name; $("pfNameMsg").textContent="";
-  $("pfStats").innerHTML=`<div class="stat"><b>${d.games}</b><small>Maç</small></div><div class="stat"><b>${d.wins}</b><small>Galibiyet</small></div><div class="stat"><b>${d.onlineWins}</b><small>Online G.</small></div>`;
-  $("pfTasks").innerHTML=d.tasks.map(t=>{ const T=TASKS[t.id]; return `<div class="task ${t.done?"done":""}"><div><b>${t.done?"✅":"🎯"} ${T.t}</b><div class="tbar"><i style="width:${Math.round(100*t.p/T.n)}%"></i></div></div><span>${T.n>1?`${t.p}/${T.n} · `:""}+${T.xp} XP</span></div>`; }).join("");
+  $("pfAv").src=avSrc(d.av); $("pfHeadName").textContent=d.name; $("pfHeadMotto").textContent=d.motto?`“${d.motto}”`:"";
+  $("pfRank").innerHTML=rankBadge(i); $("pfGold").textContent="🪙 "+(d.gold|0);
+  $("pfXp").innerHTML=`<div class="xpbar big"><b style="width:${pct}%"></b></div><div class="mp-xp">${d.xp} XP${next?` — ${T("sonraki rütbe")} <b>${T(next[1])}</b>: ${next[0]} XP`:" — "+T("En yüksek rütbedesin! ⚓")}</div>`;
+  if(document.activeElement!==$("pfName")) $("pfName").value=d.name;
+  if(document.activeElement!==$("pfMotto")) $("pfMotto").value=d.motto||"";
+  $("pfStats").innerHTML=`<div class="stat"><b>${d.games}</b><small>${T("Maç")}</small></div><div class="stat"><b>${d.wins}</b><small>${T("Galibiyet")}</small></div><div class="stat"><b>${d.onlineWins}</b><small>${T("Online G.")}</small></div>`;
+  $("pfReset").textContent="· "+T("Yenilenme")+": "+fmtDur(msToMidnight());
+  $("pfTasks").innerHTML=d.tasks.map(t=>{ const K=TASKS[t.id], rdy=t.done&&!t.cl;
+    return `<div class="task ${t.cl?"done":""} ${rdy?"ready":""}"><span class="ic">${K.ic}</span><div class="tl"><b>${T(K.t)}</b><div class="tbar"><i style="width:${Math.round(100*t.p/K.n)}%"></i></div></div>
+      <div class="rw"><small>${K.n>1?`${t.p}/${K.n} · `:""}+${K.xp} XP · 🪙${K.g}</small>${rdy?`<button class="claim" data-claim="${t.id}">🎁 ${T("Ödülü Al")}</button>`:t.cl?`<span class="claimed">✓ ${T("Alındı")}</span>`:""}</div></div>`; }).join("");
+  $("pfTasks").querySelectorAll("[data-claim]").forEach(b=>b.onclick=()=>{ const r=PROF.claim(b.dataset.claim); if(!r) return;
+    Sound.win(); vibrate([30,30,60]); const bb=b.getBoundingClientRect(); FX.explosion(bb.left+bb.width/2,bb.top+bb.height/2,.5);
+    $("pfGold").classList.remove("bump"); void $("pfGold").offsetWidth; $("pfGold").classList.add("bump");
+    if(r.r1>r.r0) setTimeout(()=>banner(T("TERFİ!"),T(RANKS[r.r1][1]).toLocaleUpperCase(LANG==="tr"?"tr":"en"),false),400);
+    renderProfile(); });
+  renderPicks();
+  $("langSw").querySelectorAll("button").forEach(b=>{ b.classList.toggle("on",b.dataset.lang===LANG); b.onclick=()=>setLang(b.dataset.lang); });
   updateGoogleUI(); $("gMsg").textContent="";
 }
-function saveName(){
-  const v=$("pfName").value.trim().replace(/\s+/g," "), err=nameError(v);
-  if(err){ Sound.error(); $("pfNameMsg").style.color="#ff9b85"; $("pfNameMsg").textContent=err; return; }
-  PROF.d.name=v; PROF.save(); Sound.place(); $("pfNameMsg").style.color="#7dffa6"; $("pfNameMsg").textContent="Kaydedildi ✓";
+let shopAsk=null;
+function renderPicks(){
+  const d=PROF.d;
+  const mk=(kind,T0,inner)=>Object.entries(T0).map(([id,it])=>{ const own=PROF.owns(kind,id), on=d[kind]===id, ask=shopAsk===kind+":"+id;
+    return `<button class="pick ${on?"on":""} ${own?"":"lock"} ${ask?"ask":""}" data-k="${kind}" data-id="${id}">${inner(id)}<span>${T(it.t)}</span>${own?"":`<span class="price">${ask?T("Aç")+"? ":"🔒 "}${it.p} 🪙</span>`}</button>`; }).join("");
+  $("pkAv").innerHTML=mk("av",AVATARS,id=>`<img class="av" src="${avSrc(id)}" alt="">`);
+  $("pkHull").innerHTML=mk("hull",HULLS,id=>`<div class="hullp" style="filter:${hullF(id)} drop-shadow(0 2px 2px rgba(0,0,0,.6))"></div>`);
+  $("pkSea").innerHTML=mk("sea",SEAS,id=>`<div class="seap" style="background-image:url(sea_${id}.jpg)"></div>`);
+  document.querySelectorAll("#profile .pick").forEach(b=>b.onclick=()=>pickItem(b));
 }
+function pickItem(b){
+  const kind=b.dataset.k, id=b.dataset.id, key=kind+":"+id, m=$("shopMsg"); m.textContent="";
+  if(PROF.owns(kind,id)){ shopAsk=null; PROF.d[kind]=id; PROF.save(); applyLook(); Sound.place(); renderProfile(); return; }
+  const it={av:AVATARS,hull:HULLS,sea:SEAS}[kind][id];
+  if(PROF.d.gold<it.p){ shopAsk=null; Sound.error(); b.classList.remove("no"); void b.offsetWidth; b.classList.add("no");
+    m.style.color="#ff9b85"; m.textContent=T("Yetersiz altın: {} 🪙 lazım. Günlük görevleri tamamla!").replace("{}",it.p); return; }
+  if(shopAsk!==key){ shopAsk=key; Sound.click(); renderPicks(); m.style.color="#ffd85a"; m.textContent=T("Açmak için bir kez daha dokun."); return; }
+  shopAsk=null; PROF.buy(kind,id); applyLook(); Sound.win(); vibrate([30,30,60]);
+  const bb=b.getBoundingClientRect(); FX.explosion(bb.left+bb.width/2,bb.top+bb.height/2,.5);
+  renderProfile(); $("shopMsg").style.color="#7dffa6"; $("shopMsg").textContent=T("Açıldı! 🎉");
+}
+function saveName(){
+  const v=$("pfName").value.trim().replace(/\s+/g," "), err=nameError(v), mo=$("pfMotto").value.trim().replace(/\s+/g," ").slice(0,40), em=mottoError(mo);
+  if(err||em){ Sound.error(); $("pfNameMsg").style.color="#ff9b85"; $("pfNameMsg").textContent=T(err||em); return; }
+  PROF.d.name=v; PROF.d.motto=mo; PROF.save(); Sound.place(); renderProfile(); $("pfNameMsg").style.color="#7dffa6"; $("pfNameMsg").textContent=T("Kaydedildi ✓");
+}
+function mottoError(m){ if(!m) return null;
+  const ws=m.toLocaleLowerCase("tr").replace(/[ç]/g,"c").replace(/[ğ]/g,"g").replace(/[ı]/g,"i").replace(/[ö]/g,"o").replace(/[ş]/g,"s").replace(/[ü]/g,"u").split(/[^a-z0-9]+/).filter(Boolean);
+  return ws.some(x=>BAD.some(w=>x===w||(w.length>=4&&x.includes(w))))?"Bu slogan uygun değil.":null; }
 /* ---------- Haftalık sıralama ---------- */
 async function openBoard(){
   Sound.init(); Sound.click(); $("board").classList.add("show"); const list=$("bdList"); list.innerHTML=`<div class="bd-empty">Yükleniyor…</div>`;
   const wk=weekNo(Date.now()), monday=new Date((wk*604800000)+345600000-3*3600e3+7*86400000);
-  $("bdSub").textContent=`Bu haftanın online galibiyetleri · ${monday.toLocaleDateString("tr-TR",{day:"numeric",month:"long"})} pazartesi sıfırlanır`;
+  $("bdSub").textContent=`Bu haftanın online galibiyetleri · ${monday.toLocaleDateString(LANG==="tr"?"tr-TR":"en-US",{day:"numeric",month:"long"})} pazartesi sıfırlanır`;
   try{
     if(!fbInit()) throw new Error("firebase yok"); ON.uid=ON.uid||await fbUser();
     const qs=await ON.db.collection("ab_weekly").doc(String(wk)).collection("players").orderBy("wins","desc").limit(30).get();
@@ -1858,9 +2243,10 @@ function botSay(kind,chance){
 function show(id){ document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("show",s.id===id)); }
 function updateBest(){
   const b=store.get("best_"+difficulty,null), w=store.get("wins",0), ow=store.get("onwins",0);
-  $("bestLine").textContent=(w?`🏆 ${w} zafer`:"")+(ow?`  ·  🌐 ${ow} online zafer`:"")+(b!==null?`  ·  ${({easy:"Kolay",normal:"Normal",hard:"Zor"})[difficulty]} rekoru: ${b} atış`:"");
+  $("bestLine").textContent=[w?`🏆 ${w} ${T("zafer")}`:"",ow?`🌐 ${ow} ${T("online zafer")}`:"",b!==null?`${T(({easy:"Kolay",normal:"Normal",hard:"Zor"})[difficulty])} ${T("rekoru")}: ${b} ${T("atış")}`:""].filter(Boolean).join("  ·  ");
 }
-function setSoundUI(){ $("soundBtn").textContent=Sound.on?"🔊":"🔇"; $("menuSound").textContent=Sound.on?"🔊":"🔇"; }
+function setSoundUI(){ $("soundBtn").textContent=Sound.on?"🔊":"🔇";
+  $("menuSound").innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z"/>${Sound.on?'<path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/>':'<path d="M16 9l6 6M22 9l-6 6"/>'}</svg>`; }
 document.querySelectorAll("#diffRow .chip").forEach(ch=>{ ch.classList.toggle("on",ch.dataset.d===difficulty);
   ch.onclick=()=>{ Sound.init(); Sound.click(); difficulty=ch.dataset.d; store.set("diff",difficulty);
     document.querySelectorAll("#diffRow .chip").forEach(x=>x.classList.toggle("on",x===ch)); updateBest(); }; });
@@ -1876,12 +2262,13 @@ $("resAgain").onclick=()=>{ Sound.click(); $("result").classList.remove("show");
 $("resMenu").onclick=()=>{ Sound.click(); $("result").classList.remove("show"); if(state.online) leaveOnline(false); show("menu"); updateBest(); };
 openRoomFromLink();
 $("menuProf").onclick=()=>{ Sound.init(); Sound.click(); renderProfile(); $("profile").classList.add("show"); };
+$("langBtn").textContent=LANG.toUpperCase(); $("langBtn").onclick=()=>setLang(LANG==="tr"?"en":"tr");
 // sade ana menü: zorluk ve online seçimleri ayrı pencerelerde
 const DIFF_TR={easy:"Kolay",normal:"Normal",hard:"Zor"};
-function updatePlaySub(){ $("playSub").textContent="Zorluk: "+DIFF_TR[difficulty]; }
+function updatePlaySub(){ $("playSub").textContent=T("Zorluk")+": "+T(DIFF_TR[difficulty]); }
 $("playBtn").onclick=()=>{ Sound.init(); Sound.click();
-  document.querySelectorAll("#diffPick .mbtn").forEach(b=>b.classList.toggle("cur",b.dataset.d===difficulty)); $("diffPick").classList.add("show"); };
-document.querySelectorAll("#diffPick .mbtn").forEach(b=>b.onclick=()=>{ difficulty=b.dataset.d; store.set("diff",difficulty); updatePlaySub(); updateBest();
+  document.querySelectorAll("#diffPick .opt").forEach(b=>b.classList.toggle("cur",b.dataset.d===difficulty)); $("diffPick").classList.add("show"); };
+document.querySelectorAll("#diffPick .opt").forEach(b=>b.onclick=()=>{ difficulty=b.dataset.d; store.set("diff",difficulty); updatePlaySub(); updateBest();
   $("diffPick").classList.remove("show"); Sound.click(); Sound.boom(.35); show("game"); newGame(); });
 $("onlineMenuBtn").onclick=()=>{ Sound.init(); Sound.click(); $("onlineSheet").classList.add("show"); };
 $("onlineBtn").addEventListener("click",()=>$("onlineSheet").classList.remove("show"),true);
@@ -1890,10 +2277,12 @@ document.querySelectorAll("[data-close]").forEach(b=>b.onclick=()=>{ Sound.click
 updatePlaySub();
 $("pfSave").onclick=saveName;
 $("pfName").addEventListener("keydown",e=>{ if(e.key==="Enter") saveName(); });
-$("pfClose").onclick=()=>{ Sound.click(); $("profile").classList.remove("show"); };
+$("pfMotto").addEventListener("keydown",e=>{ if(e.key==="Enter") saveName(); });
+$("pfClose").onclick=()=>{ Sound.click(); shopAsk=null; $("profile").classList.remove("show"); updateMenuProfile(); };
+$("foeLabel").onclick=()=>{ if(ON.active) showVs(); };
 $("boardBtn").onclick=openBoard;
 $("bdClose").onclick=()=>{ Sound.click(); $("board").classList.remove("show"); };
-PROF.load(); updateMenuProfile(); setTimeout(bootCloud,600);
+PROF.load(); applyLook(); updateMenuProfile(); setTimeout(bootCloud,600);
 $("onlineBtn").onclick=()=>findMatch();
 $("mmCancel").onclick=()=>cancelMatch();
 $("mmBot").onclick=async()=>{ await cancelMatch(); show("game"); newGame(); };
@@ -1914,7 +2303,7 @@ $("chatMute").onchange=e=>store.set("chatMute",e.target.checked);
 document.addEventListener("pointerdown",()=>Sound.init(),{once:true});
 
 buildBoard($("player"),"player"); buildBoard($("enemy"),"enemy");
-setSoundUI(); updateBest();
+setSoundUI(); updateBest(); i18nStart();
 </script>
 </body>
 </html>
