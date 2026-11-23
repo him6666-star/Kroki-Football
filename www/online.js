@@ -19,13 +19,13 @@
  KR.cloudSync=async(manual)=>{if(!isG())return;KR.pulling=1;let d=null;try{const r=await db.collection('saves').doc(KR.user.uid).get();d=r.exists?r.data():null}catch(e){KR.pulling=0;return}KR.pulling=0;
   const loc=gl('kroki-q');
   if(d&&d.q&&sc(d.q)>=sc(loc)&&d.q!==loc){try{localStorage.setItem('kroki-q',d.q);d.tour?localStorage.setItem('kroki-tour',d.tour):localStorage.removeItem('kroki-tour');if(d.jug&&+d.jug>+gl('kroki-jug'))localStorage.setItem('kroki-jug',d.jug)}catch(e){}
-   try{qLoad()}catch(e){}if(typeof state!='undefined'&&state=='menu'){try{menu()}catch(e){}}try{if(typeof toast=='function')toast(T('\u2601\ufe0f Kay\u0131t y\u00fcklendi','\u2601\ufe0f Progress loaded'))}catch(e){}}
+   try{qLoad()}catch(e){}if(typeof state!='undefined'&&state=='menu'&&window.MAINV){try{menu()}catch(e){}}try{if(typeof toast=='function')toast(T('\u2601\ufe0f Kay\u0131t y\u00fcklendi','\u2601\ufe0f Progress loaded'))}catch(e){}}
   else await KR.cloudPush()};
  setTimeout(()=>{if(typeof qSave=='function'&&!qSave._w){const o=qSave;window.qSave=function(){o.apply(this,arguments);KR.cloudQueue()};window.qSave._w=1}if(typeof tourSave=='function'&&!tourSave._w){const o=tourSave;window.tourSave=function(){o.apply(this,arguments);KR.cloudQueue()};window.tourSave._w=1}},0);
  document.addEventListener('visibilitychange',()=>{if(!isG())return;if(document.hidden)KR.cloudPush();else if(typeof state!='undefined'&&state=='menu')KR.cloudSync()});
  async function load(){
   try{const d=await db.collection('users').doc(KR.user.uid).get();KR.profile=d.exists?d.data():null}catch(e){KR.profile=null}
-  KR.prizes();const first=!KR.ready;KR.ready=true;if(first&&isG())KR.cloudSync();if(first&&typeof state!='undefined'&&state=='menu')menu();
+  KR.prizes();const first=!KR.ready;KR.ready=true;if(first&&isG())KR.cloudSync();if(first&&typeof state!='undefined'&&state=='menu'&&window.MAINV)menu();
  }
  auth.onAuthStateChanged(u=>{if(!u){auth.signInAnonymously().catch(()=>{KR.ready=true});return}KR.user=u;load()});
  KR.native=!!(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform());
