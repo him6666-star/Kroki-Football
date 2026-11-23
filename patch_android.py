@@ -24,11 +24,6 @@ public class MainActivity extends BridgeActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        if (Build.VERSION.SDK_INT >= 28) {
-            WindowManager.LayoutParams lp = getWindow().getAttributes();
-            lp.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
-            getWindow().setAttributes(lp);
-        }
         hideBars();
         try {
             if (getBridge() != null && getBridge().getWebView() != null) {
@@ -96,6 +91,11 @@ if os.path.exists(sp):
     t = open(sp, encoding='utf-8').read()
     if 'windowSplashScreenBackground' not in t and 'NoActionBarLaunch' in t:
         t = re.sub(r'(<style name="AppTheme.NoActionBarLaunch"[^>]*>)', r'\1\n        <item name="windowSplashScreenBackground">#101C19</item>\n        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_logo</item>', t, 1)
+        open(sp, 'w', encoding='utf-8').write(t)
+if os.path.exists(sp):
+    t = open(sp, encoding='utf-8').read()
+    if 'windowLayoutInDisplayCutoutMode' not in t:
+        t = re.sub(r'(<style name="AppTheme\.NoActionBar(?:Launch)?"[^>]*>)', r'\1\n        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>', t)
         open(sp, 'w', encoding='utf-8').write(t)
 print('splash tamam')
 print('patch tamam')
