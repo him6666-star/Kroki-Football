@@ -131,10 +131,22 @@ service cloud.firestore {
       allow read: if request.auth != null;
       allow create: if request.auth != null && request.auth.uid == uid
         && request.resource.data.name is string && request.resource.data.name.size() >= 3 && request.resource.data.name.size() <= 14
-        && request.resource.data.xp is int && request.resource.data.xp >= 0 && request.resource.data.xp <= 3000;
+        && request.resource.data.xp is int && request.resource.data.xp >= 0 && request.resource.data.xp <= 3000
+        && abLook(request.resource.data) && (!('gold' in request.resource.data) || request.resource.data.gold <= 2000);
       allow update: if request.auth != null && request.auth.uid == uid
         && request.resource.data.name is string && request.resource.data.name.size() >= 3 && request.resource.data.name.size() <= 14
-        && request.resource.data.xp is int && request.resource.data.xp >= 0 && request.resource.data.xp <= resource.data.xp + 1000;
+        && request.resource.data.xp is int && request.resource.data.xp >= 0 && request.resource.data.xp <= resource.data.xp + 1000
+        && abLook(request.resource.data)
+        && (!('gold' in request.resource.data) || request.resource.data.gold <= ('gold' in resource.data ? resource.data.gold : 0) + 1000);
+    }
+    // profil görünümü: slogan, arma, zırh, altın, açılan eşyalar
+    function abLook(d) {
+      return (!('motto' in d) || (d.motto is string && d.motto.size() <= 40))
+        && (!('gold' in d) || (d.gold is int && d.gold >= 0))
+        && (!('unl' in d) || (d.unl is list && d.unl.size() <= 20))
+        && (!('av' in d) || (d.av is string && d.av.size() <= 12))
+        && (!('hull' in d) || (d.hull is string && d.hull.size() <= 12))
+        && (!('sea' in d) || (d.sea is string && d.sea.size() <= 12));
     }
     // haftalik siralama: sadece rakibin filosunu batirarak kazanilan online maclar; her mac bir kez sayilir
     match /ab_wins/{gid} {
@@ -176,7 +188,7 @@ service cloud.firestore {
       allow update: if request.auth != null && (
         request.auth.uid == resource.data.p1 || request.auth.uid == resource.data.p2
         || (resource.data.p2 == null && request.resource.data.p2 == request.auth.uid
-            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['p2','status','names','ranks','hb'])));
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['p2','status','names','ranks','looks','hb'])));
       allow delete: if request.auth != null && request.auth.uid == resource.data.p1;
     }
 
