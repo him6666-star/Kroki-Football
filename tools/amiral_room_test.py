@@ -32,6 +32,8 @@ async def main():
             await asyncio.sleep(0.5)
         print("eşleşti:", ok, await A.evaluate("ON.gid") == await B.evaluate("ON.gid"))
         print("rakip etiketi A:", await A.inner_text("#foeLabel"), "| B:", await B.inner_text("#foeLabel"))
+        await asyncio.sleep(2)
+        print("rakip görünümü (looks) A:", await A.evaluate("JSON.stringify(ON.g&&ON.g.looks)"), "| A'nın gördüğü arma:", await A.evaluate("(document.querySelector('#foeLabel img.fav')||{}).src||'-'"), "| vs kart:", await A.evaluate("document.getElementById('vsCard').classList.contains('show')"))
         # hazır uyarısı: A önce hazır olsun, B'de uyarı çıksın
         await A.click("#randomBtn"); await A.click("#startBtn"); await asyncio.sleep(2.5)
         print("B hazır uyarısı:", await B.evaluate("[...document.querySelectorAll('#bubbles .bub')].map(b=>b.innerText.replace(/\\n/g,': '))"), "|", await B.inner_text("#hint"), "| süre:", await B.evaluate("Math.round((ON.deadline-Date.now())/1000)"))
