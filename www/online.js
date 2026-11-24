@@ -2,7 +2,7 @@
 (function(){
  const cfg=window.KR_CFG;
  if(!cfg||!cfg.apiKey||!window.firebase)return;
- const T=(tr,en)=>(window.ST&&ST.lang=='en')?en:tr;
+ const T=(tr,en)=>((typeof ST!='undefined'&&ST)&&ST.lang=='en')?en:tr;
  const esc=s=>String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
  firebase.initializeApp(cfg);
  const auth=firebase.auth(),db=firebase.firestore(),FV=firebase.firestore.FieldValue;
@@ -87,7 +87,7 @@
    if(tab=='w'){const left=Math.max(1,Math.ceil(((wk+1)*604800000+345600000-3*3600e3-Date.now())/864e5));h+='<div style="font-size:12px;opacity:.85;margin-bottom:4px">'+T('İlk 3\'e: 100 / 60 / 30 🪙 · '+left+' gün kaldı','Top 3 win: 100 / 60 / 30 🪙 · '+left+' day(s) left')+'</div>'}
    h+='<div style="margin:6px 0">';
    const arr=[];q.forEach(d=>{const x=d.data();arr.push({id:d.id,name:x.name,points:tab=='w'?x.wp:x.points})});const i=arr.length;
-   try{if(tab=='w'&&KR.user&&arr.some(z=>z.id==KR.user.uid)&&window.QS&&QS.bw!==wk){QS.bw=wk;if(typeof qSave=='function')qSave();if(typeof ev=='function')ev('wkBoard')}}catch(e){}
+   try{if(tab=='w'&&KR.user&&arr.some(z=>z.id==KR.user.uid)&&(typeof QS!='undefined'&&QS)&&QS.bw!==wk){QS.bw=wk;if(typeof qSave=='function')qSave();if(typeof ev=='function')ev('wkBoard')}}catch(e){}
    if(i)h+=(window.lbRows?lbRows(arr,KR.user&&KR.user.uid):'');
    if(!i)h+='<p style="text-align:center;opacity:.8">'+T('Henüz kimse yok.','Nobody yet.')+'</p>';
    ov.innerHTML=h+'</div>'+back+'</div>';
@@ -96,7 +96,7 @@
  // gecen haftanin odulunu al (sunucu yazar): gorev listesine "toplanacak odul" olarak eklenir
  KR.prizes=async()=>{
   try{
-   if(!KR.user||typeof grant!='function'||!window.QS)return;
+   if(!KR.user||typeof grant!='function'||!(typeof QS!='undefined'&&QS))return;
    const q=await db.collection('prizes').where('uid','==',KR.user.uid).get();
    for(const d of q.docs){const x=d.data();grant(Math.max(1,Math.min(100,x.gold|0)),'🏆 '+T('Haftalık sıralama #','Weekly rank #')+x.rank);try{if(typeof qSave=='function')qSave()}catch(e){}if(typeof ev=='function')ev('wkTop');await d.ref.delete()}
   }catch(e){}

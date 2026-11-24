@@ -3,7 +3,7 @@
 (function(){
  if(!window.KR||!KR.db||!window.RTCPeerConnection)return;
  const db=KR.db,FV=KR.FV;
- const T=(tr,en)=>(window.ST&&ST.lang=='en')?en:tr;
+ const T=(tr,en)=>((typeof ST!='undefined'&&ST)&&ST.lang=='en')?en:tr;
  const ACT=['u','d','l','r','k','p','s','w','x','y'];
  const ICE={iceServers:[{urls:['stun:stun.l.google.com:19302','stun:stun1.l.google.com:19302']},{urls:['turn:openrelay.metered.ca:80','turn:openrelay.metered.ca:443','turn:openrelay.metered.ca:443?transport=tcp'],username:'openrelayproject',credential:'openrelayproject'}].concat(window.KR_ICE||[]),iceCandidatePoolSize:2};
  const q1=v=>Math.round(v*10)/10,q2=v=>Math.round(v*100)/100;
@@ -42,7 +42,7 @@
   if(joinTimer){clearTimeout(joinTimer);joinTimer=null}
   if(unsub){unsub();unsub=null}
   if(n.role=='host'){db.collection('rooms').doc(n.code).delete().catch(()=>{})}
-  n.me={nm:(KR.profile&&KR.profile.name)||T('Oyuncu','Player'),lv:(window.QS&&QS.lv)||1};n.me.tm=(window.TMS&&TMS[ST.team]&&tmOpen(ST.team))?ST.team:'blue';send(n.ctl,{k:'hi',nm:n.me.nm,lv:n.me.lv,tm:n.me.tm});
+  n.me={nm:(KR.profile&&KR.profile.name)||T('Oyuncu','Player'),lv:((typeof QS!='undefined'&&QS)&&QS.lv)||1};n.me.tm=((typeof TMS!='undefined'&&TMS)&&TMS[ST.team]&&tmOpen(ST.team))?ST.team:'blue';send(n.ctl,{k:'hi',nm:n.me.nm,lv:n.me.lv,tm:n.me.tm});
   ov.style.display='flex';ov.innerHTML=vsHTML(n.role=='host',n.me,n.opp);try{sfx('whistle_pen')}catch(e){}
  }
  // ---------- host ----------
@@ -90,7 +90,7 @@
  }
  function onCtl(n,m){
   if(m.k=='in'&&n.role=='host'){applyInput(n,m.m|0)}
-  else if(m.k=='hi'){n.opp={nm:String(m.nm||'').slice(0,20),lv:m.lv|0,tm:(window.TMS&&TMS[m.tm])?m.tm:'blue'};const e=document.getElementById('vsn2');if(e){e.textContent=n.opp.nm||'?';const l=document.getElementById('vsl2');if(l)l.textContent=n.opp.lv?'\u2b06 '+(ST.lang=='en'?'Lv.':'Sv.')+n.opp.lv:''}}
+  else if(m.k=='hi'){n.opp={nm:String(m.nm||'').slice(0,20),lv:m.lv|0,tm:((typeof TMS!='undefined'&&TMS)&&TMS[m.tm])?m.tm:'blue'};const e=document.getElementById('vsn2');if(e){e.textContent=n.opp.nm||'?';const l=document.getElementById('vsl2');if(l)l.textContent=n.opp.lv?'\u2b06 '+(ST.lang=='en'?'Lv.':'Sv.')+n.opp.lv:''}}
   else if(m.k=='start'&&n.role=='guest'){startGuest(n,m)}
   else if(m.k=='ev'&&n.role=='guest'){m.e.forEach(x=>sfxPlay(x))}
   else if(m.k=='end'&&n.role=='guest'){guestEnd(m.sc)}
