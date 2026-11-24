@@ -9,6 +9,12 @@ if 'hardwareAccelerated' not in m:
     m = m.replace('<application', '<application\n        android:hardwareAccelerated="true"', 1)
 if 'screen.landscape' not in m:
     m = m.replace('<application', '<uses-feature android:name="android.hardware.screen.landscape" android:required="false" />\n    <uses-feature android:name="android.hardware.screen.portrait" android:required="false" />\n    <application', 1)
+# AdMob: uygulama kimligi. GERCEK kimlik gelene kadar Google'in TEST kimligi (ca-app-pub-3940256099942544~3347511713).
+ADMOB_APP_ID = 'ca-app-pub-3940256099942544~3347511713'
+if 'gms.ads.APPLICATION_ID' not in m:
+    m = m.replace('</application>', '        <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="' + ADMOB_APP_ID + '" />\n    </application>', 1)
+if 'permission.AD_ID' not in m:
+    m = m.replace('</manifest>', '    <uses-permission android:name="com.google.android.gms.permission.AD_ID" />\n</manifest>', 1)
 open(p, 'w', encoding='utf-8').write(m)
 # 2) MainActivity: tam ekran (immersive), ekran acik kalsin, ses otomatik baslasin
 act = '''package com.scribblekick.game;
