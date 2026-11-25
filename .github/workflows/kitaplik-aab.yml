@@ -1,0 +1,112 @@
+name: Raf Izi AAB
+# Kitapligim Android: test APK + imzali AAB. Uygulama kitaplik/ klasorunden (web surumu) alinir.
+# Firebase'e Android uygulamasini tanitir, imza parmak izlerini ekler (Google ile giris icin) ve google-services.json'i uretir.
+on:
+  push:
+    branches: [main]
+    paths: ['kitaplik-android/**', '.github/workflows/kitaplik-aab.yml']
+  workflow_dispatch:
+    inputs:
+      play:
+        description: "Play'e (kapali test - alpha) yuklensin mi? (uygulama Play Console'da olusturulmus olmali)"
+        type: boolean
+        default: false
+      play_sha1:
+        description: "Play uygulama imzalama anahtari SHA-1 (Google girisi icin; bos birakilabilir)"
+        required: false
+        default: ""
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: kitaplik-android
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - run: echo '${{ secrets.FIREBASE_KEY }}' > "$RUNNER_TEMP/key.json"
+      - name: Firebase Android uygulamasi + parmak izleri + google-services.json
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/key.json
+          PLAY_SHA1: ${{ github.event.inputs.play_sha1 }}
+        run: |
+          PKG=com.fairridegames.rafizi
+          FB="npx -y firebase-tools@13 --project scribble-kick"
+          find_app(){ $FB apps:list ANDROID --json | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const r=JSON.parse(s).result||[];const a=r.find(x=>x.packageName===process.argv[1]);console.log(a?a.appId:"")})' $PKG; }
+          APP=$(find_app)
+          if [ -z "$APP" ]; then $FB apps:create ANDROID "Raf Izi" --package-name $PKG; sleep 10; APP=$(find_app); fi
+          echo "APP_ID=$APP"
+          DEBUG_SHA1=$(keytool -list -v -keystore kitaplik-debug.keystore -storepass android 2>/dev/null | grep -m1 "SHA1:" | awk '{print $2}')
+          UPLOAD_SHA1="40:60:89:10:74:41:C3:AD:E3:65:8E:1C:31:56:B2:4C:4C:E4:39:AF"
+          EXIST=$($FB apps:android:sha:list $APP 2>/dev/null | tr 'a-f' 'A-F')
+          for S in "$DEBUG_SHA1" "$UPLOAD_SHA1" "$PLAY_SHA1"; do
+            [ -z "$S" ] && continue
+            S=$(echo "$S" | tr 'a-f' 'A-F' | tr -d ' ')
+            if echo "$EXIST" | tr -d ':' | grep -q "$(echo $S | tr -d ':')"; then echo "zaten var: $S"; else $FB apps:android:sha:create $APP "$S" && echo "eklendi: $S"; fi
+          done
+          sleep 5
+          $FB apps:sdkconfig ANDROID $APP -o google-services.json
+          node -e 'const j=require("./google-services.json");const c=j.client[0];console.log("paket:",c.client_info.android_client_info.package_name,"| oauth istemcileri:",(c.oauth_client||[]).map(o=>o.client_type).join(","))'
+      - name: Uygulamayi www klasorune koy (+ Android geri tusu)
+        run: |
+          rm -rf www && mkdir www
+          cp -r ../kitaplik/. www/ && rm -f www/firebase.json
+          cp uygulama/uygulama.js www/
+          python3 - <<'PY'
+          p='www/index.html'; s=open(p,encoding='utf-8').read()
+          s=s.replace('</body>','<script src="uygulama.js"></script>\n</body>',1)
+          open(p,'w',encoding='utf-8').write(s)
+          PY
+          ls www
+      - name: Yukleme anahtarini hazirla
+        env:
+          KS_B64: ${{ secrets.UPLOAD_KEYSTORE_B64 }}
+        run: |
+          if [ -z "$KS_B64" ]; then echo "HATA: UPLOAD_KEYSTORE_B64 yok"; exit 1; fi
+          echo "$KS_B64" | tr -d ' \r\n' | base64 -d > "$RUNNER_TEMP/upload.jks"
+      - name: Android projesini olustur
+        env:
+          UPLOAD_KS: ${{ runner.temp }}/upload.jks
+          VERSION_CODE: ${{ github.run_number }}
+        run: |
+          npm install
+          npx cap add android
+          python3 patch_android.py
+          npx cap sync android
+      - name: Test APK + AAB derle
+        working-directory: kitaplik-android/android
+        env:
+          UPLOAD_KS_PASS: ${{ secrets.UPLOAD_KS_PASS }}
+          UPLOAD_KEY_ALIAS: ${{ secrets.UPLOAD_KEY_ALIAS }}
+          UPLOAD_KEY_PASS: ${{ secrets.UPLOAD_KEY_PASS }}
+        run: |
+          ./gradlew assembleDebug bundleRelease --no-daemon
+          test -f app/build/outputs/bundle/release/app-release.aab
+          keytool -printcert -jarfile app/build/outputs/bundle/release/app-release.aab | grep -E "SHA1|SHA256" | head -2 || true
+          echo "### Raf Izi 1.0.${{ github.run_number }} (surum kodu ${{ github.run_number }}) derlendi" >> "$GITHUB_STEP_SUMMARY"
+      - name: AAB'yi indirilebilir yap
+        uses: actions/upload-artifact@v4
+        with:
+          name: rafizi-aab-1.0.${{ github.run_number }}
+          path: kitaplik-android/android/app/build/outputs/bundle/release/app-release.aab
+      - name: Test APK'yi indirilebilir yap
+        uses: actions/upload-artifact@v4
+        with:
+          name: rafizi-apk-1.0.${{ github.run_number }}
+          path: kitaplik-android/android/app/build/outputs/apk/debug/app-debug.apk
+      - name: Play'e yukle (kapali test)
+        if: github.event.inputs.play == 'true'
+        uses: r0adkll/upload-google-play@v1.1.3
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: com.fairridegames.rafizi
+          releaseFiles: kitaplik-android/android/app/build/outputs/bundle/release/app-release.aab
+          track: alpha
+          status: draft
+          whatsNewDirectory: kitaplik-android/distribution/whatsnew

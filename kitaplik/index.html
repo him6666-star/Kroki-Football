@@ -7,7 +7,8 @@
 <meta name="application-name" content="Raf İzi">
 <meta name="description" content="Raf İzi: evdeki kitaplarını raf fotoğrafı ve barkodla kaydet, hangi rafta olduğunu anında bul.">
 <meta name="theme-color" content="#0c4a3a">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230c4a3a'/%3E%3Crect x='14' y='14' width='9' height='36' rx='2' fill='%23c8902e'/%3E%3Crect x='26' y='18' width='9' height='32' rx='2' fill='%23f4f1ea'/%3E%3Crect x='38' y='12' width='9' height='38' rx='2' fill='%23c8902e' transform='rotate(10 42 31)'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="icon-512.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230c4a3a'/%3E%3Cpath d='M32 9.9a16.3 16.3 0 0 1 13.45 25.6L32 55 18.55 35.5A16.3 16.3 0 0 1 32 9.9z' fill='%23d6a03a'/%3E%3Ccircle cx='32' cy='26.2' r='11.5' fill='%230c4a3a'/%3E%3Cpath d='M23.7 22.7 31.5 24.6v8.7l-7.8-1.9zM40.3 22.7 32.5 24.6v8.7l7.8-1.9z' fill='%23f6f0e2'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -35,6 +36,7 @@ button{cursor:pointer}
 .top{position:sticky;top:0;z-index:8;background:color-mix(in srgb,var(--card) 94%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
 .top .in{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:12px;padding:0 max(3vw,14px);min-height:60px}
 .logo{font-family:var(--serif);font-size:24px;display:flex;align-items:center;gap:8px;white-space:nowrap}
+.logo .mk{width:30px;height:30px;flex:none}
 .logo i{display:inline-flex;gap:2px;align-items:flex-end}.logo i b{display:block;width:5px;border-radius:1px;background:var(--green)}.logo i b:nth-child(2){background:var(--gold);height:18px}.logo i b:first-child{height:14px}.logo i b:last-child{height:16px}
 .nav{display:flex;justify-content:center;gap:6px;overflow-x:auto;scrollbar-width:none}
 .nav button{flex:none;border:0;background:none;padding:18px 12px 16px;color:var(--mute);font-weight:500;border-bottom:2px solid transparent;white-space:nowrap}
@@ -251,6 +253,7 @@ body.out .gate{display:flex}
 </head>
 <body>
 <div class="gate"><div class="inner">
+  <svg viewBox="0 0 64 64" width="84" height="84" aria-hidden="true" style="margin-bottom:10px"><rect width="64" height="64" rx="14" fill="#ffffff14"/><path d="M32 9.9a16.3 16.3 0 0 1 13.45 25.6L32 55 18.55 35.5A16.3 16.3 0 0 1 32 9.9z" fill="#d6a03a"/><circle cx="32" cy="26.2" r="11.5" fill="#0c4a3a"/><path d="M23.7 22.7 31.5 24.6v8.7l-7.8-1.9zM40.3 22.7 32.5 24.6v8.7l7.8-1.9z" fill="#f6f0e2"/></svg>
   <h1>Raf İzi</h1>
   <p>Raflarının fotoğrafını çek, kitapların kaydedilsin. Bir kitabı aradığında hangi rafta olduğunu söylesin.</p>
   <div class="shelf" aria-hidden="true" id="gate-shelf"></div><div class="plank"></div>
@@ -259,7 +262,7 @@ body.out .gate{display:flex}
 </div></div>
 
 <header class="top"><div class="in">
-  <div class="logo"><i><b></b><b></b><b></b></i>Raf İzi</div>
+  <div class="logo"><svg class="mk" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#0c4a3a"/><path d="M32 9.9a16.3 16.3 0 0 1 13.45 25.6L32 55 18.55 35.5A16.3 16.3 0 0 1 32 9.9z" fill="#d6a03a"/><circle cx="32" cy="26.2" r="11.5" fill="#0c4a3a"/><path d="M23.7 22.7 31.5 24.6v8.7l-7.8-1.9zM40.3 22.7 32.5 24.6v8.7l7.8-1.9z" fill="#f6f0e2"/></svg>Raf İzi</div>
   <nav class="nav" aria-label="Bölümler">
     <button data-v="cat">Katalog</button>
     <button data-v="map" aria-current="true">Raf Haritası</button>
