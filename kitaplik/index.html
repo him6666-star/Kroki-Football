@@ -103,6 +103,15 @@ main{max-width:1240px;margin:0 auto;padding:clamp(18px,3vw,34px) max(3vw,14px) 8
 .spine.dragging{opacity:.25}
 .ghost{position:fixed;left:0;top:0;z-index:50;pointer-events:none;transform-origin:center;box-shadow:0 20px 34px -10px #0007;opacity:.95;transition:none}
 body.dragon,body.dragon *{cursor:grabbing!important}
+.spine.loan{background:repeating-linear-gradient(135deg,var(--c) 0 6px,color-mix(in srgb,var(--c) 55%,var(--shelfbg)) 6px 12px);opacity:.6;outline:2px dashed var(--gold);outline-offset:-2px}
+.spine .lt{position:absolute;top:-20px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);font:600 9px var(--mono);padding:2px 4px;border-radius:3px;white-space:nowrap}
+.spine.lift{transform:translateY(-10px) scale(1.04);box-shadow:0 14px 22px -10px #0008}
+.loanbox{border:1px solid color-mix(in srgb,var(--gold) 45%,var(--line));background:color-mix(in srgb,var(--gold) 9%,var(--card));border-radius:12px;padding:12px 14px}
+.loanbox b{font-size:16px}.loanbox .acts{margin-top:10px}
+.hist{font-size:13.5px;color:var(--mute);margin:8px 0 0;padding-left:18px}
+.bmenu{display:grid;gap:8px;margin-top:12px}.bmenu .btn{justify-content:flex-start;min-height:50px;font-size:16px}
+.badge.loan{background:light-dark(#f4ecd8,#3a3322);color:var(--gold-ink)}
+.opt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:10px;padding:12px;margin-top:8px;cursor:pointer}.opt input{width:20px;height:20px;accent-color:var(--green);flex:none;margin-top:2px}
 .mark{flex:none;width:4px;align-self:stretch;margin:0 1px 0;background:var(--gold);border-radius:2px}
 .shelf.over,.loose.over{background:color-mix(in srgb,var(--gold) 10%,var(--shelfbg))}
 .loose{margin-top:20px;border:1px dashed var(--line);border-radius:10px;padding:12px;min-height:56px}
@@ -396,6 +405,9 @@ function locText(b){
   if(b.pos)s+=' · Soldan '+b.pos+'. kitap';
   return s;
 }
+const dstr=t=>t?new Date(t).toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'}):'';
+const daysSince=t=>Math.max(0,Math.round((Date.now()-t)/864e5));
+const loanText=b=>b.loan?`kimde: ${b.loan.to} · verildi: ${dstr(b.loan.at)} (${daysSince(b.loan.at)} gün)`:'';
 const locShort=b=>b.bookcase?(caseLabel(b.bookcase)+(b.shelf?' · '+b.shelf+'. Raf'+(b.pos?' · #'+b.pos:''):'')):'Yeri yok';
 function matches(b,qq){const hay=norm([b.title,b.author,b.publisher,b.genre,b.isbn].join(' '));return qq.split(' ').every(w=>hay.includes(w))}
 function findExisting(title,isbn){const t=norm(title),i=(isbn||'').replace(/\D/g,'');return all().find(b=>(i&&b.isbn&&b.isbn.replace(/\D/g,'')===i)||(t&&norm(b.title)===t))}
@@ -450,7 +462,7 @@ function render(){
 
 function spineHtml(b,i,hit){
   const c=colorOf(b),h=158+hash(b.id+'h')%38,w=34+hash(b.title||'')%16;
-  return `<div class="spine${hit?' hit':''}" data-id="${esc(b.id)}" style="--c:${c};--t:${inkOf(c)};--h:${h}px;--w:${w}px" role="button" tabindex="0" aria-label="${esc(b.title)}, ${i}. kitap">${hit?'<span class="here">BURADA</span>':''}<span class="num">${i}</span><span class="tt">${esc(b.title)}</span><span class="ft"></span></div>`;
+  return `<div class="spine${hit?' hit':''}${b.loan?' loan':''}" data-id="${esc(b.id)}" style="--c:${c};--t:${inkOf(c)};--h:${h}px;--w:${w}px" role="button" tabindex="0" aria-label="${esc(b.title)}, ${i}. kitap${b.loan?', ödünçte':''}">${hit?'<span class="here">BURADA</span>':b.loan?'<span class="lt">ÖDÜNÇ</span>':''}<span class="num">${i}</span><span class="tt">${esc(b.title)}</span><span class="ft"></span></div>`;
 }
 function shelfHtml(n,s,hitId,cls){
   const row=shelfBooks(n,s);
@@ -462,7 +474,7 @@ function renderMap(){
   $('#pills').innerHTML=cases.map(c=>`<button class="pill" data-case="${esc(c)}" aria-current="${same(c,curCase)}">${esc(caseLabel(c))} <span>(${inCase(c).length})</span></button>`).join('')+`<button class="pill add" data-act="add-case">+ Kitaplık Ekle</button>`;
   $$('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.mode===mapMode));
   const sb=sel&&books[sel];
-  $('#selbar').innerHTML=sb?`<div class="selbar"><div><small>Seçili Kitabın Raf Konumu</small><h3>${esc(sb.title)} <span>— ${esc(sb.author||'')}</span></h3><div class="loc">${ICON.pin.replace('<svg','<svg width="14" height="14" style="vertical-align:-2px"')} ${esc(locText(sb))}</div></div><div class="acts">${sb.photoId&&photos[sb.photoId]?'<button class="btn sm" data-act="sel-photo">Fotoğrafta Gör</button>':''}<button class="btn sm w" data-act="sel-detail">Detaylar</button><button class="x" data-act="sel-clear" aria-label="Seçimi kaldır">×</button></div></div>`:'';
+  $('#selbar').innerHTML=sb?`<div class="selbar"><div><small>Seçili Kitabın Raf Konumu</small><h3>${esc(sb.title)} <span>— ${esc(sb.author||'')}</span></h3><div class="loc">${ICON.pin.replace('<svg','<svg width="14" height="14" style="vertical-align:-2px"')} ${esc(locText(sb))}</div>${sb.loan?`<div class="loc" style="color:#fff">Şu an ödünçte · ${esc(loanText(sb))}</div>`:''}</div><div class="acts">${sb.photoId&&photos[sb.photoId]?'<button class="btn sm" data-act="sel-photo">Fotoğrafta Gör</button>':''}<button class="btn sm w" data-act="sel-detail">Detaylar</button><button class="x" data-act="sel-clear" aria-label="Seçimi kaldır">×</button></div></div>`:'';
   renderSugg();
   const bd=$('#board');
   if(!curCase){
@@ -478,7 +490,7 @@ function renderMap(){
     for(let s=1;s<=n;s++)h+=`<div class="shead"><span class="mono">${s}. Raf</span><span>${shelfBooks(curCase,s).length} kitap</span></div>`+shelfHtml(curCase,s,sel);
     const loose=bs.filter(b=>!b.shelf);
     h+=`<div class="loose" data-shelf="0"><div class="lbl">Rafı belirsiz kitaplar${loose.length?'':' · bir kitabı rafından çıkarmak için buraya sürükle'}</div><div class="chips">${loose.map(b=>`<span class="chipb" data-id="${esc(b.id)}" role="button" tabindex="0">${esc(b.title)}</span>`).join('')}</div></div>`;
-    h+=`<div class="bfoot"><button class="btn sm" data-act="add-shelf">+ Raf ekle</button>${n>1&&!shelfBooks(curCase,n).length?'<button class="btn sm ghost" data-act="del-shelf">Boş olan son rafı kaldır</button>':''}<button class="btn sm ghost" data-act="rename-case">Kitaplığın adını değiştir</button></div>`;
+    h+=`<div class="bfoot"><button class="btn sm" data-act="add-shelf">+ Raf ekle</button>${n>1&&!shelfBooks(curCase,n).length?'<button class="btn sm ghost" data-act="del-shelf">Boş olan son rafı kaldır</button>':''}<button class="btn sm ghost" data-act="rename-case">Kitaplığın adını değiştir</button><button class="btn sm ghost danger" data-act="del-case">Kitaplığı sil</button></div>`;
   }
   bd.innerHTML=h;
   if(scrollSel){scrollSel=false;const el=bd.querySelector('.spine.hit,.bx.hit');if(el)setTimeout(()=>el.scrollIntoView({behavior:'smooth',block:'center',inline:'center'}),60)}
@@ -499,12 +511,13 @@ function select(id){const b=books[id];if(!b)return;sel=id;if(b.bookcase)curCase=
 function renderCat(){
   const qq=norm(q);
   let rows=all();
-  if(catFilter)rows=rows.filter(b=>same(b[catFilter.k]||'',catFilter.v));
+  if(catFilter)rows=catFilter.k==='loan'?rows.filter(b=>b.loan&&(!catFilter.v||same(b.loan.to,catFilter.v))):rows.filter(b=>same(b[catFilter.k]||'',catFilter.v));
   if(qq)rows=rows.filter(b=>matches(b,qq));
   const by=sortBy;
   rows.sort(by==='new'?(a,b)=>(b.addedAt||0)-(a.addedAt||0):(a,b)=>coll.compare(a[by]||'~',b[by]||'~')||coll.compare(a.title||'',b.title||''));
-  $('#catf').innerHTML=catFilter?`<span class="fchip">${esc({author:'Yazar',publisher:'Yayınevi',genre:'Kategori'}[catFilter.k])}: ${esc(catFilter.v||'belirtilmemiş')}<button data-act="clr-filter" aria-label="Filtreyi kaldır">×</button></span>`:`<span class="sub">${rows.length} kitap</span>`;
-  $('#catlist').innerHTML=rows.length?rows.map(b=>`<button class="card" data-open="${esc(b.id)}" style="--c:${colorOf(b)}"><span class="sw"></span><span class="t">${esc(b.title)}</span><span class="sub">${esc([b.author,b.publisher,b.genre].filter(Boolean).join(' · ')||'—')}</span><span class="mono loc">${esc(locShort(b))}</span>${b.status?`<span class="badge ${b.status}">${esc(stLabel[b.status])}</span>`:''}</button>`).join('')
+  const nLoan=all().filter(b=>b.loan).length;
+  $('#catf').innerHTML=catFilter?`<span class="fchip">${catFilter.k==='loan'?(catFilter.v?'Ödünç: '+esc(catFilter.v):'Ödünçtekiler'):esc({author:'Yazar',publisher:'Yayınevi',genre:'Kategori'}[catFilter.k])+': '+esc(catFilter.v||'belirtilmemiş')}<button data-act="clr-filter" aria-label="Filtreyi kaldır">×</button></span>`:`<span class="sub">${rows.length} kitap</span>${nLoan?` <button class="btn sm" data-act="loan-filter">Ödünçtekiler (${nLoan})</button>`:''}`;
+  $('#catlist').innerHTML=rows.length?rows.map(b=>`<button class="card" data-open="${esc(b.id)}" style="--c:${colorOf(b)}"><span class="sw"></span><span class="t">${esc(b.title)}</span><span class="sub">${esc([b.author,b.publisher,b.genre].filter(Boolean).join(' · ')||'—')}</span><span class="mono loc">${esc(locShort(b))}</span>${b.loan?`<span class="badge loan">Ödünçte · ${esc(b.loan.to)}</span>`:b.status?`<span class="badge ${b.status}">${esc(stLabel[b.status])}</span>`:''}</button>`).join('')
     :`<div class="emptyst">${all().length?'Eşleşen kitap yok.':'Henüz kitap eklenmedi.'}</div>`;
 }
 const stLabel={okunacak:'Okunacak',okunuyor:'Okunuyor',okundu:'Okundu'};
@@ -534,9 +547,17 @@ function renderRead(){
 }
 
 function renderDir(){
-  const tabs=[['publisher','Yayınevleri'],['author','Yazarlar'],['genre','Kategoriler']];
+  const tabs=[['publisher','Yayınevleri'],['author','Yazarlar'],['genre','Kategoriler'],['loan','Ödünç verdiklerim']];
+  if(dirTab==='loan'){
+    const m=new Map();all().filter(b=>b.loan).forEach(b=>{const k=norm(b.loan.to);if(!m.has(k))m.set(k,{name:b.loan.to,list:[]});m.get(k).list.push(b)});
+    $('#dtabs').innerHTML=tabs.map(([k,t])=>`<button data-dt="${k}" aria-pressed="${dirTab===k}">${t}${k==='loan'?' ('+m.size+')':''}</button>`).join('');
+    const g=[...m.values()].sort((a,b)=>Math.min(...a.list.map(x=>x.loan.at))-Math.min(...b.list.map(x=>x.loan.at)));
+    $('#dirgrid').innerHTML=g.length?g.map(x=>{const old=Math.min(...x.list.map(b=>b.loan.at));return `<button class="dcard" data-loanto="${esc(x.name)}"><h3>${esc(x.name)}</h3>${ICON.arrow}<div class="c">${x.list.length} kitap · en eskisi ${daysSince(old)} gündür</div><p>${esc(x.list.map(b=>b.title).join(', '))}</p></button>`}).join('')
+      :`<div class="emptyst">Şu an ödünç verdiğin kitap yok. Bir kitabın üstüne basılı tutup “Ödünç ver”i seçebilirsin.</div>`;
+    return;
+  }
   const groups=k=>{const m=new Map();all().forEach(b=>{const v=(b[k]||'').trim();const key=v?norm(v):'\u0000';if(!v){if(!m.has(key))m.set(key,{name:'',list:[]});m.get(key).list.push(b);return}if(!m.has(key))m.set(key,{name:v,list:[]});m.get(key).list.push(b)});return[...m.values()]};
-  $('#dtabs').innerHTML=tabs.map(([k,t])=>`<button data-dt="${k}" aria-pressed="${dirTab===k}">${t} (${groups(k).filter(x=>x.name).length})</button>`).join('');
+  $('#dtabs').innerHTML=tabs.map(([k,t])=>`<button data-dt="${k}" aria-pressed="${dirTab===k}">${t}${k==='loan'?' ('+new Set(all().filter(b=>b.loan).map(b=>norm(b.loan.to))).size+')':' ('+groups(k).filter(x=>x.name).length+')'}</button>`).join('');
   const g=groups(dirTab).sort((a,b)=>b.list.length-a.list.length||coll.compare(a.name,b.name));
   const miss={publisher:'Yayınevi belirtilmemiş',author:'Yazarı belirtilmemiş',genre:'Kategorisi belirtilmemiş'}[dirTab];
   $('#dirgrid').innerHTML=g.length?g.sort((a,b)=>(a.name?0:1)-(b.name?0:1)).map(x=>{const t=x.list.map(b=>b.title).sort(coll.compare);return `<button class="dcard" data-group="${esc(x.name)}" data-empty="${x.name?'':'1'}"><h3>${esc(x.name||miss)}</h3>${ICON.arrow}<div class="c">${x.list.length} kitap · ${x.list.filter(b=>b.status==='okundu').length} okundu</div><p>${esc(t.slice(0,3).join(', '))}${t.length>3?' +'+(t.length-3):''}</p></button>`}).join('')
@@ -574,12 +595,15 @@ function renderDrawer(){
       <select class="sel" id="mv-shelf" aria-label="Raf"><option value="0">Rafsız</option>${Array.from({length:n+1},(_,i)=>`<option value="${i+1}" ${b.shelf===i+1?'selected':''}>${i+1}. raf${i===n?' (yeni)':''}</option>`).join('')}</select></div>
       <div class="r2"><button class="btn" data-mv="left" ${!b.shelf||b.pos<=1?'disabled':''}>◀ Sola</button><button class="btn" data-mv="right" ${!b.shelf||b.pos>=shelfBooks(b.bookcase,b.shelf).length?'disabled':''}>Sağa ▶</button><button class="btn" data-mv="up" ${!b.shelf||b.shelf<=1?'disabled':''}>▲ Üst raf</button><button class="btn" data-mv="down" ${!b.shelf?'disabled':''}>▼ Alt raf</button></div>
     </div></div>
+  <div class="dsec"><small>Ödünç</small>${b.loan?`<div class="loanbox">Kimde: <b>${esc(b.loan.to)}</b><div class="sub">${esc(dstr(b.loan.at))} tarihinde verdin · ${daysSince(b.loan.at)} gün oldu</div>${b.loan.note?`<div style="margin-top:6px">${esc(b.loan.note)}</div>`:''}<div class="acts"><button class="btn pri sm" data-d="loan-back">Geri geldi</button><button class="btn sm" data-d="loan-edit">Düzenle</button></div></div>`:`<button class="btn sm" data-d="loan-edit">Ödünç ver</button>`}
+    ${(b.loanHistory||[]).length?`<ul class="hist">${b.loanHistory.slice(-5).reverse().map(x=>`<li>${esc(x.to)} · ${esc(dstr(x.at))} – ${esc(dstr(x.back))}</li>`).join('')}</ul>`:''}</div>
   <dl class="ftable">${rows.map(([k,v,m])=>`<div><dt>${k}</dt><dd class="${m?'mono':''}">${esc(v||'—')}</dd></div>`).join('')}</dl>
   ${b.summary?`<div class="dsec"><small>Özet</small><div>${esc(b.summary)}</div></div>`:''}
   <div class="dsec"><small>Okuma Takibi</small><div class="seg3">${['okunacak','okunuyor','okundu'].map(s=>`<button data-st="${s}" aria-pressed="${b.status===s}">${stLabel[s]}</button>`).join('')}</div></div>
   <div class="dsec"><small style="display:flex;justify-content:space-between">Okunan Sayfa<span class="mono">${b.page||0}${b.pages?' / '+b.pages+' (%'+pct+')':''}</span></small><input class="fin mono" type="number" min="0" id="d-page" value="${b.page||0}" inputmode="numeric"></div>
   <div class="dsec"><small style="display:flex;justify-content:space-between;align-items:center">Değerlendirme<span class="stars">${[1,2,3,4,5].map(x=>`<button class="${(b.rating||0)>=x?'on':''}" data-rate="${x}" data-id="${esc(b.id)}" aria-label="${x} yıldız">★</button>`).join('')}</span></small></div>
-  <div class="dsec"><small>Okuma Notları / Alıntılar</small><textarea class="fin" id="d-notes" placeholder="Notunu yaz; dışarı tıklayınca kaydedilir.">${esc(b.notes||'')}</textarea></div>`;
+  <div class="dsec"><small>Okuma Notları / Alıntılar</small><textarea class="fin" id="d-notes" placeholder="Notunu yaz; dışarı tıklayınca kaydedilir.">${esc(b.notes||'')}</textarea></div>
+  <div class="dsec"><button class="btn danger sm" data-d="del">Kitabı sil</button></div>`;
 }
 async function patch(id,ch){const b=books[id];if(!b)return;try{await putBooks([{...b,...ch}])}catch(e){toast('Kaydedilemedi')}}
 function setStatus(id,s){const b=books[id];const ns=b.status===s?'':s;const ch={status:ns,statusAt:Date.now()};if(ns==='okundu'&&b.pages)ch.page=b.pages;patch(id,ch)}
@@ -590,8 +614,9 @@ $('#d-body').addEventListener('click',async e=>{
   const t=e.target.closest('button');if(!t)return;const id=detailId;
   if(t.dataset.d==='show')return select(id);
   if(t.dataset.d==='cancel'){editMode=false;renderDrawer();return}
-  if(t.dataset.d==='del'){if(!t.dataset.arm){t.dataset.arm=1;t.textContent='Silinsin mi? Tekrar dokun';return}
-    lastDeleted={...books[id]};try{delete books[id];closeDrawer();render();await B.remove(id);if(lastDeleted.shelf)await moveFix(lastDeleted);toast('Silindi',true)}catch(er){toast('Silinemedi')}return}
+  if(t.dataset.d==='del'){if(!t.dataset.arm){t.dataset.arm=1;t.textContent='Silinsin mi? Tekrar dokun';return}closeDrawer();return deleteBook(id)}
+  if(t.dataset.d==='loan-edit')return openLoan(id);
+  if(t.dataset.d==='loan-back')return loanBack(id);
   if(t.dataset.d==='save')return saveEdit();
   if(t.dataset.st)return setStatus(id,t.dataset.st);
   if(t.dataset.rate)return patch(id,{rating:books[id].rating===+t.dataset.rate?0:+t.dataset.rate});
@@ -625,7 +650,7 @@ async function saveEdit(){
     editMode=false;renderDrawer();toast('Kaydedildi');
   }catch(e){toast('Kaydedilemedi: '+(e.code||e.message))}
 }
-$('#toast-b').onclick=async()=>{if(lastDeleted){const b=lastDeleted;lastDeleted=null;await putBooks([b]);if(b.shelf)await moveBook(b.id,b.bookcase,b.shelf,(b.pos||1)-1);toast('Geri alındı')}};
+$('#toast-b').onclick=async()=>{const f=undoFn;undoFn=null;$('#toast').classList.remove('on');if(f){try{await f();toast('Geri alındı')}catch(e){toast('Geri alınamadı')}}};
 let toastT;
 function toast(t,undo){$('#toast-t').textContent=t;$('#toast-b').hidden=!undo;$('#toast').classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>$('#toast').classList.remove('on'),undo?6000:2600)}
 
@@ -637,6 +662,83 @@ function caseDialog(title,cb,val){
   const ok=()=>{const v=$('#n-val').value.trim();closeSheet();cb(v)};
   $('#n-ok').onclick=ok;$('#n-val').onkeydown=e=>{if(e.key==='Enter')ok()};setTimeout(()=>$('#n-val').focus(),50);
   d._cancel=()=>cb('');
+}
+
+/* ---------- delete / loan / book menu ---------- */
+let undoFn=null;
+async function deleteBook(id){
+  const b=books[id];if(!b)return;
+  try{delete books[id];if(sel===id)sel=null;render();await B.remove(id);if(b.shelf)await moveFix(b);
+    undoFn=async()=>{await putBooks([b]);if(b.shelf)await moveBook(b.id,b.bookcase,b.shelf,(b.pos||1)-1)};toast('Silindi: '+b.title,true)}
+  catch(e){toast('Silinemedi')}
+}
+function people(){const s=new Map();all().forEach(b=>{[b.loan,...(b.loanHistory||[])].forEach(x=>{if(x&&x.to)s.set(norm(x.to),x.to)})});return[...s.values()].sort(coll.compare)}
+function openLoan(id){
+  const b=books[id];if(!b)return;const L=b.loan||{};
+  const today=new Date(Date.now()-new Date().getTimezoneOffset()*6e4).toISOString().slice(0,10);
+  const d0=L.at?new Date(L.at-new Date(L.at).getTimezoneOffset()*6e4).toISOString().slice(0,10):today;
+  sheetHtml('sh-loan',`<div class="ph"><h2>${L.to?'Ödünç bilgisini düzenle':'Ödünç ver'}</h2><button class="xb" data-close aria-label="Kapat">×</button></div>
+    <p class="sub" style="margin:0">${esc(b.title)}</p>
+    <label class="flab" for="l-to">Kime verdin?</label><input class="fin" id="l-to" list="dl-people" value="${esc(L.to||'')}" placeholder="ör. Ayşe">
+    <datalist id="dl-people">${people().map(p=>`<option value="${esc(p)}">`).join('')}</datalist>
+    <label class="flab" for="l-at">Ne zaman verdin?</label><input class="fin" id="l-at" type="date" value="${d0}" max="${today}">
+    <label class="flab" for="l-note">Not (isteğe bağlı)</label><input class="fin" id="l-note" value="${esc(L.note||'')}" placeholder="ör. okuyup bitirince getirecek">
+    <div class="acts" style="margin-top:16px"><button class="btn pri" id="l-ok">Kaydet</button>${L.to?'<button class="btn" id="l-back">Geri geldi</button>':''}</div>`);
+  setTimeout(()=>$('#l-to').focus(),60);
+  $('#l-ok').onclick=async()=>{const to=$('#l-to').value.trim();if(!to){$('#l-to').focus();return}
+    const v=$('#l-at').value;const at=v?new Date(v+'T12:00:00').getTime():Date.now();
+    closeSheet();await patch(id,{loan:{to,at,note:$('#l-note').value.trim()}});toast(`Ödünç verildi: ${to}`);if(detailId===id)renderDrawer()};
+  const bb=$('#l-back');if(bb)bb.onclick=()=>{closeSheet();loanBack(id)};
+}
+async function loanBack(id){
+  const b=books[id];if(!b||!b.loan)return;const L=b.loan;
+  await patch(id,{loan:null,loanHistory:[...(b.loanHistory||[]),{to:L.to,at:L.at,back:Date.now()}].slice(-20)});
+  undoFn=async()=>{await patch(id,{loan:L,loanHistory:(books[id].loanHistory||[]).slice(0,-1)})};
+  toast(`${b.title} geri geldi`,true);if(detailId===id)renderDrawer();
+}
+function sheetHtml(id,html){
+  $$('.sec').forEach(s=>s.hidden=true);
+  let d=document.getElementById(id);if(!d){d=document.createElement('section');d.className='sec';d.id=id;$('.panel').appendChild(d)}
+  d.hidden=false;d.innerHTML=html;$('#sheet').classList.add('on');
+}
+function bookMenu(id){
+  const b=books[id];if(!b)return;
+  sheetHtml('sh-bmenu',`<div class="ph"><h2 style="font-size:21px">${esc(b.title)}</h2><button class="xb" data-close aria-label="Kapat">×</button></div>
+    <div class="sub">${esc(locText(b))}${b.loan?' · Ödünçte, '+esc(loanText(b)):''}</div>
+    <div class="bmenu">
+      <button class="btn" data-bm="open">Detayları aç</button>
+      ${b.loan?'<button class="btn" data-bm="back">Ödünçten geri geldi</button><button class="btn" data-bm="loan">Ödünç bilgisini düzenle</button>':'<button class="btn" data-bm="loan">Ödünç ver…</button>'}
+      <button class="btn" data-bm="unshelve" ${b.shelf?'':'disabled'}>Raftan çıkar (rafı belirsiz)</button>
+      <button class="btn danger" data-bm="del">Kitabı sil</button>
+    </div>`);
+  $('#sh-bmenu .bmenu').onclick=async e=>{const t=e.target.closest('[data-bm]');if(!t)return;const a=t.dataset.bm;
+    if(a==='del'){if(!t.dataset.arm){t.dataset.arm=1;t.textContent='Silinsin mi? Tekrar dokun';return}closeSheet();return deleteBook(id)}
+    closeSheet();
+    if(a==='open')openDrawer(id);if(a==='loan')openLoan(id);if(a==='back')loanBack(id);
+    if(a==='unshelve'){await moveBook(id,b.bookcase,null,null);toast('Rafı belirsiz yapıldı')}};
+}
+function delCaseDialog(name){
+  const bs=inCase(name);
+  sheetHtml('sh-delcase',`<div class="ph"><h2>${esc(caseLabel(name))}’nı sil</h2><button class="xb" data-close aria-label="Kapat">×</button></div>
+    <p style="margin:0 0 6px">Bu kitaplıkta <b>${bs.length} kitap</b> ve ${shelfCount(name)} raf var.</p>
+    ${bs.length?`<label class="opt"><input type="radio" name="dc" value="all" checked><span><b>Kitaplarıyla birlikte sil</b><br><span class="sub">${bs.length} kitabın kaydı, notları ve okuma bilgileri de silinir.</span></span></label>
+    <label class="opt"><input type="radio" name="dc" value="keep"><span><b>Sadece kitaplığı sil</b><br><span class="sub">Kitaplar kalır, “Yeri girilmemiş” olarak görünür.</span></span></label>`:''}
+    <div class="acts" style="margin-top:16px"><button class="btn danger" id="dc-ok" style="border-color:#b3261e">Kitaplığı sil</button><button class="btn" data-close>Vazgeç</button></div>`);
+  $('#dc-ok').onclick=async e=>{const t=e.currentTarget;if(!t.dataset.arm){t.dataset.arm=1;t.textContent='Emin misin? Tekrar dokun';return}
+    const mode=(document.querySelector('input[name=dc]:checked')||{}).value||'all';
+    const oldMeta=JSON.parse(JSON.stringify(meta)),oldBooks=bs.map(b=>({...b})),oldPhotos=Object.entries(photos).filter(([,p])=>same(p.case,name));
+    closeSheet();
+    try{
+      const sk=slug(name);const sh={...(meta.shelves||{})};delete sh[sk];
+      meta={...meta,names:(meta.names||[]).filter(c=>!same(c,name)),shelves:sh};
+      if(mode==='all'){bs.forEach(b=>delete books[b.id]);render();await B.removeMany(bs.map(b=>b.id))}
+      else await putBooks(bs.map(b=>({...b,bookcase:'',shelf:null,pos:null,photoId:null,box:null})));
+      await saveMeta();
+      for(const[pid]of oldPhotos)await B.delPhoto(pid).catch(()=>{});
+      if(same(curCase,name))curCase=null;if(sel&&!books[sel])sel=null;render();
+      undoFn=async()=>{meta=oldMeta;await saveMeta();await putBooks(oldBooks);for(const[pid,p]of oldPhotos)await B.putPhoto(pid,p);curCase=name;render()};
+      toast(`${caseLabel(name)} silindi`,true);
+    }catch(er){toast('Silinemedi: '+(er.code||er.message))}};
 }
 
 /* ---------- drag & drop on shelves ---------- */
@@ -678,22 +780,24 @@ async function endDrag(d){
 }
 $('#board').addEventListener('pointerdown',e=>{
   const el=e.target.closest('.spine,.chipb');if(!el||e.button>0)return;
-  drag={id:el.dataset.id,el,x0:e.clientX,y0:e.clientY,type:e.pointerType,started:false,timer:null};
-  if(e.pointerType!=='mouse'){const d=drag;drag.timer=setTimeout(()=>{if(drag===d&&!d.started)startDrag(d.x0,d.y0)},350)}
+  drag={id:el.dataset.id,el,x0:e.clientX,y0:e.clientY,type:e.pointerType,started:false,armed:false,timer:null};
+  if(e.pointerType!=='mouse'){const d=drag;drag.timer=setTimeout(()=>{if(drag===d&&!d.started){d.armed=true;el.classList.add('lift');if(navigator.vibrate)try{navigator.vibrate(15)}catch(e){}}},420)}
 });
 document.addEventListener('pointermove',e=>{
   if(!drag)return;
   if(!drag.started){const m=Math.hypot(e.clientX-drag.x0,e.clientY-drag.y0);
-    if(drag.type==='mouse'&&m>6)startDrag(e.clientX,e.clientY);else if(drag.type!=='mouse'&&m>10){clearTimeout(drag.timer);drag=null}return}
+    if(drag.type==='mouse'&&m>6)startDrag(e.clientX,e.clientY);
+    else if(drag.type!=='mouse'){if(drag.armed&&m>8){drag.el.classList.remove('lift');startDrag(e.clientX,e.clientY)}else if(!drag.armed&&m>10){clearTimeout(drag.timer);drag=null}}return}
   e.preventDefault();moveDrag(e.clientX,e.clientY);
 });
-document.addEventListener('touchmove',e=>{if(drag&&drag.started)e.preventDefault()},{passive:false});
+document.addEventListener('touchmove',e=>{if(drag&&(drag.started||drag.armed))e.preventDefault()},{passive:false});
 document.addEventListener('pointerup',e=>{
   if(!drag)return;const d=drag;drag=null;clearTimeout(d.timer);
-  if(d.started)endDrag(d);else openDrawer(d.id);
+  d.el.classList.remove('lift');
+  if(d.started)endDrag(d);else if(d.armed)bookMenu(d.id);else openDrawer(d.id);
 });
-document.addEventListener('pointercancel',()=>{if(!drag)return;const d=drag;drag=null;clearTimeout(d.timer);if(d.started){d.target=null;endDrag(d)}});
-$('#board').addEventListener('contextmenu',e=>{if(e.target.closest('.spine,.chipb'))e.preventDefault()});
+document.addEventListener('pointercancel',()=>{if(!drag)return;const d=drag;drag=null;clearTimeout(d.timer);d.el.classList.remove('lift');if(d.started){d.target=null;endDrag(d)}});
+$('#board').addEventListener('contextmenu',e=>{const el=e.target.closest('.spine,.chipb');if(!el)return;e.preventDefault();if(!drag||drag.type==='mouse'){drag=null;bookMenu(el.dataset.id)}});
 $('#board').addEventListener('keydown',e=>{const el=e.target.closest('.spine,.chipb');if(el&&(e.key==='Enter'||e.key===' ')){e.preventDefault();openDrawer(el.dataset.id)}});
 $('#board').addEventListener('click',e=>{const bx=e.target.closest('.bx');if(bx)openDrawer(bx.dataset.id)});
 
@@ -713,6 +817,7 @@ document.addEventListener('click',async e=>{
   if(t.dataset.show)return select(t.dataset.show);
   if(t.dataset.group!=null&&t.classList.contains('dcard')){catFilter={k:dirTab,v:t.dataset.group};view='cat';q='';$('#q2').value='';render();return}
   if(t.dataset.dt){dirTab=t.dataset.dt;render();return}
+  if(t.dataset.loanto!=null){catFilter={k:'loan',v:t.dataset.loanto};view='cat';q='';$('#q2').value='';render();return}
   if(t.dataset.rt){readTab=t.dataset.rt;render();return}
   if(t.dataset.inc){const b=books[t.dataset.id];const p=(b.page||0)+ +t.dataset.inc;return patch(b.id,{page:b.pages?Math.min(p,b.pages):p})}
   if(t.dataset.finish)return patch(t.dataset.finish,{status:'okundu',statusAt:Date.now(),page:books[t.dataset.finish].pages||books[t.dataset.finish].page||0});
@@ -736,6 +841,8 @@ document.addEventListener('click',async e=>{
       if(!meta.names.some(c=>same(c,n)))meta.names.push(n);await saveMeta();if(list.length)await putBooks(list);
       for(const [pid,p] of Object.entries(photos))if(same(p.case,old))await B.putPhoto(pid,{...p,case:n});curCase=n;render()},old);break}
     case 'add-shelf':meta={...meta,shelves:{...(meta.shelves||{}),[slug(curCase)]:shelfCount(curCase)+1}};render();await ensureCase(curCase);await saveMeta();break;
+    case 'del-case':if(curCase)delCaseDialog(curCase);break;
+    case 'loan-filter':catFilter={k:'loan',v:''};render();break;
     case 'del-shelf':meta={...meta,shelves:{...(meta.shelves||{}),[slug(curCase)]:shelfCount(curCase)-1}};render();await saveMeta();break;
   }
 });
@@ -905,6 +1012,7 @@ if(window.firebase){
     B={
       async putMany(list){for(let i=0;i<list.length;i+=400){const bt=fs.batch();list.slice(i,i+400).forEach(x=>{const{id,...d}=x;bt.set(root.collection('books').doc(id),clean(d))});await bt.commit()}},
       remove:id=>root.collection('books').doc(id).delete(),
+      async removeMany(ids){for(let i=0;i<ids.length;i+=400){const bt=fs.batch();ids.slice(i,i+400).forEach(id=>bt.delete(root.collection('books').doc(id)));await bt.commit()}},
       setMeta:m=>root.collection('meta').doc('bookcases').set(clean(m)),
       putPhoto:(id,d)=>root.collection('photos').doc(id).set(clean(d)),
       delPhoto:id=>root.collection('photos').doc(id).delete(),
@@ -928,8 +1036,9 @@ if(window.firebase){
   const pos={};
   S.forEach(([title,author,publisher,genre,bc,shelf,pages,status,page,notes],i)=>{const k=bc+shelf;pos[k]=(pos[k]||0)+1;const id='d'+i;
     books[id]={id,title,author,publisher,genre,bookcase:bc,shelf,pos:pos[k],pages,status:status||'',page:page||(status==='okundu'?pages:0),notes:notes||'',rating:status==='okundu'?4+(i%2):0,source:i%3?'fotoğraf':'barkod',addedAt:Date.now()-i*864e5,statusAt:Date.now()-i*36e5,isbn:'97897'+String(5e7+i*7919).slice(0,8)}});
+  books.d12.loan={to:'Ayşe',at:Date.now()-12*864e5,note:'Bitirince getirecek'};
   meta={names:['Salon','Çalışma Odası'],shelves:{salon:3,'calisma-odasi':2}};
-  B={putMany:async()=>{},remove:async()=>{},setMeta:async()=>{},putPhoto:async(id,d)=>{photos[id]=d},delPhoto:async id=>{delete photos[id]},ai:null};
+  B={putMany:async()=>{},remove:async()=>{},removeMany:async()=>{},setMeta:async()=>{},putPhoto:async(id,d)=>{photos[id]=d},delPhoto:async id=>{delete photos[id]},ai:null};
   sel='d3';scrollSel=false;
 }
 render();
