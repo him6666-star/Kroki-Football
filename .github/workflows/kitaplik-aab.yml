@@ -50,9 +50,13 @@ jobs:
             S=$(echo "$S" | tr 'a-f' 'A-F' | tr -d ' ')
             if echo "$EXIST" | tr -d ':' | grep -q "$(echo $S | tr -d ':')"; then echo "zaten var: $S"; else $FB apps:android:sha:create $APP "$S" && echo "eklendi: $S"; fi
           done
-          sleep 5
-          $FB apps:sdkconfig ANDROID $APP -o google-services.json
-          node -e 'const j=require("./google-services.json");const c=j.client[0];console.log("paket:",c.client_info.android_client_info.package_name,"| oauth istemcileri:",(c.oauth_client||[]).map(o=>o.client_type).join(","))'
+          for i in 1 2 3 4 5 6; do
+            rm -f google-services.json
+            $FB apps:sdkconfig ANDROID $APP -o google-services.json
+            OK=$(node -e 'const j=require("./google-services.json");const c=j.client.find(x=>x.client_info.android_client_info.package_name==="com.fairridegames.rafizi");const t=c?(c.oauth_client||[]).map(o=>o.client_type):[];console.log("paket:",c?"bulundu":"YOK","| oauth istemcileri:",t.join(","));process.exit(c&&t.includes(3)?0:1)' && echo ok || true)
+            echo "$OK"; case "$OK" in *ok) break;; esac
+            echo "Google giris istemcisi henuz hazir degil, 20 sn bekleniyor"; sleep 20
+          done
       - name: Uygulamayi www klasorune koy (+ Android geri tusu)
         run: |
           rm -rf www && mkdir www
