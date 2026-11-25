@@ -1,4 +1,4 @@
-name: Kitapligim web yayini
+name: Raf Izi web yayini
 on:
   push:
     branches: [main]
@@ -27,7 +27,7 @@ jobs:
           FB="npx -y firebase-tools@13"
           $FB hosting:sites:list --project scribble-kick --json > sites.json || true
           SITE=""
-          for name in kitapligim kitapligim-app kitapligim-tr; do
+          for name in rafizi raf-izi rafizi-app; do
             if grep -q "sites/$name\"" sites.json; then SITE=$name; echo "Mevcut site: $name"; break; fi
             if $FB hosting:sites:create "$name" --project scribble-kick --non-interactive; then SITE=$name; echo "Yeni site: $name"; break; fi
             echo "$name alinamadi, sonrakini deniyorum"
@@ -55,6 +55,16 @@ jobs:
           npx -y firebase-tools@13 deploy --project scribble-kick --only hosting --non-interactive
           echo "### Yayinda: https://$SITE.web.app" >> "$GITHUB_STEP_SUMMARY"
           echo "ADRES: https://$SITE.web.app"
+      - name: Eski adresi (kitapligim-app) yeni adrese yonlendir
+        continue-on-error: true
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/key.json
+        run: |
+          [ "$SITE" = "kitapligim-app" ] && exit 0
+          mkdir -p /tmp/eski && cd /tmp/eski && mkdir -p public
+          printf '<!DOCTYPE html><meta charset="utf-8"><title>Raf İzi</title><meta http-equiv="refresh" content="0;url=https://%s.web.app/"><a href="https://%s.web.app/">Raf İzi yeni adresinde</a>' "$SITE" "$SITE" > public/index.html
+          printf '{"hosting":{"site":"kitapligim-app","public":"public","redirects":[{"source":"**","destination":"https://%s.web.app/","type":301}]}}' "$SITE" > firebase.json
+          npx -y firebase-tools@13 deploy --project scribble-kick --only hosting --non-interactive
       - name: Kitap tanima testi
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/key.json
