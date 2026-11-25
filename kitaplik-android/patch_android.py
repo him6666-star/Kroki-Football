@@ -68,7 +68,7 @@ for d in glob.glob('icons/mipmap-*'):
 for f in glob.glob(base + '/res/mipmap-*/ic_launcher*.webp'):
     os.remove(f)
 open(base + '/res/values/ic_launcher_background.xml', 'w', encoding='utf-8').write(
-    '<?xml version="1.0" encoding="utf-8"?>\n<resources>\n    <color name="ic_launcher_background">#0c4a3a</color>\n</resources>\n')
+    '<?xml version="1.0" encoding="utf-8"?>\n<resources>\n    <color name="ic_launcher_background">#104d2b</color>\n</resources>\n')
 
 # 4) Sabit test imzası: test APK'sı eskisinin üstüne kurulabilsin
 b = 'android/app/build.gradle'

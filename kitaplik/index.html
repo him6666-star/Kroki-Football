@@ -6,9 +6,9 @@
 <title>Raf İzi</title>
 <meta name="application-name" content="Raf İzi">
 <meta name="description" content="Raf İzi: evdeki kitaplarını raf fotoğrafı ve barkodla kaydet, hangi rafta olduğunu anında bul.">
-<meta name="theme-color" content="#0c4a3a">
+<meta name="theme-color" content="#104d2b">
 <link rel="apple-touch-icon" href="icon-512.png">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230c4a3a'/%3E%3Cpath d='M32 9.9a16.3 16.3 0 0 1 13.45 25.6L32 55 18.55 35.5A16.3 16.3 0 0 1 32 9.9z' fill='%23d6a03a'/%3E%3Ccircle cx='32' cy='26.2' r='11.5' fill='%230c4a3a'/%3E%3Cpath d='M23.7 22.7 31.5 24.6v8.7l-7.8-1.9zM40.3 22.7 32.5 24.6v8.7l7.8-1.9z' fill='%23f6f0e2'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1000 1000%22%3E%3Crect width=%221000%22 height=%221000%22 rx=%22220%22 fill=%22%23104d2b%22/%3E%3Cg fill=%22%23f5f5ef%22 stroke=%22%23f5f5ef%22 stroke-width=%2214%22 stroke-linejoin=%22round%22%3E%3Cpolygon points=%22580,245 418,245 418,188 580,188%22/%3E%3Cpolygon points=%22379,348 289,324 303,269 394,293%22/%3E%3Cpolygon points=%22620,348 606,293 696,269 711,324%22/%3E%3Cpolygon points=%22580,633 419,633 419,279 580,279%22/%3E%3Cpolygon points=%22284,726 193,703 281,355 371,378%22/%3E%3Cpolygon points=%22694,641 628,378 719,356 785,618%22/%3E%3Cpolygon points=%22716,726 702,672 793,649 806,703%22/%3E%3Cpolygon points=%22580,725 418,725 418,667 580,667%22/%3E%3Cpolygon points=%22881,811 118,811 118,758 881,758%22/%3E%3C/g%3E%3Cpath d=%22M469 279h62v110l-31-24-31 24z%22 fill=%22%2392ad94%22/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -21,7 +21,7 @@
 --bg:light-dark(#f6f6f4,#121514);--card:light-dark(#ffffff,#1a1e1c);--ink:light-dark(#18201d,#eef2ef);--mute:light-dark(#6b726e,#9aa39e);
 --line:light-dark(#e3e4e0,#2b312e);--soft:light-dark(#dde9e3,#20342c);--soft-ink:light-dark(#0c4a3a,#9fd8c0);
 --green:light-dark(#0c4a3a,#1f7a5f);--green2:light-dark(#083a2d,#16604a);--gold:#c8902e;--gold-ink:light-dark(#8a5d12,#e6b45a);
---plank:light-dark(#d8d9d5,#363c39);--shelfbg:light-dark(#f2f2f0,#171b19);
+--plank:light-dark(#d8d9d5,#363c39);--shelfbg:light-dark(#f2f2f0,#171b19);--wall:light-dark(#efe4d2,#2a211a);--wall2:light-dark(#e2d2b9,#1f1812);--frame:light-dark(#b98a5e,#5a3e28);--wood:light-dark(#b07d4f,#6b4a2f);--wood-hi:light-dark(#d1a273,#86603e);--wood-lo:light-dark(#8a5c35,#4a321f);
 --serif:Fraunces,Georgia,serif;--mono:"JetBrains Mono",ui-monospace,monospace}
 :root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
 *{box-sizing:border-box;min-width:0}
@@ -94,15 +94,19 @@ main{max-width:1240px;margin:0 auto;padding:clamp(18px,3vw,34px) max(3vw,14px) 8
 .bhead h2{font-size:24px}
 .shead{display:flex;justify-content:space-between;margin:18px 0 8px;font-size:13px;color:var(--mute)}
 .shead .mono{color:var(--ink);font-weight:600}
-.shelf{--k:1;display:flex;align-items:flex-end;gap:5px;min-height:calc(205px*var(--k));padding:calc(30px*var(--k)) 16px 0;background:var(--shelfbg);border:1px solid var(--line);border-bottom:0;border-radius:10px 10px 0 0;overflow-x:auto;position:relative;scrollbar-width:thin}
-.plank{height:11px;background:var(--plank);border-radius:0 0 6px 6px;margin-bottom:6px}
+.shelf{--k:1;display:flex;align-items:flex-end;gap:3px;min-height:calc(215px*var(--k));padding:calc(34px*var(--k)) 18px 0;background:linear-gradient(180deg,#00000038,#0000 26px),repeating-linear-gradient(90deg,#ffffff06 0 2px,#0000 2px 9px,#00000008 9px 10px,#0000 10px 23px),linear-gradient(180deg,var(--wall),var(--wall2));border:10px solid var(--frame);border-bottom:0;border-radius:6px 6px 0 0;overflow-x:auto;position:relative;scrollbar-width:thin;box-shadow:inset 0 8px 14px -6px #0006}
+.plank{height:18px;background:linear-gradient(180deg,var(--wood-hi) 0,var(--wood) 30%,var(--wood-lo) 100%);border-radius:0 0 4px 4px;margin-bottom:10px;box-shadow:0 8px 12px -8px #000a;position:relative}
+.plank::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:#ffffff30}
 .shelf .empty{align-self:center;color:var(--mute);font-size:14px;padding-bottom:20px;margin:auto}
-.spine{--h:170px;--w:40px;--c:#24493a;--t:#fff;position:relative;flex:none;width:calc(var(--w)*var(--k));height:calc(var(--h)*var(--k));background:var(--c);color:var(--t);border-radius:3px 3px 0 0;display:flex;flex-direction:column;align-items:center;padding:8px 0 10px;cursor:grab;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:pan-x pan-y;box-shadow:inset -3px 0 0 #0000001c,inset 2px 0 0 #ffffff14;transition:transform .18s}
+.spine{--h:170px;--w:40px;--c:#24493a;--t:#fff;--g:#d9b45a;position:relative;flex:none;width:calc(var(--w)*var(--k));height:calc(var(--h)*var(--k));background:linear-gradient(90deg,#0000004d 0,#ffffff26 14%,#ffffff0a 34%,#0000 60%,#0000001f 86%,#00000059 100%),var(--c);color:var(--t);border-radius:3px 3px 1px 1px;display:flex;flex-direction:column;align-items:center;padding:10px 0 12px;cursor:grab;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:pan-x pan-y;box-shadow:3px 0 4px -2px #0005;transition:transform .18s}
+.spine::before,.spine::after{content:"";position:absolute;left:12%;right:12%;height:2px;background:var(--g);opacity:.75;box-shadow:0 4px 0 var(--g)}
+.spine::before{top:6px}.spine::after{bottom:10px}
 .spine:hover{transform:translateY(-4px)}
 .spine .num{font-family:var(--mono);font-size:10px;opacity:.75}
-.spine .tt{writing-mode:vertical-rl;flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-size:calc(12.5px*var(--k) + 1px);font-weight:500;margin-top:6px;max-height:100%}
+.spine .tt{writing-mode:vertical-rl;flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font:600 calc(12.5px*var(--k) + 1px)/1 var(--serif);letter-spacing:.02em;margin-top:8px;max-height:100%;text-shadow:0 1px 1px #0004}
 .spine .ft{width:60%;height:1px;background:currentColor;opacity:.35}
-.spine.hit{outline:3px solid var(--gold);outline-offset:2px;transform:translateY(-8px)}
+.spine.hit{outline:3px solid var(--gold);outline-offset:2px;animation:pull .7s cubic-bezier(.2,.9,.3,1.2) forwards;z-index:2;box-shadow:0 0 0 6px #c8902e33,0 14px 22px -8px #000a}
+@keyframes pull{0%{transform:none}55%{transform:translateY(-22px)}100%{transform:translateY(-14px)}}
 .spine .here{position:absolute;top:-24px;left:50%;transform:translateX(-50%);background:var(--gold);color:#fff;font:600 9.5px var(--mono);padding:2px 5px;border-radius:3px;letter-spacing:.04em}
 .spine.dragging{opacity:.25}
 .dragghost{position:fixed;left:0;top:0;z-index:50;pointer-events:none;transform-origin:center;box-shadow:0 20px 34px -10px #0007;opacity:.95;transition:none}
@@ -137,22 +141,49 @@ body.dragon,body.dragon *{cursor:grabbing!important}
 .fchip{display:inline-flex;align-items:center;gap:8px;padding:4px 4px 4px 12px;border-radius:99px;background:var(--soft);color:var(--soft-ink);font-size:14px;font-weight:500}
 .fchip button{border:0;background:#0001;border-radius:99px;width:28px;height:28px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:12px}
-.card{display:grid;grid-template-columns:10px minmax(0,1fr);gap:4px 14px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px 14px 14px;text-align:left;width:100%}
+.card{display:grid;grid-template-columns:62px minmax(0,1fr);gap:4px 14px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px 14px 14px;text-align:left;width:100%}
 .card:hover{border-color:color-mix(in srgb,var(--green) 40%,var(--line))}
-.card .sw{grid-row:1/5;border-radius:3px;background:var(--c)}
+.card .cov{grid-row:1/6}
 .card .t{font-weight:600;font-size:17px}
 .card .loc{color:var(--gold-ink)}
 .badge{justify-self:start;font-size:12px;font-weight:600;border-radius:6px;padding:1px 8px;margin-top:4px}
 .badge.okunuyor{background:var(--soft);color:var(--soft-ink)}.badge.okundu{background:light-dark(#ece7da,#3a3322);color:var(--gold-ink)}.badge.okunacak{background:light-dark(#e9ecf3,#252b38);color:light-dark(#36456b,#a9b8de)}
+/* covers */
+.cov{display:block;width:62px;aspect-ratio:2/3;border-radius:3px 6px 6px 3px;object-fit:cover;background:var(--line);box-shadow:0 6px 12px -6px #0007,inset 3px 0 0 #0002}
+.cov.s{width:50px}.cov.xs{width:30px}.cov.l{width:104px}
+.cov.gen{--c:#24493a;position:relative;overflow:hidden;background:linear-gradient(90deg,#0003 0 4px,#fff2 4px 6px,#0000 6px),var(--c);color:var(--t,#fff);padding:12% 10% 0 14%;display:flex;flex-direction:column;gap:6%}
+.cov.gen b{font:600 11px/1.15 var(--serif);display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.cov.gen i{font-style:normal;font-size:8.5px;opacity:.8;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.cov.gen::after{content:"";position:absolute;left:14%;right:10%;bottom:12%;height:1px;background:currentColor;opacity:.4}
+.cov.l.gen b{font-size:17px}.cov.l.gen i{font-size:12px}.cov.s.gen b{font-size:9px}.cov.s.gen i{display:none}.cov.xs.gen b,.cov.xs.gen i{display:none}
+.dtop{display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:end;margin-bottom:16px}
+.dtop .au{margin:4px 0 0}
+.covrow{display:flex;gap:6px;margin:-2px 0 12px}
+.sugg button{grid-template-columns:30px minmax(0,1fr) auto}.sugg .cov{grid-row:1/3}.sugg .l{grid-column:3}
+.ill{display:block;margin:0 auto 14px;width:min(320px,80%);height:auto}
+.charts{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:14px;margin-top:22px}
+.chart{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px}
+.chart h3{font-size:19px;margin-bottom:2px}.chart .sub{margin:0 0 14px}
+.months{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:6px;align-items:end;height:170px;padding-top:18px}
+.months .m{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:6px}
+.months .b{width:100%;max-width:30px;border-radius:5px 5px 2px 2px;background:linear-gradient(180deg,var(--gold),#b8802a);min-height:3px;position:relative}
+.months .b.z{background:var(--line)}
+.months .b span{position:absolute;top:-18px;left:50%;transform:translateX(-50%);font:600 11.5px var(--mono);color:var(--ink)}
+.months small{font-size:11.5px;color:var(--mute)}
+.hbar{display:grid;grid-template-columns:minmax(0,9em) minmax(0,1fr) 2.6em;gap:10px;align-items:center;margin:9px 0;font-size:14px}
+.hbar .n{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hbar .tr{height:10px;border-radius:9px;background:var(--line);overflow:hidden}.hbar .tr i{display:block;height:100%;border-radius:9px;background:var(--green)}
+.hbar .v{font:600 12.5px var(--mono);text-align:right;color:var(--mute)}
+@media(max-width:760px){.charts{grid-template-columns:minmax(0,1fr)}.months small{font-size:10px}}
 /* reading */
 .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));background:var(--card);border:1px solid var(--line);border-radius:14px;margin-bottom:20px}
 .stats div{padding:18px 20px;border-left:1px solid var(--line)}.stats div:first-child{border-left:0}
 .stats small{color:var(--mute);font-size:14px}.stats b{display:block;font:600 clamp(26px,3.4vw,36px)/1.15 var(--serif);margin-top:4px}
 .stats div:last-child b{font-family:var(--mono);font-weight:600}
 .rlist{background:var(--card);border:1px solid var(--line);border-radius:14px}
-.rrow{display:grid;grid-template-columns:10px minmax(0,1fr) auto;gap:4px 18px;padding:20px;border-top:1px solid var(--line);align-items:center}
+.rrow{display:grid;grid-template-columns:50px minmax(0,1fr) auto;gap:4px 18px;padding:20px;border-top:1px solid var(--line);align-items:center}
 .rrow:first-child{border-top:0}
-.rrow .sw{grid-row:1/2;align-self:start;height:34px;border-radius:2px;background:var(--c)}
+.rrow .cov{align-self:start}
 .rrow .t{font-size:18px;font-weight:500;border:0;background:none;padding:0;text-align:left}
 .rrow .m{font-size:13.5px;color:var(--mute)}.rrow .m .mono{color:var(--soft-ink)}
 .prog{display:flex;justify-content:space-between;font-family:var(--mono);font-size:12.5px;color:var(--mute);margin-top:10px;max-width:450px}
@@ -232,8 +263,7 @@ body.out .gate{display:flex}
 .gate .inner{max-width:380px;width:100%}
 .gate h1{font-size:clamp(40px,10vw,56px);margin-bottom:10px;color:#fff}
 .gate p{color:#bfe0d2;margin:0 0 24px}
-.gate .shelf{--k:.5;background:#ffffff14;border-color:#ffffff22;justify-content:center;pointer-events:none}
-.gate .plank{background:#ffffff33;margin-bottom:26px}
+.gate .ill{width:min(330px,88%);margin-bottom:22px}
 .gate .btn{width:100%;background:#fff;color:#18201d;border-color:#fff;font-size:17px;min-height:54px}
 .gate .msg{min-height:1.5em;margin-top:12px;color:#ffd7cf;font-size:15px}
 @media(max-width:760px){
@@ -243,7 +273,7 @@ body.out .gate{display:flex}
   .kt span{display:none}
   .shelf{--k:.74}
   .stats{grid-template-columns:repeat(2,minmax(0,1fr))}.stats div:nth-child(3){border-left:0}.stats div:nth-child(n+3){border-top:1px solid var(--line)}
-  .rrow{grid-template-columns:10px minmax(0,1fr)}.ractions{grid-column:2;justify-content:flex-start;margin-top:8px}
+  .rrow{grid-template-columns:50px minmax(0,1fr)}.ractions{grid-column:2;justify-content:flex-start;margin-top:8px}
   .casebar .acts{width:100%}.casebar .seg{flex:1 1 100%}.casebar .seg button{flex:1;justify-content:center}.casebar .acts>.btn{flex:1}
   .phead .acts{width:100%}.phead .acts .btn{flex:1}
   .res .meta{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
@@ -253,16 +283,16 @@ body.out .gate{display:flex}
 </head>
 <body>
 <div class="gate"><div class="inner">
-  <svg viewBox="0 0 64 64" width="84" height="84" aria-hidden="true" style="margin-bottom:10px"><rect width="64" height="64" rx="14" fill="#ffffff14"/><path d="M32 9.9a16.3 16.3 0 0 1 13.45 25.6L32 55 18.55 35.5A16.3 16.3 0 0 1 32 9.9z" fill="#d6a03a"/><circle cx="32" cy="26.2" r="11.5" fill="#0c4a3a"/><path d="M23.7 22.7 31.5 24.6v8.7l-7.8-1.9zM40.3 22.7 32.5 24.6v8.7l7.8-1.9z" fill="#f6f0e2"/></svg>
+  <svg viewBox="0 0 1000 1000" aria-hidden="true" width="88" height="88" style="margin-bottom:10px"><rect width="1000" height="1000" rx="220" fill="#ffffff14"/><g fill="#f5f5ef" stroke="#f5f5ef" stroke-width="14" stroke-linejoin="round"><polygon points="580,245 418,245 418,188 580,188"/><polygon points="379,348 289,324 303,269 394,293"/><polygon points="620,348 606,293 696,269 711,324"/><polygon points="580,633 419,633 419,279 580,279"/><polygon points="284,726 193,703 281,355 371,378"/><polygon points="694,641 628,378 719,356 785,618"/><polygon points="716,726 702,672 793,649 806,703"/><polygon points="580,725 418,725 418,667 580,667"/><polygon points="881,811 118,811 118,758 881,758"/></g><path d="M469 279h62v110l-31-24-31 24z" fill="#92ad94"/></svg>
   <h1>Raf İzi</h1>
   <p>Raflarının fotoğrafını çek, kitapların kaydedilsin. Bir kitabı aradığında hangi rafta olduğunu söylesin.</p>
-  <div class="shelf" aria-hidden="true" id="gate-shelf"></div><div class="plank"></div>
+  <div id="gate-ill"></div>
   <button class="btn" id="login"><svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.5 12.3c0-.8-.1-1.5-.2-2.3H12v4.3h5.9a5 5 0 0 1-2.2 3.3v2.7h3.6c2-1.9 3.2-4.7 3.2-8z"/><path fill="#34A853" d="M12 23c3 0 5.5-1 7.3-2.7l-3.6-2.7c-1 .7-2.2 1-3.7 1-2.9 0-5.3-1.9-6.2-4.5H2.1v2.8A11 11 0 0 0 12 23z"/><path fill="#FBBC05" d="M5.8 14.1a6.6 6.6 0 0 1 0-4.2V7.1H2.1a11 11 0 0 0 0 9.8z"/><path fill="#EA4335" d="M12 5.4c1.6 0 3 .6 4.2 1.6l3.1-3.1A11 11 0 0 0 2.1 7.1l3.7 2.8C6.7 7.3 9.1 5.4 12 5.4z"/></svg>Google ile giriş yap</button>
   <div class="msg" id="login-msg"></div>
 </div></div>
 
 <header class="top"><div class="in">
-  <div class="logo"><svg class="mk" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#0c4a3a"/><path d="M32 9.9a16.3 16.3 0 0 1 13.45 25.6L32 55 18.55 35.5A16.3 16.3 0 0 1 32 9.9z" fill="#d6a03a"/><circle cx="32" cy="26.2" r="11.5" fill="#0c4a3a"/><path d="M23.7 22.7 31.5 24.6v8.7l-7.8-1.9zM40.3 22.7 32.5 24.6v8.7l7.8-1.9z" fill="#f6f0e2"/></svg>Raf İzi</div>
+  <div class="logo"><svg class="mk" viewBox="0 0 1000 1000" aria-hidden="true"><rect width="1000" height="1000" rx="220" fill="#104d2b"/><g fill="#f5f5ef" stroke="#f5f5ef" stroke-width="14" stroke-linejoin="round"><polygon points="580,245 418,245 418,188 580,188"/><polygon points="379,348 289,324 303,269 394,293"/><polygon points="620,348 606,293 696,269 711,324"/><polygon points="580,633 419,633 419,279 580,279"/><polygon points="284,726 193,703 281,355 371,378"/><polygon points="694,641 628,378 719,356 785,618"/><polygon points="716,726 702,672 793,649 806,703"/><polygon points="580,725 418,725 418,667 580,667"/><polygon points="881,811 118,811 118,758 881,758"/></g><path d="M469 279h62v110l-31-24-31 24z" fill="#92ad94"/></svg>Raf İzi</div>
   <nav class="nav" aria-label="Bölümler">
     <button data-v="cat">Katalog</button>
     <button data-v="map" aria-current="true">Raf Haritası</button>
@@ -317,6 +347,7 @@ body.out .gate{display:flex}
     <div class="stats" id="rstats"></div>
     <div class="seg" id="rtabs" style="margin-bottom:16px"></div>
     <div class="rlist" id="rlist"></div>
+    <div class="charts" id="rcharts"></div>
   </section>
 
   <section id="v-dir" hidden>
@@ -383,11 +414,21 @@ const num=v=>{const n=parseInt(v,10);return n>0?n:null};
 const hash=s=>{let h=7;for(const c of String(s))h=(h*31+c.charCodeAt(0))|0;return Math.abs(h)};
 const PAL=['#24493a','#22385e','#6a2433','#d6cdb9','#2a3340','#b57a33','#3f5a4b','#7a3b2e','#454b68','#8c6d3f','#5b2c45','#2f5e63'];
 const colorOf=b=>PAL[hash((b.title||'')+(b.author||''))%PAL.length];
+const coverHtml=(b,sz)=>{const c=colorOf(b);return b.cover?`<img class="cov ${sz||''}" src="${esc(b.cover)}" alt="" loading="lazy" data-cv="${esc(b.id)}">`:genCover(b,sz)};
+const genCover=(b,sz)=>{const c=colorOf(b);return `<span class="cov gen ${sz||''}" style="--c:${c};--t:${inkOf(c)}" aria-hidden="true"><b>${esc(b.title)}</b><i>${esc(b.author||'')}</i></span>`};
+document.addEventListener('error',e=>{const t=e.target;if(t&&t.tagName==='IMG'&&t.classList.contains('cov')&&!t.dataset.dead){t.dataset.dead=1;const b=books[t.dataset.cv];const sz=[...t.classList].filter(x=>x!=='cov').join(' ');const w=document.createElement('span');w.innerHTML=b?genCover(b,sz):'';if(w.firstChild)t.replaceWith(w.firstChild)}},true);
 const inkOf=c=>{const n=parseInt(c.slice(1),16);return((n>>16)*.299+((n>>8)&255)*.587+(n&255)*.114)>160?'#2a2418':'#fff'};
 const fmt=n=>new Intl.NumberFormat('tr-TR').format(n||0);
 const ICON={pin:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>',
  arrow:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
  check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m5 12 5 5 9-10"/></svg>'};
+
+/* ---------- illustrations ---------- */
+const ILL={
+shelf:`<svg class="ill" viewBox="0 0 320 220" aria-hidden="true"><ellipse cx="160" cy="208" rx="140" ry="8" fill="#0002"/><rect x="40" y="18" width="200" height="186" rx="6" fill="#8a5c35"/><rect x="50" y="28" width="180" height="78" fill="#e9dcc6"/><rect x="50" y="116" width="180" height="78" fill="#e2d2b9"/><rect x="44" y="104" width="192" height="12" fill="#b07d4f"/><rect x="44" y="192" width="192" height="12" fill="#b07d4f"/><rect x="60" y="44" width="16" height="60" rx="2" fill="#24493a"/><rect x="78" y="36" width="20" height="68" rx="2" fill="#d6a03a"/><rect x="100" y="50" width="14" height="54" rx="2" fill="#6a2433"/><rect x="116" y="40" width="18" height="64" rx="2" fill="#f5f5ef"/><rect x="136" y="46" width="15" height="58" rx="2" fill="#22385e"/><rect x="162" y="60" width="44" height="12" rx="2" fill="#3f5a4b"/><rect x="166" y="72" width="40" height="12" rx="2" fill="#b57a33"/><rect x="160" y="84" width="48" height="20" rx="2" fill="#92ad94"/><rect x="62" y="132" width="18" height="60" rx="2" fill="#92ad94"/><rect x="82" y="126" width="16" height="66" rx="2" fill="#2f5e63"/><rect x="100" y="138" width="20" height="54" rx="2" fill="#d6a03a"/><rect x="122" y="128" width="15" height="64" rx="2" fill="#454b68"/><rect x="140" y="122" width="22" height="70" rx="2" fill="#f5f5ef"/><rect x="146" y="132" width="10" height="3" fill="#d6a03a"/><rect x="164" y="134" width="16" height="58" rx="2" fill="#7a3b2e" transform="rotate(14 180 192)"/><rect x="196" y="160" width="22" height="32" rx="4" fill="#c97b4a"/><path d="M207 160c-14-18-6-34 0-38 6 4 14 20 0 38zM207 160c-20-6-26-18-24-26 8-2 20 6 24 26zM207 160c20-6 26-18 24-26-8-2-20 6-24 26z" fill="#3f8a5f"/><g transform="translate(256 30)"><path d="M18 0a18 18 0 0 1 15 28L18 52 3 28A18 18 0 0 1 18 0z" fill="#d6a03a"/><circle cx="18" cy="18" r="7" fill="#fff"/></g><path d="M262 92c-20 8-40 0-56 6" stroke="#d6a03a" stroke-width="3" stroke-dasharray="2 7" stroke-linecap="round" fill="none"/></svg>`,
+read:`<svg class="ill" viewBox="0 0 320 180" aria-hidden="true"><ellipse cx="160" cy="166" rx="120" ry="8" fill="#0002"/><path d="M40 52c40-14 80-12 118 8v100c-38-20-78-22-118-8z" fill="#f5f0e2" stroke="#c9b99b" stroke-width="2"/><path d="M280 52c-40-14-80-12-118 8v100c38-20 78-22 118-8z" fill="#fffaf0" stroke="#c9b99b" stroke-width="2"/><g stroke="#c9b99b" stroke-width="3" stroke-linecap="round"><path d="M60 72c26-6 52-4 78 6M60 88c26-6 52-4 78 6M60 104c26-6 52-4 78 6M60 120c26-6 52-4 70 4"/><path d="M182 78c26-10 52-12 78-6M182 94c26-10 52-12 78-6M182 110c26-10 52-12 78-6"/></g><path d="M226 50v40l10-8 10 8V44" fill="#6a2433"/><g transform="translate(250 112)"><rect x="0" y="12" width="40" height="34" rx="6" fill="#24493a"/><path d="M40 20h6a8 8 0 0 1 0 16h-6" stroke="#24493a" stroke-width="5" fill="none"/><path d="M10 6c0-6 6-6 6-12M24 6c0-6 6-6 6-12" stroke="#b8c9bf" stroke-width="3" stroke-linecap="round" fill="none"/></g></svg>`,
+loan:`<svg class="ill" viewBox="0 0 320 170" aria-hidden="true"><ellipse cx="160" cy="156" rx="120" ry="8" fill="#0002"/><g transform="rotate(-8 92 100)"><rect x="56" y="50" width="70" height="96" rx="5" fill="#24493a"/><rect x="64" y="66" width="50" height="6" rx="2" fill="#d6a03a"/><rect x="64" y="78" width="36" height="4" rx="2" fill="#b8c9bf"/></g><g transform="rotate(8 228 100)"><rect x="194" y="50" width="70" height="96" rx="5" fill="#d6a03a"/><rect x="202" y="66" width="50" height="6" rx="2" fill="#24493a"/><rect x="202" y="78" width="36" height="4" rx="2" fill="#fff8"/></g><path d="M132 52c20-26 46-26 60-4" stroke="#6b726e" stroke-width="4" fill="none" stroke-linecap="round"/><path d="m186 38 8 12-14 2" stroke="#6b726e" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M190 126c-20 22-46 22-60 2" stroke="#6b726e" stroke-width="4" fill="none" stroke-linecap="round" stroke-dasharray="1 9"/></svg>`
+};
 
 /* ---------- state ---------- */
 let books={},meta={names:[],shelves:{}},photos={},B=null,user=null,unsub=[];
@@ -461,14 +502,14 @@ function render(){
   const st=`${list.length} kitap · ${authors} yazar · ${pubs} yayınevi · ${done} okundu`;
   $('#map-stats').textContent=st;$('#cat-stats').textContent=st;
   $('#q').placeholder=`Kitaplığında ara (${list.length} kitap): kitap adı, yazar, yayınevi veya ISBN…`;
-  if(view==='map')renderMap();else if(view==='cat')renderCat();else if(view==='read')renderRead();else renderDir();
+  if(view==='map')renderMap();else if(view==='cat')renderCat();else if(view==='read'){renderRead();renderCharts()}else renderDir();
   if(detailId&&books[detailId]&&!$('#drawer').contains(document.activeElement))renderDrawer();
   const dl=(id,arr)=>{$(id).innerHTML=[...new Set(arr.filter(Boolean))].map(v=>`<option value="${esc(v)}">`).join('')};
   dl('#dl-case',caseList());dl('#dl-author',list.map(b=>b.author));dl('#dl-pub',list.map(b=>b.publisher));dl('#dl-genre',list.map(b=>b.genre));
 }
 
 function spineHtml(b,i,hit){
-  const c=colorOf(b),h=158+hash(b.id+'h')%38,w=34+hash(b.title||'')%16;
+  const c=colorOf(b),h=158+hash(b.id+'h')%38,w=b.pages?Math.max(28,Math.min(64,Math.round(22+b.pages/16))):34+hash(b.title||'')%16;
   return `<div class="spine${hit?' hit':''}${b.loan?' loan':''}" data-id="${esc(b.id)}" style="--c:${c};--t:${inkOf(c)};--h:${h}px;--w:${w}px" role="button" tabindex="0" aria-label="${esc(b.title)}, ${i}. kitap${b.loan?', ödünçte':''}">${hit?'<span class="here">BURADA</span>':b.loan?'<span class="lt">ÖDÜNÇ</span>':''}<span class="num">${i}</span><span class="tt">${esc(b.title)}</span><span class="ft"></span></div>`;
 }
 function shelfHtml(n,s,hitId,cls){
@@ -481,11 +522,11 @@ function renderMap(){
   $('#pills').innerHTML=cases.map(c=>`<button class="pill" data-case="${esc(c)}" aria-current="${same(c,curCase)}">${esc(caseLabel(c))} <span>(${inCase(c).length})</span></button>`).join('')+`<button class="pill add" data-act="add-case">+ Kitaplık Ekle</button>`;
   $$('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.mode===mapMode));
   const sb=sel&&books[sel];
-  $('#selbar').innerHTML=sb?`<div class="selbar"><div><small>Seçili Kitabın Raf Konumu</small><h3>${esc(sb.title)} <span>— ${esc(sb.author||'')}</span></h3><div class="loc">${ICON.pin.replace('<svg','<svg width="14" height="14" style="vertical-align:-2px"')} ${esc(locText(sb))}</div>${sb.loan?`<div class="loc" style="color:#fff">Şu an ödünçte · ${esc(loanText(sb))}</div>`:''}</div><div class="acts">${sb.photoId&&photos[sb.photoId]?'<button class="btn sm" data-act="sel-photo">Fotoğrafta Gör</button>':''}<button class="btn sm w" data-act="sel-detail">Detaylar</button><button class="x" data-act="sel-clear" aria-label="Seçimi kaldır">×</button></div></div>`:'';
+  $('#selbar').innerHTML=sb?`<div class="selbar"><div style="display:flex;gap:14px;align-items:center">${coverHtml(sb,'s')}<div><small>Seçili Kitabın Raf Konumu</small><h3>${esc(sb.title)} <span>— ${esc(sb.author||'')}</span></h3><div class="loc">${ICON.pin.replace('<svg','<svg width="14" height="14" style="vertical-align:-2px"')} ${esc(locText(sb))}</div>${sb.loan?`<div class="loc" style="color:#fff">Şu an ödünçte · ${esc(loanText(sb))}</div>`:''}</div></div><div class="acts">${sb.photoId&&photos[sb.photoId]?'<button class="btn sm" data-act="sel-photo">Fotoğrafta Gör</button>':''}<button class="btn sm w" data-act="sel-detail">Detaylar</button><button class="x" data-act="sel-clear" aria-label="Seçimi kaldır">×</button></div></div>`:'';
   renderSugg();
   const bd=$('#board');
   if(!curCase){
-    bd.innerHTML=`<div class="emptyst"><h2>Kitaplığın boş</h2><p>Bir raf fotoğrafı tara ya da kitapların barkodunu okut; raflar burada çizilecek.</p><div class="acts" style="justify-content:center"><button class="btn pri" data-act="scan-shelf">Raf Fotoğrafı Tara</button><button class="btn" data-act="new">Elle ekle</button></div></div>`;return;
+    bd.innerHTML=`<div class="emptyst">${ILL.shelf}<h2>Kitaplığın boş</h2><p>Bir raf fotoğrafı tara ya da kitapların barkodunu okut; raflar burada çizilecek.</p><div class="acts" style="justify-content:center"><button class="btn pri" data-act="scan-shelf">Raf Fotoğrafı Tara</button><button class="btn" data-act="new">Elle ekle</button></div></div>`;return;
   }
   const n=shelfCount(curCase),bs=inCase(curCase);
   let h=`<div class="bhead"><div><h2>${esc(caseLabel(curCase))}</h2><span class="sub">${n} raf · ${bs.length} kitap kayıtlı</span></div><p class="hint">${mapMode==='diagram'?'Yerini değiştirmek için kitabı sürükle (telefonda basılı tut) · Detay için dokun':'Kutulara dokununca kitabın detayı açılır'}</p></div>`;
@@ -510,7 +551,7 @@ function renderSugg(){
   const box=$('#sugg'),qq=norm(q);
   if(!qq||view!=='map'){box.hidden=true;return}
   const r=all().filter(b=>matches(b,qq)).sort((a,b)=>coll.compare(a.title||'',b.title||'')).slice(0,7);
-  box.innerHTML=r.length?r.map((b,i)=>`<button data-pick="${esc(b.id)}" class="${i?'':'on'}"><span><b>${esc(b.title)}</b></span><span class="l mono">${esc(locShort(b))}</span><span class="sub">${esc([b.author,b.publisher].filter(Boolean).join(' · '))}</span></button>`).join(''):`<div style="padding:12px 14px" class="sub">“${esc(q)}” ile eşleşen kitap yok.</div>`;
+  box.innerHTML=r.length?r.map((b,i)=>`<button data-pick="${esc(b.id)}" class="${i?'':'on'}">${coverHtml(b,'xs')}<span><b>${esc(b.title)}</b></span><span class="l mono">${esc(locShort(b))}</span><span class="sub">${esc([b.author,b.publisher].filter(Boolean).join(' · '))}</span></button>`).join(''):`<div style="padding:12px 14px" class="sub">“${esc(q)}” ile eşleşen kitap yok.</div>`;
   box.hidden=false;
 }
 function select(id){const b=books[id];if(!b)return;sel=id;if(b.bookcase)curCase=caseName(b.bookcase);view='map';q='';$('#q').value='';$('#sugg').hidden=true;scrollSel=true;closeDrawer();render();window.scrollTo({top:0,behavior:'smooth'})}
@@ -524,8 +565,8 @@ function renderCat(){
   rows.sort(by==='new'?(a,b)=>(b.addedAt||0)-(a.addedAt||0):(a,b)=>coll.compare(a[by]||'~',b[by]||'~')||coll.compare(a.title||'',b.title||''));
   const nLoan=all().filter(b=>b.loan).length;
   $('#catf').innerHTML=catFilter?`<span class="fchip">${catFilter.k==='loan'?(catFilter.v?'Ödünç: '+esc(catFilter.v):'Ödünçtekiler'):esc({author:'Yazar',publisher:'Yayınevi',genre:'Kategori'}[catFilter.k])+': '+esc(catFilter.v||'belirtilmemiş')}<button data-act="clr-filter" aria-label="Filtreyi kaldır">×</button></span>`:`<span class="sub">${rows.length} kitap</span>${nLoan?` <button class="btn sm" data-act="loan-filter">Ödünçtekiler (${nLoan})</button>`:''}`;
-  $('#catlist').innerHTML=rows.length?rows.map(b=>`<button class="card" data-open="${esc(b.id)}" style="--c:${colorOf(b)}"><span class="sw"></span><span class="t">${esc(b.title)}</span><span class="sub">${esc([b.author,b.publisher,b.genre].filter(Boolean).join(' · ')||'—')}</span><span class="mono loc">${esc(locShort(b))}</span>${b.loan?`<span class="badge loan">Ödünçte · ${esc(b.loan.to)}</span>`:b.status?`<span class="badge ${b.status}">${esc(stLabel[b.status])}</span>`:''}</button>`).join('')
-    :`<div class="emptyst">${all().length?'Eşleşen kitap yok.':'Henüz kitap eklenmedi.'}</div>`;
+  $('#catlist').innerHTML=rows.length?rows.map(b=>`<button class="card" data-open="${esc(b.id)}">${coverHtml(b)}<span class="t">${esc(b.title)}</span><span class="sub">${esc([b.author,b.publisher,b.genre].filter(Boolean).join(' · ')||'—')}</span><span class="mono loc">${esc(locShort(b))}</span>${b.loan?`<span class="badge loan">Ödünçte · ${esc(b.loan.to)}</span>`:b.status?`<span class="badge ${b.status}">${esc(stLabel[b.status])}</span>`:''}</button>`).join('')
+    :`<div class="emptyst">${all().length?'Eşleşen kitap yok.':ILL.shelf+'Henüz kitap eklenmedi.'}</div>`;
 }
 const stLabel={okunacak:'Okunacak',okunuyor:'Okunuyor',okundu:'Okundu'};
 
@@ -547,11 +588,63 @@ function renderRead(){
     else if(b.status==='okunacak')act=`<button class="btn soft sm" data-start="${esc(b.id)}">Okumaya başla</button>`;
     else if(!b.status)act=`<button class="btn sm" data-queue="${esc(b.id)}">Okunacaklara ekle</button><button class="btn soft sm" data-start="${esc(b.id)}">Okumaya başla</button><button class="btn sm" data-finish="${esc(b.id)}">Okudum</button>`;
     else act=`<span class="stars" aria-label="Puan">${[1,2,3,4,5].map(n=>`<button class="${(b.rating||0)>=n?'on':''}" data-rate="${n}" data-id="${esc(b.id)}" aria-label="${n} yıldız">★</button>`).join('')}</span>`;
-    return `<div class="rrow" style="--c:${colorOf(b)}"><span class="sw"></span><div><button class="t" data-open="${esc(b.id)}">${esc(b.title)}</button><div class="m">${esc([b.author,b.publisher,b.genre].filter(Boolean).join(' · '))} · <span class="mono">${esc(locShort(b))}</span></div>
+    return `<div class="rrow">${coverHtml(b,'s')}<div><button class="t" data-open="${esc(b.id)}">${esc(b.title)}</button><div class="m">${esc([b.author,b.publisher,b.genre].filter(Boolean).join(' · '))} · <span class="mono">${esc(locShort(b))}</span></div>
       ${b.status==='okunuyor'&&b.pages?`<div class="prog"><span>Sayfa ${b.page||0} / ${b.pages}</span><span>%${pct}</span></div><div class="bar"><i style="width:${pct}%"></i></div>`:b.status==='okunuyor'?`<div class="prog"><span>Sayfa ${b.page||0}${b.pages?'':' · toplam sayfa sayısını detaydan gir'}</span></div>`:''}
       ${b.notes?`<p class="quote">“${esc(b.notes.slice(0,160))}${b.notes.length>160?'…':''}”</p>`:''}</div>
       <div class="ractions">${act}<button class="btn sm" data-show="${esc(b.id)}">${ICON.pin.replace('<svg','<svg width="16" height="16"')}Rafta Göster</button></div></div>`;
-  }).join(''):`<div class="emptyst">${readTab==='okunuyor'?(none.length?`Şu an okuduğun kitap yok. Yeni eklediğin ${none.length} kitap “İşaretlenmemiş” sekmesinde; oradan okumaya başlayabilirsin.`:'Şu an okuduğun kitap yok.'):readTab==='none'?'Tüm kitapların işaretli.':'Bu listede kitap yok.'}</div>`;
+  }).join(''):`<div class="emptyst">${ILL.read}${readTab==='okunuyor'?(none.length?`Şu an okuduğun kitap yok. Yeni eklediğin ${none.length} kitap “İşaretlenmemiş” sekmesinde; oradan okumaya başlayabilirsin.`:'Şu an okuduğun kitap yok.'):readTab==='none'?'Tüm kitapların işaretli.':'Bu listede kitap yok.'}</div>`;
+}
+
+/* ---------- covers: Google Books, then Open Library ---------- */
+const coverAsked=new Set();let coverBusy=0;const coverQ=[];
+const titleClose=(a,b)=>{a=norm(a);b=norm(b);return !!a&&!!b&&(a===b||a.startsWith(b)||b.startsWith(a))};
+async function lookCover(b,force){
+  if(!b)return false;
+  const isbn=(b.isbn||'').replace(/[^0-9Xx]/g,'');
+  let cover='',ch={coverTried:Date.now()};
+  try{
+    const q=isbn?'isbn:'+isbn:'intitle:'+b.title+(b.author?' inauthor:'+b.author:'');
+    const r=await fetch('https://www.googleapis.com/books/v1/volumes?maxResults=5&q='+encodeURIComponent(q));
+    const j=await r.json();
+    const items=(j.items||[]).filter(x=>x.volumeInfo&&(isbn||titleClose(x.volumeInfo.title,b.title)));
+    const it=items.find(x=>x.volumeInfo.imageLinks)||items[0];
+    if(it){const v=it.volumeInfo;
+      const im=v.imageLinks&&(v.imageLinks.thumbnail||v.imageLinks.smallThumbnail);
+      if(im)cover=im.replace(/^http:/,'https:').replace('&edge=curl','');
+      if(!b.pages&&v.pageCount)ch.pages=v.pageCount;
+      if(!b.year&&v.publishedDate&&parseInt(v.publishedDate))ch.year=parseInt(v.publishedDate);
+      if(!b.publisher&&v.publisher)ch.publisher=v.publisher;
+      if(!b.author&&v.authors)ch.author=v.authors.join(', ');
+      if(!isbn){const id=(v.industryIdentifiers||[]).find(x=>x.type==='ISBN_13');if(id)ch.isbn=id.identifier}
+      if(!b.summary&&v.description&&v.language==='tr'){const s=v.description.replace(/<[^>]+>/g,'');ch.summary=s.length>320?s.slice(0,s.lastIndexOf('.',320)+1||320):s}}
+  }catch(e){}
+  if(!cover&&(isbn||ch.isbn))cover='https://covers.openlibrary.org/b/isbn/'+(isbn||ch.isbn)+'-M.jpg?default=false';
+  if(cover)ch.cover=cover;
+  if(!books[b.id])return false;
+  try{await putBooks([{...books[b.id],...ch}])}catch(e){books[b.id]={...books[b.id],...ch};render()}
+  return !!cover;
+}
+function queueCovers(){
+  for(const b of all())if(!b.cover&&!b.coverTried&&!coverAsked.has(b.id)&&coverAsked.size<80){coverAsked.add(b.id);coverQ.push(b.id)}
+  pumpCovers();
+}
+function pumpCovers(){
+  while(coverBusy<2&&coverQ.length){const id=coverQ.shift();coverBusy++;lookCover(books[id]).finally(()=>{coverBusy--;setTimeout(pumpCovers,350)})}
+}
+
+function renderCharts(){
+  const l=all(),done=l.filter(b=>b.status==='okundu');
+  const now=new Date(),months=[];
+  for(let i=11;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);months.push({y:d.getFullYear(),m:d.getMonth(),n:0,p:0})}
+  done.forEach(b=>{const t=new Date(b.finishedAt||b.statusAt||0);const x=months.find(o=>o.y===t.getFullYear()&&o.m===t.getMonth());if(x){x.n++;x.p+=b.pages||0}});
+  const mx=Math.max(1,...months.map(o=>o.n)),MN=['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
+  const yearN=months.reduce((s,o)=>s+o.n,0),yearP=months.reduce((s,o)=>s+o.p,0);
+  const grp=(arr,k)=>{const m=new Map();arr.forEach(b=>{const v=(b[k]||'').trim();if(v){const key=norm(v);m.set(key,{n:(m.get(key)||{}).n||v,c:((m.get(key)||{}).c||0)+1})}});return[...m.values()].sort((a,b)=>b.c-a.c).slice(0,6)};
+  const bars=rows=>{const top=Math.max(1,...rows.map(r=>r.c));return rows.length?rows.map(r=>`<div class="hbar"><span class="n">${esc(r.n)}</span><span class="tr"><i style="width:${Math.round(r.c/top*100)}%"></i></span><span class="v">${r.c}</span></div>`).join(''):`<p class="sub">Henüz veri yok.</p>`};
+  $('#rcharts').innerHTML=l.length?`<div class="chart" style="grid-column:1/-1"><h3>Son 12 ayda biten kitaplar</h3><p class="sub">${yearN} kitap · ${fmt(yearP)} sayfa</p>
+    <div class="months">${months.map(o=>`<div class="m"><div class="b${o.n?'':' z'}" style="height:${Math.round(o.n/mx*100)}%">${o.n?`<span>${o.n}</span>`:''}</div><small>${MN[o.m]}</small></div>`).join('')}</div></div>
+    <div class="chart"><h3>Kitaplığındaki kategoriler</h3><p class="sub">Tüm kitaplar</p>${bars(grp(l,'genre'))}</div>
+    <div class="chart"><h3>En çok okuduğun yazarlar</h3><p class="sub">Okunan kitap sayısı</p>${bars(grp(done,'author'))}</div>`:'';
 }
 
 function renderDir(){
@@ -561,15 +654,15 @@ function renderDir(){
     $('#dtabs').innerHTML=tabs.map(([k,t])=>`<button data-dt="${k}" aria-pressed="${dirTab===k}">${t}${k==='loan'?' ('+m.size+')':''}</button>`).join('');
     const g=[...m.values()].sort((a,b)=>Math.min(...a.list.map(x=>x.loan.at))-Math.min(...b.list.map(x=>x.loan.at)));
     {const at=$('#dtabs [aria-pressed=true]');if(at)at.scrollIntoView({block:'nearest',inline:'nearest'})}
-    $('#dirgrid').innerHTML=g.length?g.map(x=>{const old=Math.min(...x.list.map(b=>b.loan.at));return `<button class="dcard" data-loanto="${esc(x.name)}"><h3>${esc(x.name)}</h3>${ICON.arrow}<div class="c">${x.list.length} kitap · en eskisi ${daysSince(old)} gündür</div><p>${esc(x.list.map(b=>b.title).join(', '))}</p></button>`}).join('')
-      :`<div class="emptyst">Şu an ödünç verdiğin kitap yok. Bir kitabın üstüne basılı tutup “Ödünç ver”i seçebilirsin.</div>`;
+    $('#dirgrid').innerHTML=g.length?g.map(x=>{const old=Math.min(...x.list.map(b=>b.loan.at));return `<button class="dcard" data-loanto="${esc(x.name)}"><h3>${esc(x.name)}</h3>${ICON.arrow}<div class="covrow" style="margin-top:12px">${x.list.slice(0,5).map(b=>coverHtml(b,'xs')).join('')}</div><div class="c">${x.list.length} kitap · en eskisi ${daysSince(old)} gündür</div><p>${esc(x.list.map(b=>b.title).join(', '))}</p></button>`}).join('')
+      :`<div class="emptyst">${ILL.loan}Şu an ödünç verdiğin kitap yok. Bir kitabın üstüne basılı tutup “Ödünç ver”i seçebilirsin.</div>`;
     return;
   }
   const groups=k=>{const m=new Map();all().forEach(b=>{const v=(b[k]||'').trim();const key=v?norm(v):'\u0000';if(!v){if(!m.has(key))m.set(key,{name:'',list:[]});m.get(key).list.push(b);return}if(!m.has(key))m.set(key,{name:v,list:[]});m.get(key).list.push(b)});return[...m.values()]};
   $('#dtabs').innerHTML=tabs.map(([k,t])=>`<button data-dt="${k}" aria-pressed="${dirTab===k}">${t}${k==='loan'?' ('+new Set(all().filter(b=>b.loan).map(b=>norm(b.loan.to))).size+')':' ('+groups(k).filter(x=>x.name).length+')'}</button>`).join('');
   const g=groups(dirTab).sort((a,b)=>b.list.length-a.list.length||coll.compare(a.name,b.name));
   const miss={publisher:'Yayınevi belirtilmemiş',author:'Yazarı belirtilmemiş',genre:'Kategorisi belirtilmemiş'}[dirTab];
-  $('#dirgrid').innerHTML=g.length?g.sort((a,b)=>(a.name?0:1)-(b.name?0:1)).map(x=>{const t=x.list.map(b=>b.title).sort(coll.compare);return `<button class="dcard" data-group="${esc(x.name)}" data-empty="${x.name?'':'1'}"><h3>${esc(x.name||miss)}</h3>${ICON.arrow}<div class="c">${x.list.length} kitap · ${x.list.filter(b=>b.status==='okundu').length} okundu</div><p>${esc(t.slice(0,3).join(', '))}${t.length>3?' +'+(t.length-3):''}</p></button>`}).join('')
+  $('#dirgrid').innerHTML=g.length?g.sort((a,b)=>(a.name?0:1)-(b.name?0:1)).map(x=>{const t=x.list.map(b=>b.title).sort(coll.compare);return `<button class="dcard" data-group="${esc(x.name)}" data-empty="${x.name?'':'1'}"><h3>${esc(x.name||miss)}</h3>${ICON.arrow}<div class="covrow" style="margin-top:12px">${x.list.slice(0,5).map(b=>coverHtml(b,'xs')).join('')}</div><div class="c">${x.list.length} kitap · ${x.list.filter(b=>b.status==='okundu').length} okundu</div><p>${esc(t.slice(0,3).join(', '))}${t.length>3?' +'+(t.length-3):''}</p></button>`}).join('')
     :`<div class="emptyst">Henüz gruplanacak bilgi yok.</div>`;
 }
 
@@ -596,7 +689,7 @@ function renderDrawer(){
   const cases=caseList(),n=b.bookcase?shelfCount(b.bookcase):1,ph=b.photoId&&photos[b.photoId];
   const rows=[['Yazar',b.author],['Yayınevi',b.publisher],['Kategori',b.genre],['ISBN',b.isbn,1],['Sayfa Sayısı',b.pages,1],['Basım Yılı',b.year,1]];
   const pct=b.pages?Math.min(100,Math.round((b.page||0)/b.pages*100)):null;
-  $('#d-body').innerHTML=`<h2>${esc(b.title)}</h2><div class="au">${esc([b.author,b.publisher].filter(Boolean).join(' · ')||'Yazar bilgisi yok')}</div>
+  $('#d-body').innerHTML=`<div class="dtop">${coverHtml(b,'l')}<div><h2>${esc(b.title)}</h2><div class="au">${esc([b.author,b.publisher].filter(Boolean).join(' · ')||'Yazar bilgisi yok')}</div><button class="btn sm ghost" data-d="cover" style="margin-top:6px;padding-left:0">${b.cover?'Kapağı yenile':'Kapak ara'}</button></div></div>
   <div class="lcard"><div class="row"><div><small>Kitaplıktaki Konumu</small><div class="loc">${ICON.pin}<span>${esc(locText(b))}</span></div></div>${b.bookcase?'<button class="btn pri sm" data-d="show">Rafta Göster</button>':''}</div>
     ${ph?photoHtml(b.photoId,ph,b.id,b.id):b.bookcase&&b.shelf?shelfHtml(b.bookcase,b.shelf,b.id,'mini'):''}
     <div class="move"><small>Yerini değiştir</small>
@@ -615,7 +708,7 @@ function renderDrawer(){
   <div class="dsec"><button class="btn danger sm" data-d="del">Kitabı sil</button></div>`;
 }
 async function patch(id,ch){const b=books[id];if(!b)return;try{await putBooks([{...b,...ch}])}catch(e){toast('Kaydedilemedi')}}
-function setStatus(id,s){const b=books[id];const ns=b.status===s?'':s;const ch={status:ns,statusAt:Date.now()};if(ns==='okundu'&&b.pages)ch.page=b.pages;patch(id,ch)}
+function setStatus(id,s){const b=books[id];const ns=b.status===s?'':s;const ch={status:ns,statusAt:Date.now()};if(ns==='okundu')ch.finishedAt=Date.now();if(ns==='okundu'&&b.pages)ch.page=b.pages;patch(id,ch)}
 
 $('#d-x').onclick=closeDrawer;$('#scrim').onclick=closeDrawer;
 $('#d-edit').onclick=()=>{editMode=true;renderDrawer()};
@@ -625,6 +718,7 @@ $('#d-body').addEventListener('click',async e=>{
   if(t.dataset.d==='cancel'){editMode=false;renderDrawer();return}
   if(t.dataset.d==='del'){if(!t.dataset.arm){t.dataset.arm=1;t.textContent='Silinsin mi? Tekrar dokun';return}closeDrawer();return deleteBook(id)}
   if(t.dataset.d==='loan-edit')return openLoan(id);
+  if(t.dataset.d==='cover'){t.textContent='Aranıyor…';const ok=await lookCover(books[id],true);toast(ok?'Kapak bulundu':'Kapak bulunamadı');renderDrawer();return}
   if(t.dataset.d==='loan-back')return loanBack(id);
   if(t.dataset.d==='save')return saveEdit();
   if(t.dataset.st)return setStatus(id,t.dataset.st);
@@ -841,7 +935,7 @@ document.addEventListener('click',async e=>{
   if(t.dataset.loanto!=null){catFilter={k:'loan',v:t.dataset.loanto};view='cat';q='';$('#q2').value='';render();return}
   if(t.dataset.rt){readTab=t.dataset.rt;render();return}
   if(t.dataset.inc){const b=books[t.dataset.id];const p=(b.page||0)+ +t.dataset.inc;return patch(b.id,{page:b.pages?Math.min(p,b.pages):p})}
-  if(t.dataset.finish)return patch(t.dataset.finish,{status:'okundu',statusAt:Date.now(),page:books[t.dataset.finish].pages||books[t.dataset.finish].page||0});
+  if(t.dataset.finish)return patch(t.dataset.finish,{status:'okundu',statusAt:Date.now(),finishedAt:Date.now(),page:books[t.dataset.finish].pages||books[t.dataset.finish].page||0});
   if(t.dataset.start)return patch(t.dataset.start,{status:'okunuyor',statusAt:Date.now()});
   if(t.dataset.queue)return patch(t.dataset.queue,{status:'okunacak',statusAt:Date.now()});
   if(t.dataset.rate&&!t.closest('#d-body')){const b=books[t.dataset.id];return patch(b.id,{rating:b.rating===+t.dataset.rate?0:+t.dataset.rate})}
@@ -1001,7 +1095,7 @@ async function saveBar(next){
 $('#b-save').onclick=()=>saveBar(false);$('#b-next').onclick=()=>saveBar(true);
 
 /* ---------- backends ---------- */
-$('#gate-shelf').innerHTML=[['#24493a',170,40],['#c8902e',150,34],['#d6cdb9',180,44],['#22385e',160,38],['#6a2433',176,36],['#3f5a4b',154,42],['#b57a33',168,34]].map(([c,h,w])=>`<span class="spine" style="--c:${c};--h:${h}px;--w:${w}px"></span>`).join('');
+$('#gate-ill').innerHTML=ILL.shelf;
 const CFG={apiKey:"AIzaSyDST7X8QXynA2YJ6ZJZ1fWp1Ow2eJLylnQ",authDomain:"scribble-kick.firebaseapp.com",projectId:"scribble-kick",
   storageBucket:"scribble-kick.firebasestorage.app",messagingSenderId:"307843857448",appId:"1:307843857448:web:d35c242ae347a2ed72891d"};
 const clean=o=>JSON.parse(JSON.stringify(o));
@@ -1044,7 +1138,7 @@ if(window.firebase){
     setNote('Kitaplar yükleniyor…');
     const t=setTimeout(()=>setNote('Kayıtlara şu an ulaşılamıyor; bağlantını kontrol et.'),10000);
     unsub.push(root.collection('books').onSnapshot(s=>{if(!s.metadata.fromCache){clearTimeout(t);setNote('')}
-      const nb={};s.docs.forEach(d=>{nb[d.id]={...d.data(),id:d.id}});books=nb;render()},e=>{clearTimeout(t);setNote('Kayıtlar okunamadı ('+e.code+').')}));
+      const nb={};s.docs.forEach(d=>{nb[d.id]={...d.data(),id:d.id}});books=nb;render();queueCovers()},e=>{clearTimeout(t);setNote('Kayıtlar okunamadı ('+e.code+').')}));
     unsub.push(root.collection('meta').doc('bookcases').onSnapshot(s=>{const d=s.exists?s.data():{};meta={names:Array.isArray(d.names)?d.names:[],shelves:d.shelves||{}};render()},()=>{}));
     unsub.push(root.collection('photos').onSnapshot(s=>{const p={};s.docs.forEach(d=>p[d.id]=d.data());photos=p;render()},()=>{}));
   });
@@ -1058,7 +1152,7 @@ if(window.firebase){
    ['Sapiens: Hayvanlardan Tanrılara','Yuval Noah Harari','Kolektif Kitap','Tarih','Çalışma Odası',1,412,'okundu'],['Tüfek, Mikrop ve Çelik','Jared Diamond','Pegasus Yayınları','Tarih','Çalışma Odası',1,656,'okunuyor',190],['Zamanın Kısa Tarihi','Stephen Hawking','Alfa Yayınları','Bilim','Çalışma Odası',1,248,'okunacak'],['Kozmos','Carl Sagan','Altın Kitaplar','Bilim','Çalışma Odası',2,488,'okunacak'],['Kendime Düşünceler','Marcus Aurelius','İş Bankası Kültür Yayınları','Felsefe','Çalışma Odası',2,214,'okundu'],['Devlet','Platon','İş Bankası Kültür Yayınları','Felsefe','Çalışma Odası',2,384],['Nutuk','Mustafa Kemal Atatürk','İş Bankası Kültür Yayınları','Tarih','Çalışma Odası',2,606]];
   const pos={};
   S.forEach(([title,author,publisher,genre,bc,shelf,pages,status,page,notes],i)=>{const k=bc+shelf;pos[k]=(pos[k]||0)+1;const id='d'+i;
-    books[id]={id,title,author,publisher,genre,bookcase:bc,shelf,pos:pos[k],pages,status:status||'',page:page||(status==='okundu'?pages:0),notes:notes||'',rating:status==='okundu'?4+(i%2):0,source:i%3?'fotoğraf':'barkod',addedAt:Date.now()-i*864e5,statusAt:Date.now()-i*36e5,isbn:'97897'+String(5e7+i*7919).slice(0,8)}});
+    books[id]={id,title,author,publisher,genre,bookcase:bc,shelf,pos:pos[k],pages,status:status||'',page:page||(status==='okundu'?pages:0),notes:notes||'',rating:status==='okundu'?4+(i%2):0,source:i%3?'fotoğraf':'barkod',addedAt:Date.now()-i*864e5,statusAt:Date.now()-i*36e5,finishedAt:Date.now()-i*17*864e5,isbn:'97897'+String(5e7+i*7919).slice(0,8)}});
   books.d12.loan={to:'Ayşe',at:Date.now()-12*864e5,note:'Bitirince getirecek'};
   meta={names:['Salon','Çalışma Odası'],shelves:{salon:3,'calisma-odasi':2}};
   B={putMany:async()=>{},remove:async()=>{},removeMany:async()=>{},setMeta:async()=>{},putPhoto:async(id,d)=>{photos[id]=d},delPhoto:async id=>{delete photos[id]},ai:null};
