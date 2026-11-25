@@ -9,8 +9,8 @@ if 'hardwareAccelerated' not in m:
     m = m.replace('<application', '<application\n        android:hardwareAccelerated="true"', 1)
 if 'screen.landscape' not in m:
     m = m.replace('<application', '<uses-feature android:name="android.hardware.screen.landscape" android:required="false" />\n    <uses-feature android:name="android.hardware.screen.portrait" android:required="false" />\n    <application', 1)
-# AdMob: uygulama kimligi. GERCEK kimlik gelene kadar Google'in TEST kimligi (ca-app-pub-3940256099942544~3347511713).
-ADMOB_APP_ID = 'ca-app-pub-3940256099942544~3347511713'
+# AdMob: gercek uygulama kimligi (Scribble Kick).
+ADMOB_APP_ID = 'ca-app-pub-9797248805369214~1730254643'
 if 'gms.ads.APPLICATION_ID' not in m:
     m = m.replace('</application>', '        <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="' + ADMOB_APP_ID + '" />\n    </application>', 1)
 if 'permission.AD_ID' not in m:

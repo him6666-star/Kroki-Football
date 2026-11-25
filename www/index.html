@@ -1792,8 +1792,8 @@ setInterval(skHud,250);
 
 // ===== MONETIZATION (STUB) — gerçek AdMob/Play Billing bağlanana kadar test sürümü =====
 /* Gecis reklami: her mactan sonra (sadece Play uygulamasinda; webde reklam yok).
-   GERCEK kimlik gelene kadar Google TEST birimi: ca-app-pub-3940256099942544/1033173712 (test:true) */
-const ADMOB={INT_ID:'ca-app-pub-3940256099942544/1033173712',test:true,gap:40000};
+   Gercek Scribble Kick gecis reklam birimi. */
+const ADMOB={INT_ID:'ca-app-pub-9797248805369214/5541827944',test:false,gap:40000};
 const ADS=(function(){const C=window.Capacitor,nat=!!(C&&C.isNativePlatform&&C.isNativePlatform());
  const P=nat?((C.Plugins&&C.Plugins.AdMob)||(typeof C.registerPlugin=='function'?C.registerPlugin('AdMob'):null)):null;
  let ready=false,starting=null,loaded=false,loading=null,last=0,showing=false,rt=null;
