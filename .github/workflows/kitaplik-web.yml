@@ -71,4 +71,8 @@ jobs:
           d.text((80, 1080), 'ISBN 978-975-470-011-4', font=s, fill=(0, 0, 0))
           img.save('kapak.jpg', quality=88)
           PY
-          node tools/kitaplik_test.js "$SITE.web.app"
+          node tools/kitaplik_test.js "$SITE.web.app" || {
+            gcloud auth activate-service-account --key-file="$RUNNER_TEMP/key.json" >/dev/null 2>&1
+            echo "--- fonksiyon erisim izni ---"; gcloud run services get-iam-policy kitaplikoku --region europe-west1 --project scribble-kick 2>&1 | head -20
+            echo "--- son loglar ---"; gcloud logging read 'resource.labels.service_name="kitaplikoku"' --project scribble-kick --limit 15 --freshness 15m --format='value(severity,textPayload,jsonPayload.message)' 2>&1 | cut -c1-400
+            exit 1; }
