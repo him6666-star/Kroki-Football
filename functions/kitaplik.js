@@ -16,14 +16,16 @@ Kurallar:
 - "author" ve "publisher": sırtta yazanı yaz. Sırtta yazmıyorsa ama kitabı kesin biliyorsan doldur, emin değilsen boş bırak. Yayınevi logosunu tanıyorsan adını yaz.
 - "genre": kısa Türkçe tür (Roman, Tarih, Bilim, Çocuk, Şiir, Felsefe, Psikoloji, Deneme, Biyografi, Ders…), bilmiyorsan boş.
 - "confidence": "high", "medium" veya "low".
+- "box_2d": kitabın fotoğraftaki sırt alanı, [ymin, xmin, ymax, xmax] biçiminde 0-1000 arası normalleştirilmiş koordinat.
 - Türkçe karakterleri (ç ğ ı İ ö ş ü) doğru yaz; başlığı tamamı büyük harf yazılmışsa normal yazım biçimine çevir.
 Sadece şu JSON'u döndür:
-{"books":[{"title":"","author":"","publisher":"","genre":"","shelf":1,"position":1,"confidence":"high"}]}`;
+{"books":[{"title":"","author":"","publisher":"","genre":"","shelf":1,"position":1,"confidence":"high","box_2d":[0,0,0,0]}]}`;
 
 const back = isbn => `Bu bir kitabın arka kapağının fotoğrafı.${isbn ? ' Barkoddan okunan ISBN: ' + isbn + '.' : ' Barkod okunamadı; fotoğrafta ISBN yazıyorsa onu da oku.'}
 Kapakta görünen yazılardan (ve ISBN'den, bu kitabı kesin tanıyorsan bilgilerinden) kitabın adını, yazarını, yayınevini ve türünü çıkar.
+Kapakta yazıyorsa ya da kesin biliyorsan sayfa sayısını ve basım yılını da ekle. "summary": kitabı tek cümlede anlatan kısa Türkçe özet (kapak yazısından ya da kesin bildiğin bilgiden; emin değilsen boş).
 Emin olmadığın alanı boş bırak; tahmin uydurma. Türkçe karakterleri doğru yaz.
-Sadece şu JSON'u döndür: {"title":"","author":"","publisher":"","genre":"","isbn":"","confidence":"high"}`;
+Sadece şu JSON'u döndür: {"title":"","author":"","publisher":"","genre":"","isbn":"","pages":0,"year":0,"summary":"","confidence":"high"}`;
 
 async function gemini(prompt, b64) {
   if (!ai) {
