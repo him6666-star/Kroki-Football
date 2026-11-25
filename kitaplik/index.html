@@ -503,38 +503,43 @@ function renderCat(){
   if(qq)rows=rows.filter(b=>matches(b,qq));
   const by=sortBy;
   rows.sort(by==='new'?(a,b)=>(b.addedAt||0)-(a.addedAt||0):(a,b)=>coll.compare(a[by]||'~',b[by]||'~')||coll.compare(a.title||'',b.title||''));
-  $('#catf').innerHTML=catFilter?`<span class="fchip">${esc({author:'Yazar',publisher:'Yayınevi',genre:'Kategori'}[catFilter.k])}: ${esc(catFilter.v||'(boş)')}<button data-act="clr-filter" aria-label="Filtreyi kaldır">×</button></span>`:`<span class="sub">${rows.length} kitap</span>`;
+  $('#catf').innerHTML=catFilter?`<span class="fchip">${esc({author:'Yazar',publisher:'Yayınevi',genre:'Kategori'}[catFilter.k])}: ${esc(catFilter.v||'belirtilmemiş')}<button data-act="clr-filter" aria-label="Filtreyi kaldır">×</button></span>`:`<span class="sub">${rows.length} kitap</span>`;
   $('#catlist').innerHTML=rows.length?rows.map(b=>`<button class="card" data-open="${esc(b.id)}" style="--c:${colorOf(b)}"><span class="sw"></span><span class="t">${esc(b.title)}</span><span class="sub">${esc([b.author,b.publisher,b.genre].filter(Boolean).join(' · ')||'—')}</span><span class="mono loc">${esc(locShort(b))}</span>${b.status?`<span class="badge ${b.status}">${esc(stLabel[b.status])}</span>`:''}</button>`).join('')
     :`<div class="emptyst">${all().length?'Eşleşen kitap yok.':'Henüz kitap eklenmedi.'}</div>`;
 }
 const stLabel={okunacak:'Okunacak',okunuyor:'Okunuyor',okundu:'Okundu'};
 
+let readTabAuto=true;
 function renderRead(){
   const l=all(),cur=l.filter(b=>b.status==='okunuyor'),todo=l.filter(b=>b.status==='okunacak'),done=l.filter(b=>b.status==='okundu');
   const pages=l.reduce((s,b)=>s+(b.status==='okundu'?(b.pages||b.page||0):(b.page||0)),0);
   $('#rstats').innerHTML=`<div><small>Şu An Okunan</small><b>${cur.length}</b></div><div><small>Okunacak Kuyruğu</small><b>${todo.length}</b></div><div><small>Tamamlanan Kitap</small><b>${done.length}</b></div><div><small>Toplam Okunan Sayfa</small><b>${fmt(pages)}</b></div>`;
-  const tabs=[['okunuyor','Okunuyor',cur.length],['okunacak','Okunacak',todo.length],['okundu','Okundu',done.length],['all','Tümü',cur.length+todo.length+done.length]];
+  const none=l.filter(b=>!b.status);
+  const tabs=[['okunuyor','Okunuyor',cur.length],['okunacak','Okunacak',todo.length],['okundu','Okundu',done.length],['none','İşaretlenmemiş',none.length],['all','Tümü',l.length]];
+  if(readTabAuto){readTabAuto=false;if(!cur.length)readTab=none.length?'none':todo.length?'okunacak':'all'}
   $('#rtabs').innerHTML=tabs.map(([k,t,n])=>`<button data-rt="${k}" aria-pressed="${readTab===k}">${t} (${n})</button>`).join('');
-  const rows=(readTab==='all'?[...cur,...todo,...done]:l.filter(b=>b.status===readTab)).sort((a,b)=>(b.statusAt||0)-(a.statusAt||0));
+  const rows=readTab==='all'?[...cur,...todo,...done,...none.sort((a,b)=>coll.compare(a.title||'',b.title||''))]:readTab==='none'?none.sort((a,b)=>(b.addedAt||0)-(a.addedAt||0)):l.filter(b=>b.status===readTab).sort((a,b)=>(b.statusAt||0)-(a.statusAt||0));
   $('#rlist').innerHTML=rows.length?rows.map(b=>{
     const pct=b.pages?Math.min(100,Math.round((b.page||0)/b.pages*100)):0;
     let act='';
     if(b.status==='okunuyor')act=`<span class="stepper"><input type="number" min="0" value="${b.page||0}" data-page="${esc(b.id)}" aria-label="Okunan sayfa"><button data-inc="10" data-id="${esc(b.id)}">+10</button><button data-inc="25" data-id="${esc(b.id)}">+25</button></span><button class="btn pri sm" data-finish="${esc(b.id)}">${ICON.check.replace('<svg','<svg width="16" height="16"')}Bitirdim</button>`;
     else if(b.status==='okunacak')act=`<button class="btn soft sm" data-start="${esc(b.id)}">Okumaya başla</button>`;
+    else if(!b.status)act=`<button class="btn sm" data-queue="${esc(b.id)}">Okunacaklara ekle</button><button class="btn soft sm" data-start="${esc(b.id)}">Okumaya başla</button><button class="btn sm" data-finish="${esc(b.id)}">Okudum</button>`;
     else act=`<span class="stars" aria-label="Puan">${[1,2,3,4,5].map(n=>`<button class="${(b.rating||0)>=n?'on':''}" data-rate="${n}" data-id="${esc(b.id)}" aria-label="${n} yıldız">★</button>`).join('')}</span>`;
     return `<div class="rrow" style="--c:${colorOf(b)}"><span class="sw"></span><div><button class="t" data-open="${esc(b.id)}">${esc(b.title)}</button><div class="m">${esc([b.author,b.publisher,b.genre].filter(Boolean).join(' · '))} · <span class="mono">${esc(locShort(b))}</span></div>
       ${b.status==='okunuyor'&&b.pages?`<div class="prog"><span>Sayfa ${b.page||0} / ${b.pages}</span><span>%${pct}</span></div><div class="bar"><i style="width:${pct}%"></i></div>`:b.status==='okunuyor'?`<div class="prog"><span>Sayfa ${b.page||0}${b.pages?'':' · toplam sayfa sayısını detaydan gir'}</span></div>`:''}
       ${b.notes?`<p class="quote">“${esc(b.notes.slice(0,160))}${b.notes.length>160?'…':''}”</p>`:''}</div>
       <div class="ractions">${act}<button class="btn sm" data-show="${esc(b.id)}">${ICON.pin.replace('<svg','<svg width="16" height="16"')}Rafta Göster</button></div></div>`;
-  }).join(''):`<div class="emptyst">${readTab==='okunuyor'?'Şu an okuduğun kitap yok. Bir kitabın detayından “Okunuyor”u seç.':'Bu listede kitap yok.'}</div>`;
+  }).join(''):`<div class="emptyst">${readTab==='okunuyor'?(none.length?`Şu an okuduğun kitap yok. Yeni eklediğin ${none.length} kitap “İşaretlenmemiş” sekmesinde; oradan okumaya başlayabilirsin.`:'Şu an okuduğun kitap yok.'):readTab==='none'?'Tüm kitapların işaretli.':'Bu listede kitap yok.'}</div>`;
 }
 
 function renderDir(){
   const tabs=[['publisher','Yayınevleri'],['author','Yazarlar'],['genre','Kategoriler']];
-  const groups=k=>{const m=new Map();all().forEach(b=>{const v=(b[k]||'').trim();if(!v)return;const key=norm(v);if(!m.has(key))m.set(key,{name:v,list:[]});m.get(key).list.push(b)});return[...m.values()]};
-  $('#dtabs').innerHTML=tabs.map(([k,t])=>`<button data-dt="${k}" aria-pressed="${dirTab===k}">${t} (${groups(k).length})</button>`).join('');
+  const groups=k=>{const m=new Map();all().forEach(b=>{const v=(b[k]||'').trim();const key=v?norm(v):'\u0000';if(!v){if(!m.has(key))m.set(key,{name:'',list:[]});m.get(key).list.push(b);return}if(!m.has(key))m.set(key,{name:v,list:[]});m.get(key).list.push(b)});return[...m.values()]};
+  $('#dtabs').innerHTML=tabs.map(([k,t])=>`<button data-dt="${k}" aria-pressed="${dirTab===k}">${t} (${groups(k).filter(x=>x.name).length})</button>`).join('');
   const g=groups(dirTab).sort((a,b)=>b.list.length-a.list.length||coll.compare(a.name,b.name));
-  $('#dirgrid').innerHTML=g.length?g.map(x=>{const t=x.list.map(b=>b.title).sort(coll.compare);return `<button class="dcard" data-group="${esc(x.name)}"><h3>${esc(x.name)}</h3>${ICON.arrow}<div class="c">${x.list.length} kitap · ${x.list.filter(b=>b.status==='okundu').length} okundu</div><p>${esc(t.slice(0,3).join(', '))}${t.length>3?' +'+(t.length-3):''}</p></button>`}).join('')
+  const miss={publisher:'Yayınevi belirtilmemiş',author:'Yazarı belirtilmemiş',genre:'Kategorisi belirtilmemiş'}[dirTab];
+  $('#dirgrid').innerHTML=g.length?g.sort((a,b)=>(a.name?0:1)-(b.name?0:1)).map(x=>{const t=x.list.map(b=>b.title).sort(coll.compare);return `<button class="dcard" data-group="${esc(x.name)}" data-empty="${x.name?'':'1'}"><h3>${esc(x.name||miss)}</h3>${ICON.arrow}<div class="c">${x.list.length} kitap · ${x.list.filter(b=>b.status==='okundu').length} okundu</div><p>${esc(t.slice(0,3).join(', '))}${t.length>3?' +'+(t.length-3):''}</p></button>`}).join('')
     :`<div class="emptyst">Henüz gruplanacak bilgi yok.</div>`;
 }
 
@@ -706,12 +711,13 @@ document.addEventListener('click',async e=>{
   if(t.dataset.mode){mapMode=t.dataset.mode;render();return}
   if(t.dataset.open)return openDrawer(t.dataset.open);
   if(t.dataset.show)return select(t.dataset.show);
-  if(t.dataset.group){catFilter={k:dirTab,v:t.dataset.group};view='cat';q='';$('#q2').value='';render();return}
+  if(t.dataset.group!=null&&t.classList.contains('dcard')){catFilter={k:dirTab,v:t.dataset.group};view='cat';q='';$('#q2').value='';render();return}
   if(t.dataset.dt){dirTab=t.dataset.dt;render();return}
   if(t.dataset.rt){readTab=t.dataset.rt;render();return}
   if(t.dataset.inc){const b=books[t.dataset.id];const p=(b.page||0)+ +t.dataset.inc;return patch(b.id,{page:b.pages?Math.min(p,b.pages):p})}
   if(t.dataset.finish)return patch(t.dataset.finish,{status:'okundu',statusAt:Date.now(),page:books[t.dataset.finish].pages||books[t.dataset.finish].page||0});
   if(t.dataset.start)return patch(t.dataset.start,{status:'okunuyor',statusAt:Date.now()});
+  if(t.dataset.queue)return patch(t.dataset.queue,{status:'okunacak',statusAt:Date.now()});
   if(t.dataset.rate&&!t.closest('#d-body')){const b=books[t.dataset.id];return patch(b.id,{rating:b.rating===+t.dataset.rate?0:+t.dataset.rate})}
   if(t.hasAttribute('data-close')){const n=$('#sh-name');if(n&&!n.hidden&&n._cancel)n._cancel();closeSheet();return}
   switch(a){
@@ -875,13 +881,22 @@ if(window.firebase){
   firebase.initializeApp(CFG);
   const auth=firebase.auth(),fs=firebase.firestore();
   const aiCall=firebase.app().functions('europe-west1').httpsCallable('kitaplikOku',{timeout:150000});
-  window._signOut=()=>auth.signOut();
+  const isApp=()=>!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
+  const FA=()=>{const C=window.Capacitor;return C&&C.Plugins&&C.Plugins.FirebaseAuthentication};
+  window._signOut=async()=>{try{if(isApp()&&FA())await FA().signOut()}catch(e){}auth.signOut()};
   $('#login').onclick=async()=>{
     $('#login-msg').textContent='';const pr=new firebase.auth.GoogleAuthProvider();
+    if(isApp()){
+      try{const fa=FA();if(!fa)throw new Error('eklenti yok');
+        const r=await fa.signInWithGoogle();const idt=r&&r.credential&&r.credential.idToken;if(!idt)throw new Error('token yok');
+        await auth.signInWithCredential(firebase.auth.GoogleAuthProvider.credential(idt));
+      }catch(e){console.warn(e);$('#login-msg').textContent=/cancel|iptal/i.test(String(e&&e.message))?'Giriş iptal edildi.':'Google ile giriş yapılamadı, tekrar dene.'}
+      return;
+    }
     try{await auth.signInWithPopup(pr)}catch(e){if(e.code==='auth/popup-blocked'||e.code==='auth/operation-not-supported-in-this-environment')return auth.signInWithRedirect(pr);
       $('#login-msg').textContent=e.code==='auth/popup-closed-by-user'?'Pencere kapatıldı.':e.code==='auth/unauthorized-domain'?'Bu adres henüz Google girişine açılmadı.':'Giriş yapılamadı, tekrar dene.'}
   };
-  auth.getRedirectResult().catch(()=>{});
+  if(!isApp())auth.getRedirectResult().catch(()=>{});
   auth.onAuthStateChanged(u=>{
     unsub.forEach(f=>f());unsub=[];books={};meta={names:[],shelves:{}};photos={};user=u;B=null;
     document.body.classList.toggle('out',!u);
