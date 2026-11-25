@@ -1,0 +1,46 @@
+name: Raf Izi Play imza SHA-1 -> Firebase
+# Play'e yuklenen surumun Play imzali APK'sindan SHA-1'i okur ve Firebase'e ekler (Play'den kurulan uygulamada Google girisi icin).
+on:
+  workflow_dispatch:
+    inputs:
+      version_code:
+        description: "Play'e yuklenen surum kodu (or. 3)"
+        default: "3"
+      sha1:
+        description: "SHA-1'i elle vermek istersen (bos birakilabilir)"
+        required: false
+        default: ""
+jobs:
+  sha:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: echo '${{ secrets.FIREBASE_KEY }}' > "$RUNNER_TEMP/key.json"
+      - name: Play imza SHA-1'ini bul
+        id: sha
+        env:
+          PLAY_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          IN_SHA1: ${{ github.event.inputs.sha1 }}
+        run: |
+          if [ -n "$IN_SHA1" ]; then echo "sha1=$IN_SHA1" >> $GITHUB_OUTPUT; exit 0; fi
+          pip install -q google-auth requests
+          OUT=$(python tools/play_signing_sha1.py com.fairridegames.rafizi "${{ github.event.inputs.version_code }}")
+          echo "$OUT"
+          echo "sha1=$(echo "$OUT" | grep PLAY_SHA1= | cut -d= -f2)" >> $GITHUB_OUTPUT
+      - name: Firebase'e ekle
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/key.json
+          PLAY_SHA1: ${{ steps.sha.outputs.sha1 }}
+        run: |
+          FB="npx -y firebase-tools@13 --project scribble-kick"
+          APP=$($FB apps:list ANDROID --json | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const r=JSON.parse(s).result||[];const a=r.find(x=>x.packageName==="com.fairridegames.rafizi");console.log(a?a.appId:"")})')
+          echo "APP=$APP"
+          EXIST=$($FB apps:android:sha:list $APP 2>/dev/null | tr 'a-f' 'A-F' | tr -d ':')
+          for S in $PLAY_SHA1; do
+            S=$(echo "$S" | tr 'a-f' 'A-F')
+            if echo "$EXIST" | grep -q "$(echo $S | tr -d ':')"; then echo "zaten var: $S"; else $FB apps:android:sha:create $APP "$S" && echo "eklendi: $S"; fi
+          done
+          $FB apps:android:sha:list $APP
