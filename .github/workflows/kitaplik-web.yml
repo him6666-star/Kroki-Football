@@ -45,7 +45,7 @@ jobs:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/key.json
         run: |
           (cd functions && npm install --no-audit --no-fund)
-          npx -y firebase-tools@13 deploy --project scribble-kick --only "firestore:rules,functions:kitaplikOku" --non-interactive --force
+          npx -y firebase-tools@13 deploy --project scribble-kick --only "firestore:rules,functions:kitaplikOku,functions:kitaplikHesapSil" --non-interactive --force
       - name: Siteyi yukle
         working-directory: kitaplik
         env:

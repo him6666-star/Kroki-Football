@@ -23,6 +23,10 @@ const SITE = process.argv[2] || 'kitapligim.web.app';
     await new Promise(r => setTimeout(r, 20000));
   }
   console.log(JSON.stringify(j, null, 1));
+  const del = await (await fetch('https://europe-west1-scribble-kick.cloudfunctions.net/kitaplikHesapSil',
+    {method: 'POST', headers: {...ref, Authorization: 'Bearer ' + s.idToken}, body: JSON.stringify({data: {}})})).json();
+  console.log('hesap silme:', JSON.stringify(del));
   await admin.auth().deleteUser('kitaplik-test-bot').catch(() => {});
+  if (!del.result || !del.result.ok) process.exit(1);
   if (!j.result || !j.result.title) process.exit(1);
 })().catch(e => { console.error(e); process.exit(1); });

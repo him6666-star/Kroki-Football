@@ -91,3 +91,15 @@ exports.kitaplikOku = onCall(
     }
   }
 );
+
+// Raf Izi: kullanicinin hesabini ve tum verilerini siler (kitaplik, fotograflar, kullanim kayitlari, giris kaydi)
+exports.kitaplikHesapSil = onCall({region: 'europe-west1', maxInstances: 3}, async req => {
+  const uid = req.auth && req.auth.uid;
+  if (!uid) throw new HttpsError('unauthenticated', 'Giriş gerekli');
+  const db = admin.firestore();
+  await db.recursiveDelete(db.collection('kitaplik').doc(uid));
+  const q = await db.collection('kitaplikKota').where('uid', '==', uid).get();
+  const bt = db.batch(); q.forEach(d => bt.delete(d.ref)); await bt.commit();
+  await admin.auth().deleteUser(uid).catch(e => console.warn('auth silinemedi', e.code));
+  return {ok: true};
+});
