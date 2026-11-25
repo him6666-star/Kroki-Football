@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kitaplığım</title>
+<meta name="description" content="Evdeki kitaplarını raf fotoğrafı ve barkodla kaydet, hangi rafta olduğunu anında bul.">
+<meta name="theme-color" content="#7a1f2b">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%237a1f2b'/%3E%3Crect x='14' y='14' width='9' height='36' rx='2' fill='%23d9b44a'/%3E%3Crect x='26' y='18' width='9' height='32' rx='2' fill='%23f3ebe7'/%3E%3Crect x='38' y='12' width='9' height='38' rx='2' fill='%23d9b44a' transform='rotate(10 42 31)'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,600;7..72,800&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* VOICE: quiet, practical home tool; a librarian's card index on a phone
+   IDEA: a cloth-bound book: oxblood cover band, gilt spine labels, wooden shelves
+   PICTURE: the bookcase itself drawn as shelves of spines, the found book pulled out in gold
+   COLOUR and TYPE: oxblood cloth, gilt accent, warm wood; Literata titles, Instrument Sans body
+   LAYOUT: cover band with search, tabs, list; action bar pinned at the bottom; sheets slide up */
+:root{color-scheme:light dark;
+--bg:light-dark(#ffffff,#15100f);--ink:light-dark(#1d1514,#f3ebe7);--mute:light-dark(#6d605c,#b3a49f);
+--line:light-dark(#e9e1dd,#33292a);--card:light-dark(#faf7f5,#1f1817);
+--cloth:light-dark(#7a1f2b,#5c1520);--cloth2:light-dark(#5e1621,#43101a);--gilt:#d9b44a;--gilt-ink:light-dark(#8a6a12,#e6c766);
+--wood:light-dark(#a8764a,#7d5634);--wood2:light-dark(#8b5e37,#5e3f25)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Instrument Sans",system-ui,sans-serif;overflow-x:clip;padding-bottom:96px}
+h1,h2,h3{font-family:Literata,Georgia,serif;margin:0;line-height:1.1;text-wrap:balance}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--gilt);outline-offset:2px}
+.cover{background:linear-gradient(180deg,var(--cloth),var(--cloth2));color:#fbefe6;padding:22px max(5vw,16px) 18px}
+.cover .row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;max-width:900px;margin:0 auto}
+.cover h1{font-size:clamp(30px,6vw,44px);font-weight:800;letter-spacing:-.01em}
+.cover .count{color:var(--gilt);font-size:15px;white-space:nowrap}
+.search{max-width:900px;margin:14px auto 0;position:relative}
+.search input{width:100%;height:52px;border-radius:12px;border:2px solid transparent;background:#fff;color:#1d1514;padding:0 16px 0 46px;font-size:17px}
+.search input:focus{border-color:var(--gilt);outline:none}
+.search svg{position:absolute;left:14px;top:15px;width:22px;height:22px;color:#7a1f2b}
+.note{max-width:900px;margin:8px auto 0;font-size:14px;color:#f1d9cf}
+.note:empty{display:none}
+main{max-width:900px;margin:0 auto;padding:0 max(4vw,12px)}
+.tabs{display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid var(--line);margin:0 -4px;padding:0 4px;scrollbar-width:none}
+.tabs button{flex:none;border:0;background:none;padding:14px 12px 11px;font-weight:600;color:var(--mute);border-bottom:3px solid transparent;min-height:48px}
+.tabs button[aria-selected=true]{color:var(--ink);border-bottom-color:var(--cloth)}
+.chip{display:inline-flex;align-items:center;gap:8px;margin:12px 0 0;padding:6px 6px 6px 12px;border-radius:99px;background:var(--card);border:1px solid var(--line);font-size:14px}
+.chip button{border:0;background:var(--line);border-radius:99px;width:28px;height:28px}
+.where{margin:16px 0 4px;padding:16px;border-radius:14px;background:var(--card);border:1px solid var(--line)}
+.where .lbl{font-size:13px;color:var(--mute)}
+.where h2{font-size:24px;margin:2px 0 4px}
+.where .loc{font-size:19px;font-weight:600;color:var(--gilt-ink)}
+.list{list-style:none;margin:0;padding:0}
+.list li{border-bottom:1px solid var(--line)}
+.list button{all:unset;box-sizing:border-box;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;width:100%;padding:13px 2px;cursor:pointer}
+.list button:focus-visible{outline:3px solid var(--gilt)}
+.t{font-weight:600;font-size:17px}
+.s{color:var(--mute);font-size:14px;grid-column:1}
+.lc{grid-row:1/3;grid-column:2;align-self:center;font-size:13px;text-align:right;color:var(--gilt-ink);font-weight:600;max-width:42vw}
+.lc.none{color:var(--mute);font-weight:400}
+.grp button{grid-template-columns:minmax(0,1fr) auto}
+.grp .n{font-variant-numeric:tabular-nums;color:var(--mute)}
+.empty{text-align:center;padding:28px 8px;color:var(--mute)}
+.empty .case{margin:0 auto 18px;max-width:360px}
+/* bookcase */
+.case{background:var(--wood2);padding:8px;border-radius:8px;box-shadow:0 10px 24px -14px #0008}
+.shelf{display:flex;align-items:flex-end;gap:2px;min-height:92px;padding:6px 6px 0;background:linear-gradient(180deg,#0000 0,#0000 calc(100% - 10px),var(--wood) calc(100% - 10px));overflow-x:auto;position:relative}
+.shelf+.shelf{margin-top:6px}
+.shelf .no{position:sticky;left:0;align-self:flex-start;flex:none;font-size:12px;font-weight:600;color:#f6e7d6;background:#0005;border-radius:6px;padding:1px 6px;margin-right:4px;z-index:1}
+.spine{flex:none;border:0;padding:4px 0;border-radius:2px 2px 0 0;margin-bottom:10px;writing-mode:vertical-rl;transform:rotate(180deg);font-size:10.5px;line-height:1.1;color:#f7efe4;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;box-shadow:inset -3px 0 0 #0002,inset 2px 0 0 #fff2}
+.spine.hit{outline:3px solid var(--gilt);outline-offset:0;transform:rotate(180deg) translateY(8px);color:#2a1d05;background:var(--gilt)!important}
+.casehead{display:flex;justify-content:space-between;align-items:baseline;margin:22px 0 8px;gap:8px}
+.casehead h3{font-size:22px}
+.loose{font-size:14px;color:var(--mute);margin-top:8px}
+/* action bar */
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:5;background:var(--bg);border-top:1px solid var(--line);padding:10px max(4vw,12px) calc(10px + env(safe-area-inset-bottom))}
+.bar div{max-width:900px;margin:0 auto;display:grid;grid-template-columns:1.3fr 1fr auto;gap:8px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);font-weight:600}
+.btn svg{width:20px;height:20px;flex:none}
+.btn.pri{background:var(--cloth);border-color:var(--cloth);color:#fff}
+.btn.gilt{background:var(--gilt);border-color:var(--gilt);color:#2a1d05}
+.btn.danger{color:#b3261e}
+.btn:disabled{opacity:.5;cursor:default}
+/* sheet */
+.sheet{position:fixed;inset:0;z-index:10;background:#0008;display:none;align-items:flex-end;justify-content:center}
+.sheet.on{display:flex}
+.panel{background:var(--bg);width:100%;max-width:640px;max-height:92vh;overflow-y:auto;border-radius:18px 18px 0 0;padding:18px max(4vw,14px) 24px}
+@media(min-width:700px){.sheet{align-items:center}.panel{border-radius:18px}}
+.ph{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px}
+.ph h2{font-size:24px}
+.x{border:0;background:var(--card);width:44px;height:44px;border-radius:99px;font-size:22px}
+.sec[hidden]{display:none}
+label{display:block;font-size:14px;color:var(--mute);margin:10px 0 4px}
+.in{width:100%;height:46px;border-radius:10px;border:1px solid var(--line);background:var(--card);padding:0 12px;font-size:16px}
+.g2{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr) minmax(0,1fr);gap:8px}
+.g2b{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}
+.acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.acts .btn{flex:1 1 140px}
+.hint{font-size:14px;color:var(--mute);margin:6px 0 0}
+.status{font-size:15px;margin:10px 0 0;min-height:1.5em}
+.status.err{color:#b3261e}
+.prev{display:block;width:100%;max-height:260px;object-fit:contain;border-radius:10px;background:var(--card);margin-top:10px}
+.prev[hidden]{display:none}
+.fileb{position:relative;overflow:hidden}
+.fileb input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.res{list-style:none;padding:0;margin:12px 0 0}
+.res li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 10px;padding:10px 0;border-top:1px solid var(--line)}
+.res input[type=checkbox]{width:22px;height:22px;margin-top:10px;accent-color:var(--cloth)}
+.res .in{height:40px;font-size:15px}
+.res .meta{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) 64px 64px;gap:6px}
+.tag{font-size:12px;font-weight:600;border-radius:6px;padding:1px 7px;justify-self:start}
+.tag.new{background:#e3f1e6;color:#1d5b2c}.tag.old{background:#f6ecd2;color:#6b5210}.tag.low{background:#f8e0de;color:#8c1d16}
+.check{display:flex;gap:10px;align-items:flex-start;margin-top:12px;font-size:15px;color:var(--ink)}
+.check input{width:22px;height:22px;flex:none;accent-color:var(--cloth)}
+.toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);z-index:20;background:var(--ink);color:var(--bg);border-radius:12px;padding:10px 12px 10px 16px;display:none;gap:12px;align-items:center;max-width:92vw}
+.toast.on{display:flex}
+.toast button{border:0;background:var(--gilt);color:#2a1d05;border-radius:8px;padding:8px 12px;font-weight:600}
+.gate{display:none;position:fixed;inset:0;z-index:30;background:linear-gradient(180deg,var(--cloth),var(--cloth2));color:#fbefe6;align-items:center;justify-content:center;padding:24px;text-align:center}
+body.out .gate{display:flex}
+.gate .inner{max-width:380px;width:100%}
+.gate h1{font-size:clamp(40px,10vw,56px);font-weight:800;margin-bottom:10px}
+.gate p{color:#f1d9cf;margin:0 0 22px}
+.gate .case{margin:0 auto 26px}
+.gate .btn{width:100%;background:#fff;color:#1d1514;border-color:#fff;font-size:17px;min-height:54px}
+.gate .msg{min-height:1.5em;margin-top:12px;color:#ffd7cf;font-size:15px}
+.tools{display:flex;flex-wrap:wrap;gap:8px;margin:26px 0 8px}
+@media(max-width:420px){.bar .lbl2{display:none}.res .meta{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+@media(prefers-reduced-motion:no-preference){.spine.hit{transition:transform .35s}.panel{animation:up .22s ease-out}@keyframes up{from{transform:translateY(30px);opacity:.4}}}
+</style>
+</head>
+<body class="out">
+<div class="gate"><div class="inner">
+  <h1>Kitaplığım</h1>
+  <p>Raflarının fotoğrafını çek, kitapların kaydedilsin. Bir kitabı aradığında hangi rafta olduğunu söylesin.</p>
+  <div class="case" aria-hidden="true"><div class="shelf"><span class="spine" style="width:20px;height:78px;background:#2f4858"></span><span class="spine" style="width:16px;height:70px;background:#d9b44a"></span><span class="spine" style="width:24px;height:84px;background:#5b6b2e"></span><span class="spine" style="width:18px;height:66px;background:#9a6a1c"></span><span class="spine" style="width:22px;height:80px;background:#4b3f72"></span><span class="spine" style="width:16px;height:74px;background:#f3ebe7"></span><span class="spine" style="width:20px;height:82px;background:#2e6062"></span></div><div class="shelf"><span class="spine" style="width:22px;height:72px;background:#8a4a2a"></span><span class="spine" style="width:18px;height:84px;background:#3d3d3d"></span><span class="spine" style="width:16px;height:68px;background:#d9b44a"></span><span class="spine" style="width:24px;height:78px;background:#2f4858"></span><span class="spine" style="width:18px;height:74px;background:#6a2a2a"></span><span class="spine" style="width:20px;height:86px;background:#5b6b2e"></span></div></div>
+  <button class="btn" id="login"><svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.5 12.3c0-.8-.1-1.5-.2-2.3H12v4.3h5.9a5 5 0 0 1-2.2 3.3v2.7h3.6c2-1.9 3.2-4.7 3.2-8z"/><path fill="#34A853" d="M12 23c3 0 5.5-1 7.3-2.7l-3.6-2.7c-1 .7-2.2 1-3.7 1-2.9 0-5.3-1.9-6.2-4.5H2.1v2.8A11 11 0 0 0 12 23z"/><path fill="#FBBC05" d="M5.8 14.1a6.6 6.6 0 0 1 0-4.2V7.1H2.1a11 11 0 0 0 0 9.8z"/><path fill="#EA4335" d="M12 5.4c1.6 0 3 .6 4.2 1.6l3.1-3.1A11 11 0 0 0 2.1 7.1l3.7 2.8C6.7 7.3 9.1 5.4 12 5.4z"/></svg>Google ile giriş yap</button>
+  <div class="msg" id="login-msg"></div>
+</div></div>
+<header class="cover">
+  <div class="row"><h1>Kitaplığım</h1><span class="count" id="count"></span></div>
+  <div class="search">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg>
+    <input id="q" type="search" placeholder="Kitap, yazar veya yayınevi ara…" autocomplete="off" aria-label="Ara">
+  </div>
+  <p class="note" id="note"></p>
+</header>
+
+<main>
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-v="books" aria-selected="true">Kitaplar</button>
+    <button role="tab" data-v="author" aria-selected="false">Yazarlar</button>
+    <button role="tab" data-v="publisher" aria-selected="false">Yayınevleri</button>
+    <button role="tab" data-v="genre" aria-selected="false">Türler</button>
+    <button role="tab" data-v="cases" aria-selected="false">Raflar</button>
+  </nav>
+  <div id="out"></div>
+</main>
+
+<div class="bar"><div>
+  <button class="btn pri" id="go-shelf"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>Raf fotoğrafı</button>
+  <button class="btn" id="go-bar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6v12M7 6v12M10 6v12M14 6v12M16 6v12M20 6v12"/></svg>Barkod</button>
+  <button class="btn" id="go-new" aria-label="Elle ekle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg><span class="lbl2">Elle</span></button>
+</div></div>
+
+<div class="sheet" id="sheet"><div class="panel" role="dialog" aria-modal="true">
+  <!-- book -->
+  <section class="sec" id="sh-book" hidden>
+    <div class="ph"><h2 id="fb-h">Kitap</h2><button class="x" data-close aria-label="Kapat">×</button></div>
+    <div id="fb-map"></div>
+    <label for="f-title">Kitap adı</label><input class="in" id="f-title">
+    <div class="g2b"><div><label for="f-author">Yazar</label><input class="in" id="f-author" list="dl-author"></div>
+    <div><label for="f-pub">Yayınevi</label><input class="in" id="f-pub" list="dl-pub"></div></div>
+    <div class="g2b"><div><label for="f-genre">Tür</label><input class="in" id="f-genre" list="dl-genre"></div>
+    <div><label for="f-isbn">ISBN / barkod</label><input class="in" id="f-isbn" inputmode="numeric"></div></div>
+    <div class="g2"><div><label for="f-case">Kitaplık</label><input class="in" id="f-case" list="dl-case" placeholder="ör. Salon"></div>
+    <div><label for="f-shelf">Raf (üstten)</label><input class="in" id="f-shelf" type="number" min="1" inputmode="numeric"></div>
+    <div><label for="f-pos">Soldan sıra</label><input class="in" id="f-pos" type="number" min="1" inputmode="numeric"></div></div>
+    <div class="acts"><button class="btn pri" id="f-save">Kaydet</button><button class="btn danger" id="f-del">Sil</button></div>
+  </section>
+
+  <!-- shelf photo -->
+  <section class="sec" id="sh-shelf" hidden>
+    <div class="ph"><h2>Raf fotoğrafından ekle</h2><button class="x" data-close aria-label="Kapat">×</button></div>
+    <div class="g2b"><div><label for="s-case">Hangi kitaplık?</label><input class="in" id="s-case" list="dl-case" placeholder="ör. Salon"></div>
+    <div><label for="s-top">Fotoğraftaki en üst raf kaçıncı?</label><input class="in" id="s-top" type="number" min="1" value="1" inputmode="numeric"></div></div>
+    <p class="hint">Bütün dolabı ya da tek bir rafı çekebilirsin. Sırtlar okunabilir olsun: rafın karşısına geç, flaşı kapat, gerekirse rafları ayrı ayrı çek.</p>
+    <div class="acts">
+      <span class="btn gilt fileb">Fotoğraf çek<input type="file" accept="image/*" capture="environment" id="s-cam"></span>
+      <span class="btn fileb">Galeriden seç<input type="file" accept="image/*" id="s-gal"></span>
+    </div>
+    <img class="prev" id="s-img" alt="Seçilen raf fotoğrafı" hidden>
+    <div class="acts"><button class="btn pri" id="s-run" disabled>Kitapları tanı</button></div>
+    <p class="status" id="s-status"></p>
+    <div id="s-out" hidden>
+      <p class="hint">Yanlış okunanları düzelt, istemediklerinin işaretini kaldır.</p>
+      <ul class="res" id="s-res"></ul>
+      <label class="check"><input type="checkbox" id="s-clear" checked><span>Bu raflarda kayıtlı olup fotoğrafta görünmeyen kitapların rafını “belirsiz” yap</span></label>
+      <div class="acts"><button class="btn pri" id="s-save">Seçilenleri kaydet</button></div>
+    </div>
+  </section>
+
+  <!-- barcode -->
+  <section class="sec" id="sh-bar" hidden>
+    <div class="ph"><h2>Barkodla ekle</h2><button class="x" data-close aria-label="Kapat">×</button></div>
+    <p class="hint">Kitabın arka kapağını barkod ve yazılar görünecek şekilde çek.</p>
+    <div class="acts">
+      <span class="btn gilt fileb">Arka kapağı çek<input type="file" accept="image/*" capture="environment" id="b-cam"></span>
+      <span class="btn fileb">Galeriden seç<input type="file" accept="image/*" id="b-gal"></span>
+    </div>
+    <img class="prev" id="b-img" alt="Arka kapak fotoğrafı" hidden>
+    <label for="b-isbn">ISBN (barkod numarası)</label><input class="in" id="b-isbn" inputmode="numeric" placeholder="978…">
+    <p class="status" id="b-status"></p>
+    <label for="b-title">Kitap adı</label><input class="in" id="b-title">
+    <div class="g2b"><div><label for="b-author">Yazar</label><input class="in" id="b-author" list="dl-author"></div>
+    <div><label for="b-pub">Yayınevi</label><input class="in" id="b-pub" list="dl-pub"></div></div>
+    <label for="b-genre">Tür</label><input class="in" id="b-genre" list="dl-genre">
+    <div class="g2"><div><label for="b-case">Kitaplık</label><input class="in" id="b-case" list="dl-case"></div>
+    <div><label for="b-shelf">Raf</label><input class="in" id="b-shelf" type="number" min="1" inputmode="numeric"></div>
+    <div><label for="b-pos">Sıra</label><input class="in" id="b-pos" type="number" min="1" inputmode="numeric"></div></div>
+    <div class="acts"><button class="btn pri" id="b-save">Kaydet</button><button class="btn" id="b-next">Kaydet, sıradaki</button></div>
+  </section>
+</div></div>
+
+<div class="toast" id="toast"><span id="toast-t"></span><button id="toast-b" hidden>Geri al</button></div>
+<datalist id="dl-case"></datalist><datalist id="dl-author"></datalist><datalist id="dl-pub"></datalist><datalist id="dl-genre"></datalist>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-functions-compat.js"></script>
+<script>
+{
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const TR={'ç':'c','ğ':'g','ı':'i','ö':'o','ş':'s','ü':'u','â':'a','î':'i','û':'u'};
+const norm=s=>String(s||'').toLocaleLowerCase('tr').replace(/[çğıöşüâîû]/g,c=>TR[c]).normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,' ').trim();
+const coll=new Intl.Collator('tr');
+const num=v=>{const n=parseInt(v,10);return n>0?n:null};
+const PAL=['#7a1f2b','#2f4858','#5b6b2e','#9a6a1c','#4b3f72','#7d3c5c','#2e6062','#8a4a2a','#3d3d3d','#6a2a2a'];
+const hash=s=>{let h=0;for(const c of String(s))h=(h*31+c.charCodeAt(0))|0;return Math.abs(h)};
+
+let books={},cases=[],db=null,aiCall=null,user=null,unsub=[];
+let view='books',filter=null,editId=null,lastDeleted=null;
+
+/* ---------- storage ---------- */
+function setNote(t){$('#note').textContent=t}
+function saveLocal(){try{localStorage.setItem('kitaplik_v1',JSON.stringify({books,cases}))}catch(e){}}
+function loadLocal(){try{const d=JSON.parse(localStorage.getItem('kitaplik_v1')||'{}');books=d.books||{};cases=d.cases||[]}catch(e){}}
+const newId=()=>'b'+Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+async function putBook(b){
+  const id=b.id||newId();const data={...b,updatedAt:Date.now()};delete data.id;
+  books[id]={...data,id};
+  if(db)await db.collection('books').doc(id).set(data);else throw new Error('Önce giriş yapmalısın.');
+  return id;
+}
+async function removeBook(id){
+  delete books[id];
+  if(db)await db.collection('books').doc(id).delete();else throw new Error('Önce giriş yapmalısın.');
+}
+async function ensureCase(name){
+  name=(name||'').trim();if(!name||cases.some(c=>norm(c)===norm(name)))return;
+  cases=[...cases,name];
+  if(db)await db.collection('meta').doc('bookcases').set({names:cases});else throw new Error('Önce giriş yapmalısın.');
+}
+function caseName(name){const n=(name||'').trim();return cases.find(c=>norm(c)===norm(n))||n}
+
+/* ---------- helpers ---------- */
+function locText(b,long){
+  if(!b.bookcase)return 'Yeri girilmemiş';
+  let s=b.bookcase+(long?' kitaplığı':'');
+  if(b.shelf)s+=' · '+b.shelf+'. raf'+(long?' (üstten)':'');else s+=' · raf belirsiz';
+  if(b.shelf&&b.pos)s+=' · soldan '+b.pos+'.'+(long?' kitap':'');
+  return s;
+}
+const all=()=>Object.values(books).sort((a,b)=>coll.compare(a.title||'',b.title||''));
+function matches(b,q){
+  const hay=norm([b.title,b.author,b.publisher,b.genre,b.isbn,b.bookcase].join(' '));
+  return q.split(' ').every(w=>hay.includes(w));
+}
+function findExisting(title,isbn){
+  const t=norm(title),i=(isbn||'').replace(/\D/g,'');
+  return Object.values(books).find(b=>(i&&b.isbn&&b.isbn.replace(/\D/g,'')===i)||(t&&norm(b.title)===t));
+}
+function spineHtml(b,hit){
+  const w=16+hash(b.title)%14,h=62+hash(b.id)%26;
+  return `<button class="spine${hit?' hit':''}" data-id="${esc(b.id)}" style="width:${w}px;height:${h}px;background:${PAL[hash(b.author||b.title)%PAL.length]}" title="${esc(b.title)}">${esc(b.title)}</button>`;
+}
+function caseHtml(name,hitId){
+  const inCase=Object.values(books).filter(b=>norm(b.bookcase)===norm(name));
+  const max=Math.max(1,...inCase.map(b=>b.shelf||0));
+  let h='<div class="case">';
+  for(let s=1;s<=max;s++){
+    const row=inCase.filter(b=>b.shelf===s).sort((a,b)=>(a.pos||999)-(b.pos||999));
+    h+=`<div class="shelf"><span class="no">${s}</span>${row.map(b=>spineHtml(b,b.id===hitId)).join('')}</div>`;
+  }
+  h+='</div>';
+  const loose=inCase.filter(b=>!b.shelf);
+  if(loose.length)h+=`<p class="loose">Rafı belirsiz: ${loose.map(b=>esc(b.title)).join(', ')}</p>`;
+  return h;
+}
+
+/* ---------- render ---------- */
+function render(){
+  const list=all();
+  $('#count').textContent=list.length?list.length+' kitap':'';
+  document.querySelectorAll('.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.v===view));
+  const q=norm($('#q').value);
+  let h='';
+  if(!list.length){
+    h=`<div class="empty"><div class="case" aria-hidden="true">${[1,2].map(()=>'<div class="shelf"></div>').join('')}</div><h2>Kitaplığın boş</h2><p>Aşağıdan bir raf fotoğrafı çek ya da kitapların barkodunu okut.</p><p><button class="btn" id="logout">Çıkış yap</button></p></div>`;
+  }else if(view==='books'||q){
+    let rows=list;
+    if(filter)rows=rows.filter(b=>norm(b[filter.k])===norm(filter.v));
+    if(q)rows=rows.filter(b=>matches(b,q));
+    if(filter)h+=`<span class="chip">${esc(({author:'Yazar',publisher:'Yayınevi',genre:'Tür'})[filter.k])}: ${esc(filter.v)}<button id="clr" aria-label="Filtreyi kaldır">×</button></span>`;
+    if(q&&rows.length){
+      const b=rows[0];
+      h+=`<div class="where"><div class="lbl">${rows.length>1?rows.length+' sonuçtan ilki':'Bulundu'}</div><h2>${esc(b.title)}</h2><div class="loc">${esc(locText(b,true))}</div>${b.bookcase&&b.shelf?'<div style="margin-top:12px">'+caseHtml(b.bookcase,b.id)+'</div>':''}</div>`;
+    }
+    h+=rows.length?'<ul class="list">'+rows.map(b=>`<li><button data-id="${esc(b.id)}"><span class="t">${esc(b.title)}</span><span class="s">${esc([b.author,b.publisher].filter(Boolean).join(' · ')||'—')}</span><span class="lc${b.bookcase?'':' none'}">${esc(locText(b))}</span></button></li>`).join('')+'</ul>'
+      :`<p class="empty">“${esc($('#q').value)}” ile eşleşen kitap yok.</p>`;
+  }else if(view==='cases'){
+    const names=[...new Set([...cases,...list.map(b=>b.bookcase).filter(Boolean)].map(caseName))];
+    h=names.map(n=>{const c=list.filter(b=>norm(b.bookcase)===norm(n)).length;return `<div class="casehead"><h3>${esc(n)}</h3><span class="n">${c} kitap</span></div>${caseHtml(n)}`}).join('');
+    const nowhere=list.filter(b=>!b.bookcase);
+    if(nowhere.length)h+=`<div class="casehead"><h3>Yeri girilmemiş</h3><span class="n">${nowhere.length} kitap</span></div><ul class="list">${nowhere.map(b=>`<li><button data-id="${esc(b.id)}"><span class="t">${esc(b.title)}</span><span class="s">${esc(b.author||'')}</span></button></li>`).join('')}</ul>`;
+    h+=`<div class="tools"><button class="btn" id="csv">Listeyi kopyala (Excel’e yapıştırılabilir)</button><button class="btn" id="logout">Çıkış yap${user&&user.email?' ('+esc(user.email)+')':''}</button></div>`;
+  }else{
+    const m=new Map();
+    list.forEach(b=>{const k=(b[view]||'').trim()||'(Boş)';m.set(k,(m.get(k)||0)+1)});
+    const g=[...m].sort((a,b)=>coll.compare(a[0],b[0]));
+    h='<ul class="list grp">'+g.map(([k,n])=>`<li><button data-g="${esc(k)}"><span class="t">${esc(k)}</span><span class="n">${n}</span></button></li>`).join('')+'</ul>';
+  }
+  $('#out').innerHTML=h;
+  const dl=(id,arr)=>{$(id).innerHTML=[...new Set(arr.filter(Boolean))].map(v=>`<option value="${esc(v)}">`).join('')};
+  dl('#dl-case',[...cases,...list.map(b=>b.bookcase)]);dl('#dl-author',list.map(b=>b.author));
+  dl('#dl-pub',list.map(b=>b.publisher));dl('#dl-genre',list.map(b=>b.genre));
+}
+
+/* ---------- sheets ---------- */
+function openSheet(id){document.querySelectorAll('.sec').forEach(s=>s.hidden=s.id!==id);$('#sheet').classList.add('on')}
+function closeSheet(){$('#sheet').classList.remove('on');$('#f-del').textContent='Sil';$('#f-del').dataset.arm=''}
+let toastT;
+function toast(t,undo){$('#toast-t').textContent=t;$('#toast-b').hidden=!undo;$('#toast').classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>$('#toast').classList.remove('on'),undo?6000:2800)}
+
+function openBook(id){
+  const b=id?books[id]:{};editId=id||null;
+  $('#fb-h').textContent=id?'Kitap':'Elle kitap ekle';
+  $('#f-title').value=b.title||'';$('#f-author').value=b.author||'';$('#f-pub').value=b.publisher||'';
+  $('#f-genre').value=b.genre||'';$('#f-isbn').value=b.isbn||'';$('#f-case').value=b.bookcase||'';
+  $('#f-shelf').value=b.shelf||'';$('#f-pos').value=b.pos||'';
+  $('#f-del').hidden=!id;
+  $('#fb-map').innerHTML=id&&b.bookcase&&b.shelf?`<p class="where" style="margin:0 0 6px"><span class="loc">${esc(locText(b,true))}</span></p>`+caseHtml(b.bookcase,id):'';
+  openSheet('sh-book');
+}
+$('#f-save').onclick=async()=>{
+  const title=$('#f-title').value.trim();if(!title){$('#f-title').focus();return}
+  const old=editId?books[editId]:{};
+  const bc=caseName($('#f-case').value);
+  const b={...old,title,author:$('#f-author').value.trim(),publisher:$('#f-pub').value.trim(),genre:$('#f-genre').value.trim(),
+    isbn:$('#f-isbn').value.trim(),bookcase:bc,shelf:num($('#f-shelf').value),pos:num($('#f-pos').value),addedAt:old.addedAt||Date.now(),source:old.source||'elle'};
+  if(!editId){const ex=findExisting(title,b.isbn);if(ex){b.id=ex.id;b.addedAt=ex.addedAt}}
+  try{await ensureCase(bc);await putBook(b);closeSheet();render();toast('Kaydedildi')}catch(e){toast('Kaydedilemedi: '+(e.code||e.message))}
+};
+$('#f-del').onclick=async e=>{
+  const btn=e.currentTarget;
+  if(!btn.dataset.arm){btn.dataset.arm='1';btn.textContent='Silinsin mi? Tekrar dokun';return}
+  lastDeleted={...books[editId]};
+  try{await removeBook(editId);closeSheet();render();toast('Silindi',true)}catch(er){toast('Silinemedi')}
+};
+$('#toast-b').onclick=async()=>{if(lastDeleted){await putBook(lastDeleted);lastDeleted=null;render();toast('Geri alındı')}};
+
+/* ---------- image utils ---------- */
+async function shrink(file,max,q){
+  const bmp=await createImageBitmap(file);
+  const k=Math.min(1,max/Math.max(bmp.width,bmp.height));
+  const c=document.createElement('canvas');c.width=Math.round(bmp.width*k);c.height=Math.round(bmp.height*k);
+  c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);
+  return await new Promise(r=>c.toBlob(r,'image/jpeg',q||.86));
+}
+function parseJSON(t){const m=String(t).match(/\{[\s\S]*\}/);return m?JSON.parse(m[0]):null}
+async function toB64(blob){return await new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(String(r.result).split(',')[1]);r.onerror=no;r.readAsDataURL(blob)})}
+async function askAI(kind,blob,extra,statusEl){
+  if(!aiCall)throw new Error('Önce giriş yapmalısın.');
+  statusEl.textContent=kind==='shelf'?'Kitaplar okunuyor… (10–40 sn sürebilir)':'Bilgiler okunuyor…';
+  const r=await aiCall({kind,image:await toB64(blob),...(extra||{})});
+  if(!r||!r.data)throw new Error('Yanıt anlaşılamadı, tekrar dene.');return r.data;
+}
+const errText=e=>{const c=e&&String(e.code||'').replace('functions/','');return c==='resource-exhausted'?'Bugünlük tanıma hakkın doldu, yarın tekrar dene.':c==='unauthenticated'?'Önce giriş yapmalısın.':c==='deadline-exceeded'?'Yanıt gecikti; tekrar dene ya da rafları ayrı ayrı çek.':c==='internal'||c==='unavailable'?'Tanıma servisine ulaşılamadı, biraz sonra tekrar dene.':(e&&e.message)||'Bir hata oldu.'};
+
+/* ---------- shelf photo ---------- */
+let shelfFile=null,scan=[];
+function pickShelf(f){if(!f)return;shelfFile=f;const u=URL.createObjectURL(f);$('#s-img').src=u;$('#s-img').hidden=false;$('#s-run').disabled=false;$('#s-out').hidden=true;$('#s-status').textContent='';}
+$('#s-cam').onchange=e=>pickShelf(e.target.files[0]);$('#s-gal').onchange=e=>pickShelf(e.target.files[0]);
+$('#go-shelf').onclick=()=>{if(!$('#s-case').value&&cases.length)$('#s-case').value=cases[0];openSheet('sh-shelf')};
+$('#s-run').onclick=async()=>{
+  const st=$('#s-status');st.className='status';
+  const bc=$('#s-case').value.trim();if(!bc){st.className='status err';st.textContent='Önce kitaplığın adını yaz (ör. Salon).';$('#s-case').focus();return}
+  $('#s-run').disabled=true;st.textContent='Fotoğraf hazırlanıyor…';
+  try{
+    const blob=await shrink(shelfFile,2400,.88);
+    const v=await askAI('shelf',blob,null,st);
+    const top=num($('#s-top').value)||1;
+    scan=(v.books||[]).filter(x=>x&&x.title).map(x=>{
+      const ex=findExisting(x.title);
+      return {on:true,title:String(x.title).trim(),author:String(x.author||'').trim(),publisher:String(x.publisher||'').trim(),genre:String(x.genre||'').trim(),
+        shelf:(num(x.shelf)||1)+top-1,pos:num(x.position),conf:x.confidence||'medium',exId:ex?ex.id:null};
+    });
+    st.textContent=scan.length?scan.length+' kitap bulundu.':'Hiç kitap okunamadı. Daha yakından veya tek raf çekmeyi dene.';
+    renderScan();$('#s-out').hidden=!scan.length;
+  }catch(e){st.className='status err';st.textContent=errText(e)}
+  $('#s-run').disabled=false;
+};
+function renderScan(){
+  $('#s-res').innerHTML=scan.map((r,i)=>`<li><input type="checkbox" data-i="${i}" data-k="on" ${r.on?'checked':''} aria-label="Ekle">
+  <div><span class="tag ${r.exId?'old':'new'}">${r.exId?'Kayıtlı · yeri güncellenecek':'Yeni'}</span>${r.conf==='low'?' <span class="tag low">Emin değil</span>':''}
+  <input class="in" data-i="${i}" data-k="title" value="${esc(r.title)}" aria-label="Kitap adı" style="margin:4px 0">
+  <div class="meta"><input class="in" data-i="${i}" data-k="author" value="${esc(r.author)}" placeholder="Yazar" aria-label="Yazar">
+  <input class="in" data-i="${i}" data-k="publisher" value="${esc(r.publisher)}" placeholder="Yayınevi" aria-label="Yayınevi">
+  <input class="in" type="number" data-i="${i}" data-k="shelf" value="${r.shelf||''}" placeholder="Raf" aria-label="Raf">
+  <input class="in" type="number" data-i="${i}" data-k="pos" value="${r.pos||''}" placeholder="Sıra" aria-label="Soldan sıra"></div></div></li>`).join('');
+}
+$('#s-res').oninput=e=>{const t=e.target,i=t.dataset.i,k=t.dataset.k;if(i==null)return;
+  scan[i][k]=k==='on'?t.checked:(k==='shelf'||k==='pos')?num(t.value):t.value;
+  if(k==='title'){const ex=findExisting(t.value);scan[i].exId=ex?ex.id:null}};
+$('#s-save').onclick=async()=>{
+  const bc=caseName($('#s-case').value);const st=$('#s-status');
+  const pick=scan.filter(r=>r.on&&r.title.trim());if(!pick.length)return;
+  $('#s-save').disabled=true;st.className='status';
+  try{
+    await ensureCase(bc);
+    const touched=new Set(),shelves=new Set();let n=0,u=0;
+    for(const r of pick){
+      const ex=r.exId&&books[r.exId];
+      const b=ex?{...ex,bookcase:bc,shelf:r.shelf,pos:r.pos,author:ex.author||r.author,publisher:ex.publisher||r.publisher,genre:ex.genre||r.genre,title:r.title.trim()||ex.title}
+        :{title:r.title.trim(),author:r.author,publisher:r.publisher,genre:r.genre,bookcase:bc,shelf:r.shelf,pos:r.pos,addedAt:Date.now(),source:'fotoğraf'};
+      const id=await putBook(b);touched.add(id);if(r.shelf)shelves.add(r.shelf);ex?u++:n++;
+      st.textContent='Kaydediliyor… '+(n+u)+'/'+pick.length;
+    }
+    let cleared=0;
+    if($('#s-clear').checked)for(const b of Object.values(books))
+      if(!touched.has(b.id)&&norm(b.bookcase)===norm(bc)&&shelves.has(b.shelf)){await putBook({...b,shelf:null,pos:null});cleared++}
+    closeSheet();render();toast(`${n} yeni, ${u} güncellendi${cleared?', '+cleared+' kitabın rafı belirsiz':''}`);
+    scan=[];$('#s-out').hidden=true;$('#s-img').hidden=true;$('#s-run').disabled=true;st.textContent='';
+  }catch(e){st.className='status err';st.textContent='Kaydedilemedi: '+(e.code||e.message)}
+  $('#s-save').disabled=false;
+};
+
+/* ---------- barcode ---------- */
+let zx=null;
+function loadZXing(){return zx||(zx=new Promise((ok,no)=>{const s=document.createElement('script');s.src='https://unpkg.com/@zxing/library@0.21.3/umd/index.min.js';s.onload=()=>ok(window.ZXing);s.onerror=no;document.head.appendChild(s)}))}
+async function readBarcode(file){
+  try{
+    if('BarcodeDetector' in window){
+      const f=(await BarcodeDetector.getSupportedFormats()).filter(x=>['ean_13','ean_8','upc_a','upc_e'].includes(x));
+      if(f.length){const r=await new BarcodeDetector({formats:f}).detect(await createImageBitmap(file));if(r[0])return r[0].rawValue}
+    }
+  }catch(e){}
+  try{
+    const Z=await loadZXing();const small=await shrink(file,1400,.92);const url=URL.createObjectURL(small);
+    const res=await new Z.BrowserMultiFormatReader().decodeFromImageUrl(url);URL.revokeObjectURL(url);return res&&res.getText();
+  }catch(e){return null}
+}
+let barFile=null;
+const bf=['title','author','pub','genre'];
+async function pickBar(f){
+  if(!f)return;barFile=f;$('#b-img').src=URL.createObjectURL(f);$('#b-img').hidden=false;
+  const st=$('#b-status');st.className='status';st.textContent='Barkod okunuyor…';
+  const code=await readBarcode(f);
+  if(code)$('#b-isbn').value=code;
+  const ex=code&&findExisting('',code);
+  if(ex){st.textContent='Bu kitap zaten kayıtlı: '+ex.title+' — '+locText(ex);fillBar(ex);return}
+  st.textContent=code?'Barkod: '+code+'. Bilgiler okunuyor…':'Barkod çözülemedi, kapaktaki yazılardan okunuyor…';
+  try{
+    const v=await askAI('back',await shrink(f,1600,.86),{isbn:code||''},st);
+    if(v.isbn&&!$('#b-isbn').value)$('#b-isbn').value=String(v.isbn).replace(/[^\dX]/gi,'');
+    $('#b-title').value=v.title||'';$('#b-author').value=v.author||'';$('#b-pub').value=v.publisher||'';$('#b-genre').value=v.genre||'';
+    st.textContent=(v.confidence==='low'?'Emin olamadı, ':'')+'Bilgileri kontrol edip kaydet.';
+  }catch(e){st.className='status err';st.textContent=errText(e)+' Bilgileri elle yazabilirsin.'}
+}
+function fillBar(b){$('#b-title').value=b.title||'';$('#b-author').value=b.author||'';$('#b-pub').value=b.publisher||'';$('#b-genre').value=b.genre||'';$('#b-case').value=b.bookcase||'';$('#b-shelf').value=b.shelf||'';$('#b-pos').value=b.pos||''}
+function resetBar(keepPlace){barFile=null;$('#b-img').hidden=true;$('#b-isbn').value='';bf.forEach(k=>$('#b-'+k).value='');$('#b-status').textContent='';
+  if(!keepPlace){$('#b-case').value='';$('#b-shelf').value='';$('#b-pos').value=''}else if(num($('#b-pos').value))$('#b-pos').value=num($('#b-pos').value)+1;
+  $('#b-cam').value='';$('#b-gal').value=''}
+$('#b-cam').onchange=e=>pickBar(e.target.files[0]);$('#b-gal').onchange=e=>pickBar(e.target.files[0]);
+$('#go-bar').onclick=()=>openSheet('sh-bar');
+async function saveBar(next){
+  const title=$('#b-title').value.trim();const st=$('#b-status');
+  if(!title){st.className='status err';st.textContent='Kitap adı boş olamaz.';$('#b-title').focus();return}
+  const isbn=$('#b-isbn').value.trim();const ex=findExisting(title,isbn);const bc=caseName($('#b-case').value);
+  const b={...(ex||{addedAt:Date.now(),source:'barkod'}),title,author:$('#b-author').value.trim(),publisher:$('#b-pub').value.trim(),genre:$('#b-genre').value.trim(),isbn,
+    bookcase:bc||(ex&&ex.bookcase)||'',shelf:num($('#b-shelf').value)||(bc?null:ex&&ex.shelf)||null,pos:num($('#b-pos').value)||(bc?null:ex&&ex.pos)||null};
+  try{await ensureCase(bc);await putBook(b);render();toast(ex?'Güncellendi':'Eklendi: '+title);
+    if(next){resetBar(true);$('#b-status').textContent='Sıradaki kitabın arka kapağını çek.'}else{resetBar(false);closeSheet()}}
+  catch(e){st.className='status err';st.textContent='Kaydedilemedi: '+(e.code||e.message)}
+}
+$('#b-save').onclick=()=>saveBar(false);$('#b-next').onclick=()=>saveBar(true);
+
+/* ---------- events ---------- */
+$('#go-new').onclick=()=>openBook(null);
+$('#q').oninput=render;
+document.querySelector('.tabs').onclick=e=>{const v=e.target.closest('button')?.dataset.v;if(v){view=v;filter=null;$('#q').value='';render()}};
+$('#out').onclick=e=>{
+  const t=e.target.closest('button');if(!t)return;
+  if(t.id==='clr'){filter=null;render();return}
+  if(t.id==='csv'){const rows=[['Kitap','Yazar','Yayınevi','Tür','ISBN','Kitaplık','Raf','Sıra'],...all().map(b=>[b.title,b.author,b.publisher,b.genre,b.isbn,b.bookcase,b.shelf,b.pos])];
+    navigator.clipboard.writeText(rows.map(r=>r.map(x=>String(x??'').replace(/\t|\n/g,' ')).join('\t')).join('\n')).then(()=>toast('Liste kopyalandı'),()=>toast('Kopyalanamadı'));return}
+  if(t.dataset.g){filter={k:view,v:t.dataset.g==='(Boş)'?'':t.dataset.g};view='books';render();return}
+  if(t.dataset.id)openBook(t.dataset.id);
+};
+$('#fb-map').onclick=e=>{const id=e.target.closest('.spine')?.dataset.id;if(id&&id!==editId)openBook(id)};
+$('#sheet').onclick=e=>{if(e.target.id==='sheet'||e.target.closest('[data-close]'))closeSheet()};
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSheet()});
+
+/* ---------- boot ---------- */
+const CFG={apiKey:"AIzaSyDST7X8QXynA2YJ6ZJZ1fWp1Ow2eJLylnQ",authDomain:"scribble-kick.firebaseapp.com",projectId:"scribble-kick",
+  storageBucket:"scribble-kick.firebasestorage.app",messagingSenderId:"307843857448",appId:"1:307843857448:web:d35c242ae347a2ed72891d"};
+render();
+if(!window.firebase){setNote('Bağlantı kurulamadı; sayfayı yenile.')}else{
+  firebase.initializeApp(CFG);
+  const auth=firebase.auth(),fs=firebase.firestore();
+  aiCall=firebase.app().functions('europe-west1').httpsCallable('kitaplikOku',{timeout:150000});
+  $('#login').onclick=async()=>{
+    $('#login-msg').textContent='';
+    try{await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())}
+    catch(e){if(e.code==='auth/popup-blocked'||e.code==='auth/operation-not-supported-in-this-environment')return auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider());
+      $('#login-msg').textContent=e.code==='auth/popup-closed-by-user'?'Pencere kapatıldı.':e.code==='auth/unauthorized-domain'?'Bu adres henüz Google girişine açılmadı.':'Giriş yapılamadı, tekrar dene.'}
+  };
+  auth.getRedirectResult().catch(()=>{});
+  auth.onAuthStateChanged(u=>{
+    unsub.forEach(f=>f());unsub=[];books={};cases=[];user=u;
+    document.body.classList.toggle('out',!u);
+    if(!u){db=null;render();return}
+    db=fs.collection('kitaplik').doc(u.uid);
+    setNote('Kitaplar yükleniyor…');
+    const t=setTimeout(()=>setNote('Kayıtlara şu an ulaşılamıyor; bağlantını kontrol et.'),10000);
+    unsub.push(db.collection('books').onSnapshot(s=>{
+      if(!s.metadata.fromCache){clearTimeout(t);setNote('')}
+      const nb={};s.docs.forEach(d=>{nb[d.id]={...d.data(),id:d.id}});books=nb;render();
+    },e=>{clearTimeout(t);setNote('Kayıtlar okunamadı ('+e.code+').')}));
+    unsub.push(db.collection('meta').doc('bookcases').onSnapshot(s=>{cases=(s.exists&&Array.isArray(s.data().names))?s.data().names:[];render()},()=>{}));
+  });
+  document.addEventListener('click',e=>{if(e.target.id==='logout')auth.signOut()});
+}
+}
+</script>
+</body>
+</html>

@@ -27,3 +27,6 @@ exports.weeklyPrizes = onSchedule(
     await batch.commit();
   }
 );
+
+// Kitapligim (kitapligim.web.app) kitap tanima
+exports.kitaplikOku = require('./kitaplik').kitaplikOku;

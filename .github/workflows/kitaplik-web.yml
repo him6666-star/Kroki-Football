@@ -1,0 +1,74 @@
+name: Kitapligim web yayini
+on:
+  push:
+    branches: [main]
+    paths: ["kitaplik/**", "functions/kitaplik.js", "tools/kitaplik_test.js", ".github/workflows/kitaplik-web.yml"]
+  workflow_dispatch:
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Anahtari yaz
+        run: echo '${{ secrets.FIREBASE_KEY }}' > "$RUNNER_TEMP/key.json"
+      - name: Gemini (Vertex AI) servisini ac
+        continue-on-error: true
+        run: |
+          gcloud auth activate-service-account --key-file="$RUNNER_TEMP/key.json"
+          gcloud services enable aiplatform.googleapis.com --project scribble-kick
+          gcloud projects add-iam-policy-binding scribble-kick --member="serviceAccount:307843857448-compute@developer.gserviceaccount.com" --role="roles/aiplatform.user" --condition=None --quiet >/dev/null && echo "rol verildi"
+      - name: Siteyi bul / olustur
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/key.json
+        run: |
+          FB="npx -y firebase-tools@13"
+          $FB hosting:sites:list --project scribble-kick --json > sites.json || true
+          SITE=""
+          for name in kitapligim kitapligim-app kitapligim-tr; do
+            if grep -q "sites/$name\"" sites.json; then SITE=$name; echo "Mevcut site: $name"; break; fi
+            if $FB hosting:sites:create "$name" --project scribble-kick --non-interactive; then SITE=$name; echo "Yeni site: $name"; break; fi
+            echo "$name alinamadi, sonrakini deniyorum"
+          done
+          if [ -z "$SITE" ]; then echo "HATA: site olusturulamadi"; exit 1; fi
+          echo "SITE=$SITE" >> "$GITHUB_ENV"
+      - name: Google girisi icin alan adi
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/key.json
+        run: |
+          npm i --no-save firebase-admin@12 >/dev/null 2>&1
+          node tools/auth_domain_add.js "$SITE.web.app"
+      - name: Kurallar + tanima fonksiyonu
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/key.json
+        run: |
+          (cd functions && npm install --no-audit --no-fund)
+          npx -y firebase-tools@13 deploy --project scribble-kick --only "firestore:rules,functions:kitaplikOku" --non-interactive --force
+      - name: Siteyi yukle
+        working-directory: kitaplik
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/key.json
+        run: |
+          sed -i "s/SITE_ADI/$SITE/" firebase.json
+          npx -y firebase-tools@13 deploy --project scribble-kick --only hosting --non-interactive
+          echo "### Yayinda: https://$SITE.web.app" >> "$GITHUB_STEP_SUMMARY"
+          echo "ADRES: https://$SITE.web.app"
+      - name: Kitap tanima testi
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/key.json
+        run: |
+          pip install -q pillow
+          python3 - <<'PY'
+          from PIL import Image, ImageDraw, ImageFont
+          img = Image.new('RGB', (900, 1300), (245, 240, 230)); d = ImageDraw.Draw(img)
+          f = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', 64)
+          s = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', 40)
+          d.text((80, 150), 'Tutunamayanlar', font=f, fill=(20, 20, 20))
+          d.text((80, 260), 'Oğuz Atay', font=s, fill=(60, 60, 60))
+          d.text((80, 1000), 'İletişim Yayınları', font=s, fill=(60, 60, 60))
+          d.text((80, 1080), 'ISBN 978-975-470-011-4', font=s, fill=(0, 0, 0))
+          img.save('kapak.jpg', quality=88)
+          PY
+          node tools/kitaplik_test.js "$SITE.web.app"

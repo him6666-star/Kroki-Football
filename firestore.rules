@@ -192,5 +192,16 @@ service cloud.firestore {
       allow delete: if request.auth != null && request.auth.uid == resource.data.p1;
     }
 
+    // Kitapligim: her kullanici yalnizca kendi kitapligini okur/yazar
+    match /kitaplik/{uid} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+      match /{rest=**} {
+        allow read, write: if request.auth != null && request.auth.uid == uid;
+      }
+    }
+    // Kitapligim gunluk tanima kotasi: yalnizca sunucu yazar
+    match /kitaplikKota/{id} {
+      allow read, write: if false;
+    }
   }
 }
