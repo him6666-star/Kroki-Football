@@ -1,0 +1,17 @@
+name: Raf Izi magaza sayfasi
+on:
+  workflow_dispatch:
+    inputs:
+      lang:
+        description: "Dil (or. en-US)"
+        default: "en-US"
+jobs:
+  listing:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install -q google-api-python-client google-auth
+      - name: Play'e yukle
+        env:
+          PLAY_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+        run: python tools/play_listing.py com.fairridegames.rafizi "${{ github.event.inputs.lang }}" "kitaplik-android/store/${{ github.event.inputs.lang }}"
