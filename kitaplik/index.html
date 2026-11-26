@@ -1592,9 +1592,17 @@ render();
   function close(){stop();if(box){box.remove();box=null}target=null}
   async function start(){
     const v=box.querySelector('video'),m=box.querySelector('.cmsg');m.hidden=true;stop();
-    try{stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:{ideal:'environment'},width:{ideal:2560},height:{ideal:1920}}});
-      v.srcObject=stream;await v.play();box.querySelector('.shut').disabled=false}
-    catch(e){m.hidden=false;box.querySelector('.shut').disabled=true}
+    const tries=[{facingMode:{ideal:'environment'},width:{ideal:2560},height:{ideal:1920}},{facingMode:'environment'},true];let err;
+    for(const video of tries){try{stream=await navigator.mediaDevices.getUserMedia({audio:false,video});break}catch(e){err=e;stream=null;if(e&&(e.name==='NotAllowedError'||e.name==='SecurityError'))break}}
+    if(stream){try{v.srcObject=stream;await v.play();box.querySelector('.shut').disabled=false;return}catch(e){err=e}}
+    box.querySelector('.shut').disabled=true;const n=(err&&err.name)||'?';
+    const inApp=/FBAN|FBAV|Instagram|WhatsApp|Line\/|GSA\/|Twitter|TikTok|Snapchat|LinkedInApp/i.test(navigator.userAgent);
+    m.textContent=inApp?'Bu uygulamanın içindeki tarayıcı kameraya izin vermiyor. Sağ üstteki menüden “Safari’de aç” deyip tekrar dene.'
+      :n==='NotAllowedError'?'Kamera izni kapalı. Adres çubuğundaki “aA” → Web Sitesi Ayarları → Kamera: İzin Ver yap (ya da Ayarlar → Safari → Kamera → İzin Ver), sonra sayfayı yenile.'
+      :n==='NotReadableError'?'Kamera başka bir uygulama tarafından kullanılıyor. Diğer uygulamaları kapatıp tekrar dene.'
+      :'Kamera açılamadı. Aşağıdaki “Fotoğraf seç” ile galeriden seçebilirsin.';
+    m.insertAdjacentHTML('beforeend','<br><small style="opacity:.6">('+n+')</small><br><button class="btn" data-c="re" style="margin-top:14px">Tekrar dene</button>');
+    m.querySelector('[data-c=re]').onclick=start;m.hidden=false
   }
   function open(inp){
     target=inp;
