@@ -1,0 +1,10 @@
+name: Raf Izi surum yayinla
+on: workflow_dispatch
+jobs:
+  r:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install -q google-api-python-client google-auth
+      - env: {PLAY_JSON: "${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}"}
+        run: python tools/play_release.py com.fairridegames.rafizi alpha
