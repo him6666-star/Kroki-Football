@@ -151,7 +151,8 @@ body.dragon,body.dragon *{cursor:grabbing!important}
 /* covers */
 .cov{display:block;width:62px;aspect-ratio:2/3;border-radius:3px 6px 6px 3px;object-fit:cover;background:var(--line);box-shadow:0 6px 12px -6px #0007,inset 3px 0 0 #0002}
 .cov.s{width:50px}.cov.xs{width:30px}.cov.l{width:104px}
-.cov.gen{--c:#24493a;position:relative;overflow:hidden;background:linear-gradient(90deg,#0003 0 4px,#fff2 4px 6px,#0000 6px),var(--c);color:var(--t,#fff);padding:12% 10% 0 14%;display:flex;flex-direction:column;gap:6%}
+.cov.gen{--c:#24493a;position:relative;overflow:hidden;background:linear-gradient(90deg,#0003 0 4px,#fff2 4px 6px,#0000 6px),var(--c);color:var(--t,#fff);padding:8px 6px 0 10px;display:flex;flex-direction:column;gap:4px}
+.cov.l.gen{padding:14px 10px 0 16px;gap:8px}
 .cov.gen b{font:600 11px/1.15 var(--serif);display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
 .cov.gen i{font-style:normal;font-size:8.5px;opacity:.8;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .cov.gen::after{content:"";position:absolute;left:14%;right:10%;bottom:12%;height:1px;background:currentColor;opacity:.4}
@@ -252,6 +253,14 @@ textarea.fin{height:auto;min-height:88px;padding:10px 12px;resize:vertical}
 .res .meta{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) 62px 62px;gap:6px;margin-top:4px}
 .tag{font-size:12px;font-weight:600;border-radius:6px;padding:1px 7px;justify-self:start}
 .tag.new{background:var(--soft);color:var(--soft-ink)}.tag.old{background:light-dark(#f4ecd8,#3a3322);color:var(--gold-ink)}.tag.low{background:#f8e0de;color:#8c1d16}
+.verdict{display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;border-radius:14px;padding:16px;margin-top:14px;align-items:start}
+.verdict.yes{background:var(--soft);color:var(--ink)}.verdict.no{background:light-dark(#fbeceb,#3a2423)}
+.verdict .vt{display:flex;align-items:center;gap:8px;font:600 22px/1.1 var(--serif);margin-bottom:8px}
+.verdict.yes .vt{color:var(--soft-ink)}.verdict.no .vt{color:light-dark(#a3261c,#ff9d93)}
+.verdict h3{font-size:18px}.verdict .vloc{display:flex;gap:6px;align-items:flex-start;font:600 14px/1.4 var(--mono);color:var(--gold-ink);margin-top:8px}
+.verdict .vnote{font-size:14px;margin:8px 0 0;color:var(--mute)}.verdict .acts{margin-top:12px}
+.verdict .cov.l{width:88px}
+@media(max-width:420px){.verdict{grid-template-columns:minmax(0,1fr)}.verdict .cov.l{width:76px}}
 .check{display:flex;gap:10px;align-items:flex-start;margin-top:12px;font-size:15px}.check input{width:22px;height:22px;flex:none;accent-color:var(--green)}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:60;background:var(--ink);color:var(--bg);border-radius:12px;padding:10px 12px 10px 16px;display:none;gap:12px;align-items:center;max-width:92vw}
 .toast.on{display:flex}.toast button{border:0;background:var(--gold);color:#fff;border-radius:8px;padding:8px 12px;font-weight:600}
@@ -302,6 +311,7 @@ body.out .gate{display:flex}
   <div class="addwrap">
     <button class="btn pri kt" id="add-btn" aria-haspopup="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg><span>Kitap Tara</span></button>
     <div class="menu" id="add-menu" hidden>
+      <button data-act="check"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5a2 2 0 0 1 2-2h11v15H6a2 2 0 0 0-2 2z"/><path d="M4 20a2 2 0 0 0 2 2h11v-4"/><path d="M9 8.5a2 2 0 1 1 2.5 1.9c-.5.2-1 .6-1 1.1v.5M10.5 14h.01"/></svg>Bende var mı?</button>
       <button data-act="scan-shelf"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>Raf fotoğrafı</button>
       <button data-act="scan-bar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6v12M7 6v12M10 6v12M14 6v12M16 6v12M20 6v12"/></svg>Barkod okut</button>
       <button data-act="new"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>Elle ekle</button>
@@ -318,7 +328,7 @@ body.out .gate{display:flex}
   <section id="v-map">
     <div class="phead">
       <div><h1>Kitaplık Raf Haritası</h1><p id="map-stats"></p></div>
-      <div class="acts"><button class="btn soft" data-act="scan-shelf"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>Raf Fotoğrafı Tara</button><button class="btn" data-act="scan-bar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7V4h3M17 4h3v3M20 17v3h-3M7 20H4v-3M8 8v8M11 8v8M14 8v8M17 8v8"/></svg>Barkod Okut</button></div>
+      <div class="acts"><button class="btn" data-act="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5a2 2 0 0 1 2-2h11v15H6a2 2 0 0 0-2 2z"/><path d="M4 20a2 2 0 0 0 2 2h11v-4"/><path d="M9 8.5a2 2 0 1 1 2.5 1.9c-.5.2-1 .6-1 1.1v.5M10.5 14h.01"/></svg>Bende var mı?</button><button class="btn soft" data-act="scan-shelf"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>Raf Fotoğrafı Tara</button><button class="btn" data-act="scan-bar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7V4h3M17 4h3v3M20 17v3h-3M7 20H4v-3M8 8v8M11 8v8M14 8v8M17 8v8"/></svg>Barkod Okut</button></div>
     </div>
     <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg>
       <input id="q" type="search" autocomplete="off" aria-label="Kitaplığında ara"><div class="sugg" id="sugg" hidden></div></div>
@@ -379,6 +389,13 @@ body.out .gate{display:flex}
       <label class="check"><input type="checkbox" id="s-clear" checked><span>Bu raflarda kayıtlı olup fotoğrafta görünmeyen kitapların rafını “belirsiz” yap</span></label>
       <div class="acts" style="margin-top:14px"><button class="btn pri" id="s-save">Seçilenleri kaydet</button></div>
     </div>
+  </section>
+  <section class="sec" id="sh-check" hidden>
+    <div class="ph"><h2>Bende var mı?</h2><button class="xb" data-close aria-label="Kapat">×</button></div>
+    <p class="hint">Kitapçıda kitabın arka kapağındaki barkodu çek; kitaplığında olup olmadığını, varsa hangi rafta olduğunu hemen söyleyeyim.</p>
+    <div class="acts" style="margin-top:12px"><span class="btn pri fileb">Barkodu çek<input type="file" accept="image/*" capture="environment" id="c-cam"></span><span class="btn fileb">Galeriden seç<input type="file" accept="image/*" id="c-gal"></span></div>
+    <label class="flab" for="c-q">ya da barkod numarasını / kitabın adını yaz</label><input class="fin" id="c-q" type="search" autocomplete="off" placeholder="978… ya da kitap adı">
+    <div id="c-res" aria-live="polite"></div>
   </section>
   <section class="sec" id="sh-bar" hidden>
     <div class="ph"><h2>Barkod okut</h2><button class="xb" data-close aria-label="Kapat">×</button></div>
@@ -966,6 +983,7 @@ document.addEventListener('click',async e=>{
   switch(a){
     case 'scan-shelf':$('#add-menu').hidden=true;if(!$('#s-case').value&&curCase)$('#s-case').value=curCase;openSheet('sh-shelf');break;
     case 'scan-case':$('#s-case').value=curCase||'';openSheet('sh-shelf');break;
+    case 'check':$('#add-menu').hidden=true;openCheck();break;
     case 'scan-bar':$('#add-menu').hidden=true;if(!$('#b-case').value&&curCase)$('#b-case').value=curCase;openSheet('sh-bar');break;
     case 'new':$('#add-menu').hidden=true;openDrawer('__new',true);break;
     case 'del-account':$('#add-menu').hidden=true;delAccountDialog();break;
@@ -1116,6 +1134,72 @@ async function saveBar(next){
   catch(e){st.className='status err';st.textContent='Kaydedilemedi: '+(e.code||e.message)}
 }
 $('#b-save').onclick=()=>saveBar(false);$('#b-next').onclick=()=>saveBar(true);
+
+/* ---------- "Bende var mı?" (kitapçıda kontrol) ---------- */
+const BOOKQ='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5a2 2 0 0 1 2-2h11v15H6a2 2 0 0 0-2 2z"/><path d="M4 20a2 2 0 0 0 2 2h11v-4"/><path d="M9 8.5a2 2 0 1 1 2.5 1.9c-.5.2-1 .6-1 1.1v.5M10.5 14h.01"/></svg>';
+async function googleByIsbn(isbn){
+  try{const j=await getJSON('https://www.googleapis.com/books/v1/volumes?maxResults=1&q=isbn:'+isbn);const v=(j.items||[])[0]&&j.items[0].volumeInfo;
+    if(v)return{title:v.title||'',author:(v.authors||[]).join(', '),publisher:v.publisher||'',pages:v.pageCount||0,cover:v.imageLinks&&(v.imageLinks.thumbnail||'').replace(/^http:/,'https:').replace('&edge=curl','')}}catch(e){}
+  try{const j=await getJSON('https://openlibrary.org/search.json?isbn='+isbn+'&limit=1&fields=title,author_name,number_of_pages_median,cover_i,publisher');const d=(j.docs||[])[0];
+    if(d)return{title:d.title||'',author:(d.author_name||[]).join(', '),publisher:'',pages:d.number_of_pages_median||0,cover:d.cover_i?`https://covers.openlibrary.org/b/id/${d.cover_i}-M.jpg`:''}}catch(e){}
+  return null;
+}
+const authorOk=(a,b)=>{if(!a||!b)return true;const last=s=>norm(s).split(' ').pop();return norm(a).includes(last(b))||norm(b).includes(last(a))};
+function findByTitle(title,author){return all().filter(b=>titleClose(b.title,title)&&authorOk(b.author,author))}
+const nextBtn=`<span class="btn pri fileb">${'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7V4h3M17 4h3v3M20 17v3h-3M7 20H4v-3M8 8v8M11 8v8M14 8v8M17 8v8"/></svg>'}Sıradaki kitabı okut<input type="file" accept="image/*" capture="environment" class="c-file"></span>`;
+function verdictYes(b,kind,info){
+  const st=b.status==='okundu'?'Bunu okudun.':b.status==='okunuyor'?'Şu an okuyorsun.':b.status==='okunacak'?'Okunacaklar listende.':'';
+  return `<div class="verdict yes">${coverHtml(b,'l')}<div><div class="vt">${ICON.check.replace('<svg','<svg width="26" height="26"')}Bu kitap sende var</div>
+    <h3>${esc(b.title)}</h3><div class="sub">${esc([b.author,b.publisher].filter(Boolean).join(' · '))}</div>
+    <div class="vloc">${ICON.pin.replace('<svg','<svg width="16" height="16"')}${esc(locText(b))}</div>
+    ${kind==='edition'?`<p class="vnote">Barkod farklı: sendeki başka bir baskısı olabilir${info&&info.publisher?' (okuttuğun: '+esc(info.publisher)+')':''}.</p>`:''}
+    ${b.loan?`<p class="vnote">Şu an ödünçte, ${esc(loanText(b))}.</p>`:''}${st?`<p class="vnote">${st}</p>`:''}
+    <div class="acts"><button class="btn" data-c="show" data-id="${esc(b.id)}">Rafta göster</button>${nextBtn}</div></div></div>`;
+}
+function verdictNo(info,isbn){
+  const fake={id:'_',title:info&&info.title||'Bilinmeyen kitap',author:info&&info.author||''};
+  const cov=info&&info.cover?`<img class="cov l" src="${esc(info.cover)}" alt="">`:genCover(fake,'l');
+  return `<div class="verdict no">${cov}<div><div class="vt"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 6l12 12M18 6 6 18"/></svg>Sende yok</div>
+    <h3>${esc(fake.title)}</h3><div class="sub">${esc([fake.author,info&&info.publisher].filter(Boolean).join(' · ')||(isbn?'ISBN '+isbn:''))}</div>
+    ${info?'':`<p class="vnote">Bu barkodla internette kitap bilgisi bulunamadı; kitaplığında da yok.</p>`}
+    <div class="acts"><button class="btn" data-c="add" data-isbn="${esc(isbn||'')}">Aldım, kitaplığa ekle</button>${nextBtn}</div></div></div>`;
+}
+let checkInfo=null;
+async function checkIsbn(code){
+  const res=$('#c-res');const isbn=String(code).replace(/[^0-9Xx]/g,'');
+  res.innerHTML=`<p class="status">Barkod ${esc(isbn)} · kitaplığına bakılıyor…</p>`;
+  const ex=all().find(b=>b.isbn&&b.isbn.replace(/[^0-9Xx]/g,'')===isbn);
+  if(ex){res.innerHTML=verdictYes(ex,'same');return}
+  res.innerHTML=`<p class="status">Kitaplığında bu barkod yok; kitabın adı bulunuyor…</p>`;
+  const info=await googleByIsbn(isbn);checkInfo=info?{...info,isbn}:{isbn};
+  const m=info&&info.title?findByTitle(info.title,info.author):[];
+  res.innerHTML=m.length?verdictYes(m[0],'edition',info):verdictNo(info,isbn);
+}
+async function checkPhoto(f){
+  if(!f)return;const res=$('#c-res');res.innerHTML='<p class="status">Barkod okunuyor…</p>';
+  const code=await readBarcode(f);
+  if(code)return checkIsbn(code);
+  res.innerHTML='<p class="status">Barkod okunamadı, kapaktaki yazılardan bakılıyor…</p>';
+  try{const v=await askAI('back',await shrink(f,1600,.86),{isbn:''},res.querySelector('.status'));
+    if(v.isbn&&String(v.isbn).replace(/\D/g,'').length>=10)return checkIsbn(v.isbn);
+    checkInfo={title:v.title,author:v.author,publisher:v.publisher};
+    const m=v.title?findByTitle(v.title,v.author):[];res.innerHTML=m.length?verdictYes(m[0],'same'):verdictNo(v.title?v:null,'')}
+  catch(e){res.innerHTML=`<p class="status err">${esc(errText(e))} Barkod numarasını ya da kitabın adını aşağıya yazabilirsin.</p>`}
+}
+function openCheck(){$('#c-res').innerHTML='';$('#c-q').value='';openSheet('sh-check')}
+let cqT;
+$('#c-q').addEventListener('input',e=>{clearTimeout(cqT);const v=e.target.value.trim();const res=$('#c-res');
+  if(!v){res.innerHTML='';return}
+  const digits=v.replace(/[^0-9Xx]/g,'');
+  if(digits.length>=10&&/^[\d\-\sXx]+$/.test(v)){cqT=setTimeout(()=>checkIsbn(digits),400);return}
+  cqT=setTimeout(()=>{const m=all().filter(b=>matches(b,norm(v))).slice(0,5);
+    res.innerHTML=m.length?m.map(b=>verdictYes(b,'same')).join(''):`<div class="verdict no"><div><div class="vt"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 6l12 12M18 6 6 18"/></svg>Sende yok</div><p class="vnote">Kitaplığında “${esc(v)}” ile eşleşen kitap yok.</p></div></div>`},250)});
+$('#c-cam').onchange=e=>{checkPhoto(e.target.files[0]);e.target.value=''};$('#c-gal').onchange=e=>{checkPhoto(e.target.files[0]);e.target.value=''};
+document.addEventListener('change',e=>{if(e.target.classList&&e.target.classList.contains('c-file')){const f=e.target.files[0];checkPhoto(f)}});
+$('#c-res').addEventListener('click',e=>{const t=e.target.closest('[data-c]');if(!t)return;
+  if(t.dataset.c==='show'){closeSheet();select(t.dataset.id)}
+  if(t.dataset.c==='add'){const i=checkInfo||{};closeSheet();resetBar(true);$('#b-isbn').value=i.isbn||t.dataset.isbn||'';$('#b-title').value=i.title||'';$('#b-author').value=i.author||'';$('#b-pub').value=i.publisher||'';$('#b-pages').value=i.pages||'';
+    if(!$('#b-case').value&&curCase)$('#b-case').value=curCase;openSheet('sh-bar');$('#b-status').textContent='Bilgileri kontrol edip rafını seç, sonra kaydet.'}});
 
 /* ---------- backends ---------- */
 $('#gate-ill').innerHTML=ILL.shelf;
