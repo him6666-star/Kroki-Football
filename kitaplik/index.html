@@ -882,6 +882,7 @@ function delAccountDialog(){
   const n=all().length;
   sheetHtml('sh-delacc',`<div class="ph"><h2>Hesabını ve verilerini sil</h2><button class="xb" data-close aria-label="Kapat">×</button></div>
     <p style="margin:0">Bu işlem <b>${n} kitabın</b>, tüm kitaplık ve raf bilgilerin, okuma ve ödünç kayıtların, notların, saklanan raf fotoğrafların ve Raf İzi hesabın kalıcı olarak silinir. Geri alınamaz.</p>
+    ${fam&&fam.owner&&fam.uyeler.length?`<p class="status err" style="margin:8px 0 0">Bu kitaplığı ${fam.uyeler.length} kişiyle paylaşıyorsun: ortak kitaplık da silinir ve onlar erişimini kaybeder.</p>`:''}${fam&&!fam.owner?'<p class="sub" style="margin:8px 0 0">Aile kitaplığından da çıkarılırsın; ortak kitaplar silinmez.</p>':''}
     <p class="sub">Google hesabının kendisi etkilenmez. Ayrıntılar: <a href="hesap-silme.html" target="_blank" rel="noopener">hesap silme</a></p>
     <label class="flab" for="da-c">Onaylamak için <b>SİL</b> yaz</label><input class="fin" id="da-c" autocomplete="off">
     <div class="acts" style="margin-top:16px"><button class="btn danger" id="da-ok" style="border-color:#b3261e" disabled>Hesabımı kalıcı olarak sil</button><button class="btn" data-close>Vazgeç</button></div><p class="status" id="da-st"></p>`);
