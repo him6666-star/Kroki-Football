@@ -253,6 +253,14 @@ textarea.fin{height:auto;min-height:88px;padding:10px 12px;resize:vertical}
 .res .meta{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) 62px 62px;gap:6px;margin-top:4px}
 .tag{font-size:12px;font-weight:600;border-radius:6px;padding:1px 7px;justify-self:start}
 .tag.new{background:var(--soft);color:var(--soft-ink)}.tag.old{background:light-dark(#f4ecd8,#3a3322);color:var(--gold-ink)}.tag.low{background:#f8e0de;color:#8c1d16}
+.remind{background:light-dark(#fff6e2,#33291a);border:1px solid light-dark(#f0d9a6,#5a4724);border-radius:14px;padding:14px 16px;margin-bottom:16px}
+.remind .rh{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;margin-bottom:6px}.remind .rh b{font:600 18px var(--serif)}
+.remind .ri{display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 0;border-top:1px solid light-dark(#f0d9a6,#5a4724)}
+.remind .ri .acts{gap:6px}
+.btn.wa{background:#1f9d55;border-color:#1f9d55;color:#fff;text-decoration:none}
+.arprev .shelf.mini{--k:.56;min-height:0}.arprev .plank{height:12px;margin-bottom:6px}
+.spine.moved{outline:2px solid var(--gold);outline-offset:1px}
+@media(max-width:600px){.remind .ri{grid-template-columns:30px minmax(0,1fr)}.remind .ri .acts{grid-column:1/-1}}
 .verdict{display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;border-radius:14px;padding:16px;margin-top:14px;align-items:start}
 .verdict.yes{background:var(--soft);color:var(--ink)}.verdict.no{background:light-dark(#fbeceb,#3a2423)}
 .verdict .vt{display:flex;align-items:center;gap:8px;font:600 22px/1.1 var(--serif);margin-bottom:8px}
@@ -263,7 +271,7 @@ textarea.fin{height:auto;min-height:88px;padding:10px 12px;resize:vertical}
 @media(max-width:420px){.verdict{grid-template-columns:minmax(0,1fr)}.verdict .cov.l{width:76px}}
 .check{display:flex;gap:10px;align-items:flex-start;margin-top:12px;font-size:15px}.check input{width:22px;height:22px;flex:none;accent-color:var(--green)}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:60;background:var(--ink);color:var(--bg);border-radius:12px;padding:10px 12px 10px 16px;display:none;gap:12px;align-items:center;max-width:92vw}
-.toast.on{display:flex}.toast button{border:0;background:var(--gold);color:#fff;border-radius:8px;padding:8px 12px;font-weight:600}
+.toast.on{display:flex}.toast button{white-space:nowrap;flex:none;border:0;background:var(--gold);color:#fff;border-radius:8px;padding:8px 12px;font-weight:600}
 .note{background:light-dark(#fff6e2,#33291a);color:light-dark(#6b4c0e,#f0cf8a);border-radius:10px;padding:10px 14px;margin-bottom:16px;font-size:14px}
 .note:empty{display:none}
 /* login gate */
@@ -316,6 +324,7 @@ body.out .gate{display:flex}
       <button data-act="scan-bar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6v12M7 6v12M10 6v12M14 6v12M16 6v12M20 6v12"/></svg>Barkod okut</button>
       <button data-act="new"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>Elle ekle</button>
       <a class="mlink" href="gizlilik.html" target="_blank" rel="noopener">Gizlilik politikası</a>
+      <button data-act="data"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M7 10l5 5 5-5M4 19h16"/></svg>Yedek ve aktarma</button>
       <button data-act="del-account" id="m-delacc" style="color:#b3261e"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>Hesabımı ve verilerimi sil</button>
       <button data-act="logout" id="m-logout"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10"/></svg>Çıkış yap</button>
     </div>
@@ -332,6 +341,7 @@ body.out .gate{display:flex}
     </div>
     <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg>
       <input id="q" type="search" autocomplete="off" aria-label="Kitaplığında ara"><div class="sugg" id="sugg" hidden></div></div>
+    <div id="remind"></div>
     <div id="selbar"></div>
     <div class="casebar">
       <div class="pills" id="pills"></div>
@@ -526,7 +536,7 @@ function render(){
 }
 
 function spineHtml(b,i,hit){
-  const c=colorOf(b),h=158+hash(b.id+'h')%38,w=b.pages?Math.max(28,Math.min(64,Math.round(22+b.pages/16))):34+hash(b.title||'')%16;
+  const c=b.spine||colorOf(b),h=158+hash(b.id+'h')%38,w=b.pages?Math.max(28,Math.min(64,Math.round(22+b.pages/16))):34+hash(b.title||'')%16;
   return `<div class="spine${hit?' hit':''}${b.loan?' loan':''}" data-id="${esc(b.id)}" style="--c:${c};--t:${inkOf(c)};--h:${h}px;--w:${w}px" role="button" tabindex="0" aria-label="${esc(b.title)}, ${i}. kitap${b.loan?', ödünçte':''}">${hit?'<span class="here">BURADA</span>':b.loan?'<span class="lt">ÖDÜNÇ</span>':''}<span class="num">${i}</span><span class="tt">${esc(b.title)}</span><span class="ft"></span></div>`;
 }
 function shelfHtml(n,s,hitId,cls){
@@ -540,6 +550,7 @@ function renderMap(){
   $$('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.mode===mapMode));
   const sb=sel&&books[sel];
   $('#selbar').innerHTML=sb?`<div class="selbar"><div style="display:flex;gap:14px;align-items:center">${coverHtml(sb,'s')}<div><small>Seçili Kitabın Raf Konumu</small><h3>${esc(sb.title)} <span>— ${esc(sb.author||'')}</span></h3><div class="loc">${ICON.pin.replace('<svg','<svg width="14" height="14" style="vertical-align:-2px"')} ${esc(locText(sb))}</div>${sb.loan?`<div class="loc" style="color:#fff">Şu an ödünçte · ${esc(loanText(sb))}</div>`:''}</div></div><div class="acts">${sb.photoId&&photos[sb.photoId]?'<button class="btn sm" data-act="sel-photo">Fotoğrafta Gör</button>':''}<button class="btn sm w" data-act="sel-detail">Detaylar</button><button class="x" data-act="sel-clear" aria-label="Seçimi kaldır">×</button></div></div>`:'';
+  $('#remind').innerHTML=remindHtml();
   renderSugg();
   const bd=$('#board');
   if(!curCase){
@@ -555,7 +566,7 @@ function renderMap(){
     for(let s=1;s<=n;s++)h+=`<div class="shead"><span class="mono">${s}. Raf</span><span>${shelfBooks(curCase,s).length} kitap</span></div>`+shelfHtml(curCase,s,sel);
     const loose=bs.filter(b=>!b.shelf);
     h+=`<div class="loose" data-shelf="0"><div class="lbl">Rafı belirsiz kitaplar${loose.length?'':' · bir kitabı rafından çıkarmak için buraya sürükle'}</div><div class="chips">${loose.map(b=>`<span class="chipb" data-id="${esc(b.id)}" role="button" tabindex="0">${esc(b.title)}</span>`).join('')}</div></div>`;
-    h+=`<div class="bfoot"><button class="btn sm" data-act="add-shelf">+ Raf ekle</button>${n>1&&!shelfBooks(curCase,n).length?'<button class="btn sm ghost" data-act="del-shelf">Boş olan son rafı kaldır</button>':''}<button class="btn sm ghost" data-act="rename-case">Kitaplığın adını değiştir</button><button class="btn sm ghost danger" data-act="del-case">Kitaplığı sil</button></div>`;
+    h+=`<div class="bfoot"><button class="btn sm soft" data-act="arrange">Düzenleme önerisi</button><button class="btn sm" data-act="add-shelf">+ Raf ekle</button>${n>1&&!shelfBooks(curCase,n).length?'<button class="btn sm ghost" data-act="del-shelf">Boş olan son rafı kaldır</button>':''}<button class="btn sm ghost" data-act="rename-case">Kitaplığın adını değiştir</button><button class="btn sm ghost danger" data-act="del-case">Kitaplığı sil</button></div>`;
   }
   bd.innerHTML=h;
   if(scrollSel){scrollSel=false;const el=bd.querySelector('.spine.hit,.bx.hit');if(el)setTimeout(()=>el.scrollIntoView({behavior:'smooth',block:'center',inline:'center'}),60)}
@@ -737,7 +748,7 @@ function renderDrawer(){
       <select class="sel" id="mv-shelf" aria-label="Raf"><option value="0">Rafsız</option>${Array.from({length:n+1},(_,i)=>`<option value="${i+1}" ${b.shelf===i+1?'selected':''}>${i+1}. raf${i===n?' (yeni)':''}</option>`).join('')}</select></div>
       <div class="r2"><button class="btn" data-mv="left" ${!b.shelf||b.pos<=1?'disabled':''}>◀ Sola</button><button class="btn" data-mv="right" ${!b.shelf||b.pos>=shelfBooks(b.bookcase,b.shelf).length?'disabled':''}>Sağa ▶</button><button class="btn" data-mv="up" ${!b.shelf||b.shelf<=1?'disabled':''}>▲ Üst raf</button><button class="btn" data-mv="down" ${!b.shelf?'disabled':''}>▼ Alt raf</button></div>
     </div></div>
-  <div class="dsec"><small>Ödünç</small>${b.loan?`<div class="loanbox">Kimde: <b>${esc(b.loan.to)}</b><div class="sub">${esc(dstr(b.loan.at))} tarihinde verdin · ${daysSince(b.loan.at)} gün oldu</div>${b.loan.note?`<div style="margin-top:6px">${esc(b.loan.note)}</div>`:''}<div class="acts"><button class="btn pri sm" data-d="loan-back">Geri geldi</button><button class="btn sm" data-d="loan-edit">Düzenle</button></div></div>`:`<button class="btn sm" data-d="loan-edit">Ödünç ver</button>`}
+  <div class="dsec"><small>Ödünç</small>${b.loan?`<div class="loanbox">Kimde: <b>${esc(b.loan.to)}</b><div class="sub">${esc(dstr(b.loan.at))} tarihinde verdin · ${daysSince(b.loan.at)} gün oldu</div>${b.loan.note?`<div style="margin-top:6px">${esc(b.loan.note)}</div>`:''}${dueAt(b.loan)?`<div class="sub" style="margin-top:4px">Hatırlatma: ${esc(dstr(dueAt(b.loan)))}</div>`:''}<div class="acts"><button class="btn pri sm" data-d="loan-back">Geri geldi</button><a class="btn sm wa" href="${esc(waLink(b))}" target="_blank" rel="noopener">${WA_SVG}Hatırlat</a><button class="btn sm" data-d="loan-edit">Düzenle</button></div></div>`:`<button class="btn sm" data-d="loan-edit">Ödünç ver</button>`}
     ${(b.loanHistory||[]).length?`<ul class="hist">${b.loanHistory.slice(-5).reverse().map(x=>`<li>${esc(x.to)} · ${esc(dstr(x.at))} – ${esc(dstr(x.back))}</li>`).join('')}</ul>`:''}</div>
   <dl class="ftable">${rows.map(([k,v,m])=>`<div><dt>${k}</dt><dd class="${m?'mono':''}">${esc(v||'—')}</dd></div>`).join('')}</dl>
   ${b.summary?`<div class="dsec"><small>Özet</small><div>${esc(b.summary)}</div></div>`:''}
@@ -825,16 +836,18 @@ function openLoan(id){
     <label class="flab" for="l-to">Kime verdin?</label><input class="fin" id="l-to" list="dl-people" value="${esc(L.to||'')}" placeholder="ör. Ayşe">
     <datalist id="dl-people">${people().map(p=>`<option value="${esc(p)}">`).join('')}</datalist>
     <label class="flab" for="l-at">Ne zaman verdin?</label><input class="fin" id="l-at" type="date" value="${d0}" max="${today}">
+    <label class="flab" for="l-rem">Ne zaman hatırlatayım?</label><select class="fin" id="l-rem">${[[7,'1 hafta sonra'],[14,'2 hafta sonra'],[30,'1 ay sonra'],[60,'2 ay sonra'],[90,'3 ay sonra'],[0,'Hatırlatma yok']].map(([v,t])=>`<option value="${v}" ${(L.remindDays==null?REM_DEF:L.remindDays)===v?'selected':''}>${t}</option>`).join('')}</select>
     <label class="flab" for="l-note">Not (isteğe bağlı)</label><input class="fin" id="l-note" value="${esc(L.note||'')}" placeholder="ör. okuyup bitirince getirecek">
     <div class="acts" style="margin-top:16px"><button class="btn pri" id="l-ok">Kaydet</button>${L.to?'<button class="btn" id="l-back">Geri geldi</button>':''}</div>`);
   setTimeout(()=>$('#l-to').focus(),60);
   $('#l-ok').onclick=async()=>{const to=$('#l-to').value.trim();if(!to){$('#l-to').focus();return}
     const v=$('#l-at').value;const at=v?new Date(v+'T12:00:00').getTime():Date.now();
-    closeSheet();await patch(id,{loan:{to,at,note:$('#l-note').value.trim()}});toast(`Ödünç verildi: ${to}`);if(detailId===id)renderDrawer()};
+    const rd=+$('#l-rem').value;closeSheet();await patch(id,{loan:{to,at,note:$('#l-note').value.trim(),remindDays:rd}});toast(rd?`Ödünç verildi: ${to}. ${rd} gün sonra hatırlatacağım.`:`Ödünç verildi: ${to}`);syncLoanNotifs(true);if(detailId===id)renderDrawer()};
   const bb=$('#l-back');if(bb)bb.onclick=()=>{closeSheet();loanBack(id)};
 }
 async function loanBack(id){
   const b=books[id];if(!b||!b.loan)return;const L=b.loan;
+  setTimeout(()=>syncLoanNotifs(),500);
   await patch(id,{loan:null,loanHistory:[...(b.loanHistory||[]),{to:L.to,at:L.at,back:Date.now()}].slice(-20)});
   undoFn=async()=>{await patch(id,{loan:L,loanHistory:(books[id].loanHistory||[]).slice(0,-1)})};
   toast(`${b.title} geri geldi`,true);if(detailId===id)renderDrawer();
@@ -986,6 +999,8 @@ document.addEventListener('click',async e=>{
     case 'check':$('#add-menu').hidden=true;openCheck();break;
     case 'scan-bar':$('#add-menu').hidden=true;if(!$('#b-case').value&&curCase)$('#b-case').value=curCase;openSheet('sh-bar');break;
     case 'new':$('#add-menu').hidden=true;openDrawer('__new',true);break;
+    case 'data':$('#add-menu').hidden=true;openData();break;
+    case 'arrange':openArrange();break;
     case 'del-account':$('#add-menu').hidden=true;delAccountDialog();break;
     case 'logout':$('#add-menu').hidden=true;if(window._signOut)window._signOut();break;
     case 'sel-clear':sel=null;render();break;
@@ -1201,6 +1216,164 @@ $('#c-res').addEventListener('click',e=>{const t=e.target.closest('[data-c]');if
   if(t.dataset.c==='add'){const i=checkInfo||{};closeSheet();resetBar(true);$('#b-isbn').value=i.isbn||t.dataset.isbn||'';$('#b-title').value=i.title||'';$('#b-author').value=i.author||'';$('#b-pub').value=i.publisher||'';$('#b-pages').value=i.pages||'';
     if(!$('#b-case').value&&curCase)$('#b-case').value=curCase;openSheet('sh-bar');$('#b-status').textContent='Bilgileri kontrol edip rafını seç, sonra kaydet.'}});
 
+/* ---------- dosya kaydetme (web: indir, Android: paylaş) ---------- */
+let xlsxP=null;
+const loadXLSX=()=>xlsxP||(xlsxP=new Promise((ok,no)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';s.onload=()=>ok(window.XLSX);s.onerror=()=>{xlsxP=null;no(new Error('Excel modülü yüklenemedi; internet bağlantını kontrol et.'))};document.head.appendChild(s)}));
+const isNative=()=>!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
+async function saveFile(name,blob){
+  const P=window.Capacitor&&window.Capacitor.Plugins;
+  if(isNative()&&P&&P.Filesystem&&P.Share){
+    const b64=(await new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(String(r.result));r.onerror=no;r.readAsDataURL(blob)})).split(',')[1];
+    const w=await P.Filesystem.writeFile({path:name,data:b64,directory:'CACHE'});
+    await P.Share.share({title:name,files:[w.uri],dialogTitle:'Dosyayı kaydet ya da gönder'});return;
+  }
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},4000);
+}
+const today=()=>new Date().toISOString().slice(0,10);
+const COLS=[['Kitap','title'],['Yazar','author'],['Yayınevi','publisher'],['Kategori','genre'],['ISBN','isbn'],['Sayfa','pages'],['Basım yılı','year'],['Kitaplık','bookcase'],['Raf','shelf'],['Sıra','pos'],['Durum','status'],['Okunan sayfa','page'],['Puan','rating'],['Notlar','notes']];
+async function exportExcel(){
+  const X=await loadXLSX();
+  const rows=all().sort((a,b)=>coll.compare(a.title||'',b.title||'')).map(b=>{const o={};COLS.forEach(([h,k])=>o[h]=k==='status'?(stLabel[b.status]||''):(b[k]??''));o['Ödünç (kimde)']=b.loan?b.loan.to:'';o['Ödünç tarihi']=b.loan?new Date(b.loan.at).toLocaleDateString('tr-TR'):'';return o});
+  const ws=X.utils.json_to_sheet(rows);ws['!cols']=[{wch:34},{wch:22},{wch:24},{wch:14},{wch:15},{wch:7},{wch:9},{wch:14},{wch:5},{wch:5},{wch:10},{wch:9},{wch:6},{wch:40},{wch:14},{wch:12}];
+  const wb=X.utils.book_new();X.utils.book_append_sheet(wb,ws,'Kitaplar');
+  const out=X.write(wb,{bookType:'xlsx',type:'array'});
+  await saveFile(`raf-izi-kitapligim-${today()}.xlsx`,new Blob([out],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
+}
+async function exportBackup(){
+  const data={app:'raf-izi',v:1,at:new Date().toISOString(),meta,books:all().map(b=>{const c={...b};delete c.photoId;delete c.box;return c})};
+  await saveFile(`raf-izi-yedek-${today()}.json`,new Blob([JSON.stringify(data)],{type:'application/json'}));
+}
+/* içe aktarma: Raf İzi yedeği (.json), Excel / CSV, Goodreads dışa aktarımı */
+const HMAP={title:['kitap','kitap adi','title','baslik','ad','eser'],author:['yazar','author','authors','yazarlar'],publisher:['yayinevi','publisher','yayinci'],genre:['kategori','tur','genre'],
+  isbn:['isbn13','isbn','isbn 13'],pages:['sayfa','sayfa sayisi','number of pages','pages'],year:['basim yili','yil','year published','original publication year','yayin yili'],
+  bookcase:['kitaplik'],shelf:['raf'],pos:['sira'],status:['durum','exclusive shelf','read status'],page:['okunan sayfa'],rating:['puan','my rating'],notes:['notlar','my review','private notes','not'],finishedAt:['date read','bitis tarihi']};
+const STMAP={'read':'okundu','okundu':'okundu','currently reading':'okunuyor','currently-reading':'okunuyor','okunuyor':'okunuyor','to read':'okunacak','to-read':'okunacak','okunacak':'okunacak'};
+let importRows=[];
+async function readImportFile(f){
+  const st=$('#d-imp');st.className='status';st.textContent='Dosya okunuyor…';importRows=[];
+  try{
+    if(/\.json$/i.test(f.name)){const j=JSON.parse(await f.text());if(!j||!Array.isArray(j.books))throw new Error('Bu bir Raf İzi yedek dosyası değil.');importRows=j.books.filter(b=>b&&b.title).map(b=>({...b}));if(j.meta&&Array.isArray(j.meta.names))importRows._meta=j.meta}
+    else{const X=await loadXLSX();const wb=X.read(await f.arrayBuffer(),{type:'array',cellDates:true});const ws=wb.Sheets[wb.SheetNames[0]];
+      const rows=X.utils.sheet_to_json(ws,{defval:''});if(!rows.length)throw new Error('Dosyada satır bulunamadı.');
+      const keys=Object.keys(rows[0]);const col={};for(const[k,al]of Object.entries(HMAP)){const hit=keys.find(h=>al.includes(norm(h)));if(hit)col[k]=hit}
+      if(!col.title)throw new Error('Kitap adı sütunu bulunamadı (başlık “Kitap” ya da “Title” olmalı).');
+      importRows=rows.map(r=>{const b={};for(const[k,h]of Object.entries(col)){let v=r[h];if(v===''||v==null)continue;b[k]=v}
+        if(!b.title)return null;b.title=String(b.title).trim();
+        if(b.author)b.author=String(b.author).trim();if(b.publisher)b.publisher=String(b.publisher).trim();if(b.genre)b.genre=String(b.genre).trim();
+        if(b.isbn)b.isbn=String(b.isbn).replace(/[^0-9Xx]/g,'');if(b.isbn==='')delete b.isbn;
+        ['pages','year','shelf','pos','page'].forEach(k=>{if(b[k]!=null)b[k]=num(b[k])});
+        if(b.rating!=null){b.rating=Math.max(0,Math.min(5,parseInt(b.rating)||0))}
+        if(b.status!=null){b.status=STMAP[norm(b.status).replace(/ /g,' ')]||STMAP[String(b.status).toLowerCase()]||''}
+        if(b.finishedAt){const t=new Date(b.finishedAt).getTime();b.finishedAt=isNaN(t)?null:t;if(b.finishedAt&&!b.status)b.status='okundu'}
+        if(b.bookcase)b.bookcase=String(b.bookcase).trim();if(b.notes)b.notes=String(b.notes);
+        return b}).filter(Boolean)}
+    const dup=importRows.filter(b=>findExisting(b.title,b.isbn)).length;
+    st.textContent=`${importRows.length} kitap bulundu${dup?`, ${dup} tanesi zaten kitaplığında (atlanacak)`:''}.`;
+    $('#d-imp-go').hidden=!(importRows.length-dup);$('#d-imp-go').textContent=`${importRows.length-dup} kitabı ekle`;
+  }catch(e){st.className='status err';st.textContent=e.message||'Dosya okunamadı.';$('#d-imp-go').hidden=true}
+}
+async function doImport(){
+  const st=$('#d-imp');const add=importRows.filter(b=>!findExisting(b.title,b.isbn));if(!add.length)return;
+  $('#d-imp-go').disabled=true;st.textContent='Ekleniyor…';
+  try{
+    const out=add.map(b=>{const c={...b,id:books[b.id]?newId():(b.id&&/^[\w-]{4,40}$/.test(b.id)?b.id:newId()),addedAt:b.addedAt||Date.now(),source:b.source||'içe aktarma'};if(c.bookcase)c.bookcase=caseName(c.bookcase);if(!c.shelf){c.shelf=null;c.pos=null}return c});
+    for(const c of new Set(out.map(b=>b.bookcase).filter(Boolean)))await ensureCase(c,Math.max(0,...out.filter(b=>same(b.bookcase,c)).map(b=>b.shelf||0)));
+    if(importRows._meta)for(const n of importRows._meta.names)await ensureCase(n,(importRows._meta.shelves||{})[slug(n)]||0);
+    for(let i=0;i<out.length;i+=300)await putBooks(out.slice(i,i+300));
+    closeSheet();toast(`${out.length} kitap eklendi; kapak ve eksik bilgiler arka planda tamamlanıyor`);queueCovers();importRows=[];
+  }catch(e){st.className='status err';st.textContent='Eklenemedi: '+(e.code||e.message)}
+  $('#d-imp-go').disabled=false;
+}
+function openData(){
+  sheetHtml('sh-data',`<div class="ph"><h2>Yedek ve aktarma</h2><button class="xb" data-close aria-label="Kapat">×</button></div>
+    <div class="dsec" style="margin-top:4px"><small>Dışa aktar</small>
+      <div class="acts"><button class="btn pri" id="d-xlsx">Excel olarak indir</button><button class="btn" id="d-json">Yedek dosyası indir</button></div>
+      <p class="hint">Excel dosyasında tüm kitapların yeri, okuma ve ödünç bilgileriyle olur. Yedek dosyası (.json) Raf İzi'ye geri yüklemek içindir.</p></div>
+    <div class="dsec"><small>İçe aktar</small>
+      <span class="btn fileb">Dosya seç (Excel, CSV, Goodreads, Raf İzi yedeği)<input type="file" id="d-file" accept=".xlsx,.xls,.csv,.json,text/csv,application/json,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"></span>
+      <p class="hint">Goodreads'ten: My Books → Import and export → Export Library ile indirdiğin CSV dosyasını seç. Kendi Excel listende ilk satırda “Kitap”, “Yazar”, “Yayınevi”, “ISBN” gibi başlıklar olsun. Zaten kayıtlı kitaplar atlanır.</p>
+      <p class="status" id="d-imp"></p><div class="acts"><button class="btn pri" id="d-imp-go" hidden>Ekle</button></div></div>`);
+  const busy=async(btn,fn)=>{const t=btn.textContent;btn.disabled=true;btn.textContent='Hazırlanıyor…';try{await fn();toast('Dosya hazır')}catch(e){toast(e.message||'Olmadı, tekrar dene')}btn.disabled=false;btn.textContent=t};
+  $('#d-xlsx').onclick=e=>busy(e.currentTarget,exportExcel);$('#d-json').onclick=e=>busy(e.currentTarget,exportBackup);
+  $('#d-file').onchange=e=>{const f=e.target.files[0];if(f)readImportFile(f);e.target.value=''};$('#d-imp-go').onclick=doImport;
+}
+
+/* ---------- ödünç hatırlatma ---------- */
+const REM_DEF=30;
+const dueAt=L=>{const d=L.remindDays==null?REM_DEF:L.remindDays;if(!d)return null;return Math.max(L.at+d*864e5,L.snoozeUntil||0)};
+const overdue=()=>all().filter(b=>b.loan&&dueAt(b.loan)&&dueAt(b.loan)<=Date.now()).sort((a,b)=>a.loan.at-b.loan.at);
+function waText(b){return `Merhaba ${b.loan.to}, ${dstr(b.loan.at)} tarihinde verdiğim “${b.title}” kitabı sende duruyor mu? Bitirdiysen uygun bir zamanda geri alabilir miyim? Teşekkürler!`}
+const waLink=b=>'https://wa.me/?text='+encodeURIComponent(waText(b));
+const WA_SVG='<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.5 0-3-.4-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6.5-.1 1.5-.6 1.7-1.2s.2-1.1.2-1.2-.3-.2-.5-.3z"/></svg>';
+function remindHtml(){
+  const o=overdue();if(!o.length)return '';
+  return `<div class="remind"><div class="rh"><b>Geri isteme zamanı</b><span class="sub">${o.length} kitap uzun süredir ödünçte</span></div>${o.slice(0,4).map(b=>`<div class="ri">${coverHtml(b,'xs')}<div><b>${esc(b.title)}</b><div class="sub">Kimde: ${esc(b.loan.to)} · ${daysSince(b.loan.at)} gündür</div></div>
+    <div class="acts"><a class="btn sm wa" href="${esc(waLink(b))}" target="_blank" rel="noopener">${WA_SVG}Hatırlat</a><button class="btn sm" data-rm="back" data-id="${esc(b.id)}">Geri geldi</button><button class="btn sm ghost" data-rm="snooze" data-id="${esc(b.id)}">7 gün sonra</button></div></div>`).join('')}${o.length>4?`<p class="sub" style="margin:8px 0 0">+${o.length-4} kitap daha: Dizin → Ödünç verdiklerim</p>`:''}</div>`;
+}
+document.addEventListener('click',e=>{const t=e.target.closest('[data-rm]');if(!t)return;const id=t.dataset.id;
+  if(t.dataset.rm==='back')loanBack(id);
+  if(t.dataset.rm==='snooze'){const b=books[id];patch(id,{loan:{...b.loan,snoozeUntil:Date.now()+7*864e5}});toast('7 gün sonra tekrar hatırlatılacak')}});
+/* Android: zamanı gelince bildirim */
+let notifT=null,notifAsked=false;
+function syncLoanNotifs(ask){
+  const LN=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.LocalNotifications;if(!isNative()||!LN)return;
+  clearTimeout(notifT);notifT=setTimeout(async()=>{try{
+    if(ask&&!notifAsked){notifAsked=true;await LN.requestPermissions()}
+    const pend=(await LN.getPending()).notifications||[];const mine=pend.filter(n=>n.id>=1e8&&n.id<2e9);if(mine.length)await LN.cancel({notifications:mine.map(n=>({id:n.id}))});
+    const list=all().filter(b=>b.loan&&dueAt(b.loan)&&dueAt(b.loan)>Date.now()+6e4).map(b=>({id:1e8+hash(b.id)%9e8,title:'Ödünç hatırlatma',body:`“${b.title}” ${b.loan.to} adlı kişide; geri istemek ister misin?`,schedule:{at:new Date(dueAt(b.loan)),allowWhileIdle:true},extra:{id:b.id}}));
+    if(list.length)await LN.schedule({notifications:list.slice(0,60)});
+  }catch(e){console.warn('bildirim',e)}},1500);
+}
+
+/* ---------- raf düzenleme önerisi ---------- */
+const hexHsl=hex=>{const n=parseInt(hex.slice(1),16);let r=(n>>16)/255,g=((n>>8)&255)/255,b=(n&255)/255;const mx=Math.max(r,g,b),mn=Math.min(r,g,b);let h=0,s=0,l=(mx+mn)/2;
+  if(mx!==mn){const d=mx-mn;s=l>.5?d/(2-mx-mn):d/(mx+mn);h=mx===r?(g-b)/d+(g<b?6:0):mx===g?(b-r)/d+2:(r-g)/d+4;h*=60}return[h,s,l]};
+const spineCache={};
+function spineFromPhoto(b){return new Promise(res=>{const p=photos[b.photoId];if(!p||!p.img||!Array.isArray(b.box))return res(null);
+  const im=new Image();im.onload=()=>{try{const[y0,x0,y1,x1]=b.box.map(v=>+v/1000);const W=im.naturalWidth,H=im.naturalHeight;
+    const sx=(x0+(x1-x0)*.2)*W,sw=(x1-x0)*.6*W,sy=(y0+(y1-y0)*.25)*H,sh=(y1-y0)*.5*H;if(sw<2||sh<2)return res(null);
+    const c=document.createElement('canvas');c.width=8;c.height=16;const g=c.getContext('2d');g.drawImage(im,sx,sy,sw,sh,0,0,8,16);
+    const d=g.getImageData(0,0,8,16).data;let r=0,gg=0,bb=0;for(let i=0;i<d.length;i+=4){r+=d[i];gg+=d[i+1];bb+=d[i+2]}const n=d.length/4;
+    res('#'+[r,gg,bb].map(v=>Math.round(v/n).toString(16).padStart(2,'0')).join(''))}catch(e){res(null)}};im.onerror=()=>res(null);im.src=p.img})}
+let spineT=null;
+function fillSpineColors(){clearTimeout(spineT);spineT=setTimeout(async()=>{
+  const todo=all().filter(b=>!b.spine&&b.photoId&&photos[b.photoId]&&!spineCache[b.id]).slice(0,120);if(!todo.length)return;
+  const out=[];for(const b of todo){spineCache[b.id]=1;const c=await spineFromPhoto(b);if(c)out.push({...books[b.id],spine:c})}
+  if(out.length)try{await putBooks(out)}catch(e){}},1500)}
+const surname=a=>{const p=String(a||'').trim().split(/\s+/);return p.length?p[p.length-1]:''};
+const ARR={author:['Yazara göre',(a,b)=>coll.compare(surname(a.author)||'~',surname(b.author)||'~')||coll.compare(a.author||'',b.author||'')||coll.compare(a.title||'',b.title||'')],
+  genre:['Kategoriye göre',(a,b)=>coll.compare(a.genre||'~',b.genre||'~')||coll.compare(surname(a.author)||'~',surname(b.author)||'~')||coll.compare(a.title||'',b.title||'')],
+  publisher:['Yayınevine göre',(a,b)=>coll.compare(a.publisher||'~',b.publisher||'~')||coll.compare(a.title||'',b.title||'')],
+  title:['Kitap adına göre',(a,b)=>coll.compare(a.title||'',b.title||'')],
+  color:['Renge göre',(a,b)=>{const k=x=>{if(!x.spine)return[3,0,0];const[h,s,l]=hexHsl(x.spine);return s<.18||l<.12||l>.9?[1,l,0]:[0,h,l]};const A=k(a),B=k(b);return A[0]-B[0]||A[1]-B[1]||A[2]-B[2]}]};
+let arrMode='author';
+function proposal(){
+  const n=shelfCount(curCase),counts=[],list=[];for(let s=1;s<=n;s++){const r=shelfBooks(curCase,s);counts.push(r.length);list.push(...r)}
+  const sorted=[...list].sort(ARR[arrMode][1]);const plan=[];let i=0;
+  counts.forEach((c,si)=>{for(let k=0;k<c;k++){plan.push({b:sorted[i++],shelf:si+1,pos:k+1})}});
+  return{plan,counts,moved:plan.filter(p=>p.b.shelf!==p.shelf||p.b.pos!==p.pos).length,unknown:arrMode==='color'?list.filter(b=>!b.spine).length:0};
+}
+function openArrange(){
+  if(!curCase)return;
+  const draw=()=>{const P=proposal();let h='';
+    P.counts.forEach((c,si)=>{const row=P.plan.filter(p=>p.shelf===si+1);
+      h+=`<div class="shead"><span class="mono">${si+1}. Raf</span><span>${c} kitap</span></div><div class="shelf mini">${row.map(p=>spineHtml({...p.b,pos:p.pos},p.pos,p.b.shelf!==p.shelf||p.b.pos!==p.pos).replace('class="spine hit','class="spine moved').replace('<span class="here">BURADA</span>','')).join('')||'<span class="empty">Boş raf</span>'}</div><div class="plank"></div>`});
+    $('#ar-prev').innerHTML=h;
+    const tot=P.counts.reduce((s,c)=>s+c,0);
+    if(arrMode==='color'&&P.unknown===tot){$('#ar-sum').innerHTML='Renge göre dizmek için kitapların raf fotoğrafıyla taranmış olması gerekiyor; renkleri fotoğraftan okuyorum. Bu kitaplıkta henüz fotoğrafla taranmış kitap yok.';$('#ar-prev').innerHTML='';$('#ar-go').hidden=true;$$('#ar-modes button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===arrMode));return}
+    $('#ar-sum').innerHTML=P.moved?`Bu düzende <b>${P.moved} kitabın</b> yeri değişir (altın çerçeveli olanlar). Her raftaki kitap sayısı aynı kalır.${P.unknown?` Rengi bilinmeyen ${P.unknown} kitap sona kondu; renk yalnızca raf fotoğrafıyla taranan kitaplardan okunabiliyor.`:''}`:'Kitapların zaten bu sırada.';
+    $('#ar-go').hidden=!P.moved;$$('#ar-modes button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===arrMode))};
+  sheetHtml('sh-arr',`<div class="ph"><h2>Raf düzenleme önerisi</h2><button class="xb" data-close aria-label="Kapat">×</button></div>
+    <p class="hint">${esc(caseLabel(curCase))} için kitapları nasıl dizebileceğini raf raf gösteriyorum. Beğenirsen kitapları bu sıraya göre dizip “Bu düzeni kaydet”e dokun.</p>
+    <div class="seg" id="ar-modes" style="margin:10px 0 4px">${Object.entries(ARR).map(([k,[t]])=>`<button data-m="${k}">${t}</button>`).join('')}</div>
+    <p class="status" id="ar-sum"></p><div id="ar-prev" class="arprev"></div>
+    <div class="acts" style="margin-top:14px"><button class="btn pri" id="ar-go">Bu düzeni kaydet</button><button class="btn" data-close>Vazgeç</button></div>`);
+  $('#ar-modes').onclick=e=>{const b=e.target.closest('[data-m]');if(b){arrMode=b.dataset.m;draw()}};
+  $('#ar-go').onclick=async()=>{const P=proposal();const old=P.plan.map(p=>({...p.b}));const ch=P.plan.filter(p=>p.b.shelf!==p.shelf||p.b.pos!==p.pos).map(p=>({...p.b,shelf:p.shelf,pos:p.pos,photoId:null,box:null}));
+    closeSheet();await putBooks(ch);undoFn=async()=>{await putBooks(old)};toast(`${ch.length} kitabın yeri güncellendi`,true)};
+  draw();
+}
+
 /* ---------- backends ---------- */
 $('#gate-ill').innerHTML=ILL.shelf;
 const CFG={apiKey:"AIzaSyDST7X8QXynA2YJ6ZJZ1fWp1Ow2eJLylnQ",authDomain:"scribble-kick.firebaseapp.com",projectId:"scribble-kick",
@@ -1245,9 +1418,9 @@ if(window.firebase){
     setNote('Kitaplar yükleniyor…');
     const t=setTimeout(()=>setNote('Kayıtlara şu an ulaşılamıyor; bağlantını kontrol et.'),10000);
     unsub.push(root.collection('books').onSnapshot(s=>{if(!s.metadata.fromCache){clearTimeout(t);setNote('')}
-      const nb={};s.docs.forEach(d=>{nb[d.id]={...d.data(),id:d.id}});books=nb;render();queueCovers()},e=>{clearTimeout(t);setNote('Kayıtlar okunamadı ('+e.code+').')}));
+      const nb={};s.docs.forEach(d=>{nb[d.id]={...d.data(),id:d.id}});books=nb;render();queueCovers();syncLoanNotifs();fillSpineColors()},e=>{clearTimeout(t);setNote('Kayıtlar okunamadı ('+e.code+').')}));
     unsub.push(root.collection('meta').doc('bookcases').onSnapshot(s=>{const d=s.exists?s.data():{};meta={names:Array.isArray(d.names)?d.names:[],shelves:d.shelves||{}};render()},()=>{}));
-    unsub.push(root.collection('photos').onSnapshot(s=>{const p={};s.docs.forEach(d=>p[d.id]=d.data());photos=p;render()},()=>{}));
+    unsub.push(root.collection('photos').onSnapshot(s=>{const p={};s.docs.forEach(d=>p[d.id]=d.data());photos=p;render();fillSpineColors()},()=>{}));
   });
 }else{
   // Önizleme: örnek kitaplarla, kayıt sadece bu sayfada
