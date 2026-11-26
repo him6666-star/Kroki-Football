@@ -6,7 +6,7 @@ const TR={'ç':'c','ğ':'g','ı':'i','ö':'o','ş':'s','ü':'u','â':'a','î':'i
 const norm=s=>String(s||'').toLocaleLowerCase('tr').replace(/[çğıöşüâîû]/g,c=>TR[c]).normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,' ').trim();
 const books={};const putBooks=async()=>{};const render=()=>{};
 eval(code+';globalThis.lookMeta=lookMeta;');
-const T=[['Tutunamayanlar','Oğuz Atay'],['Kürk Mantolu Madonna','Sabahattin Ali'],['İnce Memed 1','Yaşar Kemal'],['Saatleri Ayarlama Enstitüsü','Ahmet Hamdi Tanpınar'],['Kara Kitap','Orhan Pamuk'],['Suç ve Ceza','Fyodor Dostoyevski']];
+const T=[['Tutunamayanlar','Oğuz Atay'],['Kürk Mantolu Madonna','Sabahattin Ali'],['İnce Memed 1','Yaşar Kemal'],['Saatleri Ayarlama Enstitüsü','Ahmet Hamdi Tanpınar'],['Kara Kitap','Orhan Pamuk'],['Suç ve Ceza','Fyodor Dostoyevski'],['Dune','Frank Herbert'],['Sapiens: Hayvanlardan Tanrılara','Yuval Noah Harari']];
 (async()=>{let ok=0;
   for(const [title,author] of T){const id='t'+Math.random();books[id]={id,title,author};
     const ch=await lookMeta(books[id]);if(ch.isbn||ch.pages)ok++;

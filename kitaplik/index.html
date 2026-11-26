@@ -606,12 +606,15 @@ async function lookMeta(b){
   const isbn0=(b.isbn||'').replace(/[^0-9Xx]/g,'');
   const lastName=(b.author||'').trim().split(/\s+/).pop()||'';
   const cand=[];   // {src,title,isbn,trIsbn,pages,year,publisher,cover,tr}
+  const vol=(norm(b.title).match(/ (\d+)$/)||[])[1];   // cilt numarası (İnce Memed 1 gibi)
+  const volOk=t=>!vol||new RegExp('(^| )'+vol+'( |$)').test(norm(t))&&!/ cilt| set| takim/.test(norm(t)+' ');
   // 1) Google Books
   const gq=isbn0?['isbn:'+isbn0]:[`intitle:${b.title}${lastName?' inauthor:'+lastName:''}`,`${b.title} ${b.author||''}`.trim()];
   for(const q of gq){
     try{const j=await getJSON('https://www.googleapis.com/books/v1/volumes?maxResults=8&q='+encodeURIComponent(q));
       for(const it of j.items||[]){const v=it.volumeInfo||{};const full=[v.title,v.subtitle].filter(Boolean).join(' ');
-        if(!isbn0&&!titleClose(v.title,b.title)&&!titleClose(full,b.title))continue;
+        if(!isbn0&&((!titleClose(v.title,b.title)&&!titleClose(full,b.title))||!volOk(full)))continue;
+        if(v.pageCount>1500)v.pageCount=0;
         const ids=(v.industryIdentifiers||[]).map(x=>x.identifier.replace(/[^0-9X]/g,''));const i13=ids.find(x=>x.length===13)||'';
         const im=v.imageLinks&&(v.imageLinks.thumbnail||v.imageLinks.smallThumbnail);
         cand.push({src:'g',isbn:i13,trIsbn:TR_ISBN.test(i13)||v.language==='tr',pages:v.pageCount||0,year:parseInt(v.publishedDate)||0,publisher:v.publisher||'',
@@ -623,7 +626,7 @@ async function lookMeta(b){
   try{
     const u=isbn0?`https://openlibrary.org/search.json?isbn=${isbn0}&limit=3`:`https://openlibrary.org/search.json?title=${encodeURIComponent(b.title)}${lastName?'&author='+encodeURIComponent(lastName):''}&limit=6`;
     const j=await getJSON(u+'&fields=title,isbn,number_of_pages_median,first_publish_year,publisher,cover_i,language');
-    for(const d of j.docs||[]){if(!isbn0&&!titleClose(d.title,b.title))continue;
+    for(const d of j.docs||[]){if(!isbn0&&(!titleClose(d.title,b.title)||!volOk(d.title)))continue;if(d.number_of_pages_median>1500)d.number_of_pages_median=0;
       const is=(d.isbn||[]).filter(x=>x.length===13);const tri=is.find(x=>TR_ISBN.test(x));
       cand.push({src:'o',isbn:tri||'',trIsbn:!!tri,pages:d.number_of_pages_median||0,year:d.first_publish_year||0,publisher:'',
         cover:d.cover_i?`https://covers.openlibrary.org/b/id/${d.cover_i}-M.jpg`:'',tr:(d.language||[]).includes('tur')})}
@@ -631,7 +634,7 @@ async function lookMeta(b){
   const ch={metaV:META_V,coverTried:Date.now()};
   const pick=f=>{const c=cand.find(x=>x.tr&&x[f])||cand.find(x=>x[f]);return c?c[f]:null};
   if(!isbn0){const c=cand.find(x=>x.isbn&&x.trIsbn);if(c)ch.isbn=c.isbn}
-  if(!b.pages){const c=cand.find(x=>x.pages&&x.trIsbn)||cand.find(x=>x.pages);if(c)ch.pages=c.pages}
+  if(!b.pages){const same=cand.find(x=>x.pages&&x.isbn&&x.isbn===(ch.isbn||isbn0));const c=same||cand.find(x=>x.pages&&x.trIsbn)||cand.find(x=>x.pages);if(c)ch.pages=c.pages}
   if(!b.year){const y=pick('year');if(y)ch.year=y}
   if(!b.publisher){const c=cand.find(x=>x.publisher&&x.tr);if(c)ch.publisher=c.publisher}
   if(!b.summary){const c=cand.find(x=>x.summary);if(c){const s=c.summary.replace(/<[^>]+>/g,'');ch.summary=s.length>320?s.slice(0,s.lastIndexOf('.',320)+1||320):s}}
