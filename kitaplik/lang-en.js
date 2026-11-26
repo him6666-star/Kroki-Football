@@ -40,7 +40,7 @@ exact:{
 'Yayınevi belirtilmemiş':'No publisher','Yazarı belirtilmemiş':'No author','Kategorisi belirtilmemiş':'No category','belirtilmemiş':'not set',
 'Şu an ödünç verdiğin kitap yok. Bir kitabın üstüne basılı tutup “Ödünç ver”i seçebilirsin.':'You haven’t lent any books. Press and hold a book and choose “Lend”.',
 // drawer
-'Kitap detayı':'Book details','Düzenle':'Edit','Kapat':'Close','Kitap':'Book','Yeni kitap':'New book','Raf Fotoğrafı':'Shelf photo','Barkod':'Barcode','Elle eklendi':'Added manually',
+'Kitap detayı':'Book details','Düzenle':'Edit','Kapat':'Close','Kamera açılamadı. Aşağıdaki “Fotoğraf seç” ile çekebilir ya da galeriden seçebilirsin.':'Couldn’t open the camera. Use “Choose photo” below to take one or pick from your gallery.','Fotoğraf seç':'Choose photo','Çek':'Take','Kitap':'Book','Yeni kitap':'New book','Raf Fotoğrafı':'Shelf photo','Barkod':'Barcode','Elle eklendi':'Added manually',
 'Kapak ara':'Find cover','Kapağı yenile':'Refresh cover','İnternetten tamamla':'Fill in from the web','Bilgileri yenile':'Refresh details','Aranıyor…':'Searching…',
 'Kitaplıktaki Konumu':'Location in your bookcase','Yerini değiştir':'Move','Kitaplık':'Bookcase','Raf':'Shelf','Rafsız':'No shelf','Kitaplık seç':'Choose bookcase','+ Yeni kitaplık…':'+ New bookcase…',
 '◀ Sola':'◀ Left','Sağa ▶':'Right ▶','▲ Üst raf':'▲ Shelf up','▼ Alt raf':'▼ Shelf down',

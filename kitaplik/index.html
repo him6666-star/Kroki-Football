@@ -305,6 +305,13 @@ body.out .gate{display:flex}
   .res .meta{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
 }
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+.cam{position:fixed;inset:0;z-index:9999;background:#000;display:flex;flex-direction:column;color:#fff}
+.cam video{flex:1 1 auto;min-height:0;width:100%;object-fit:cover;background:#000}
+.cam .cbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px calc(16px + env(safe-area-inset-bottom))}
+.cam .cbar .btn{min-width:84px}
+.cam .shut{width:72px;height:72px;border-radius:50%;border:4px solid #fff;background:rgba(255,255,255,.25);flex:none;padding:0}
+.cam .shut:active{background:#fff}
+.cam .cmsg{position:absolute;left:20px;right:20px;top:40%;text-align:center;font-size:15px;line-height:1.5}
 </style>
 </head>
 <body>
@@ -1574,6 +1581,36 @@ if(window.firebase){
 }
 render();
 }
+
+/* iPhone/iPad: sistem kamerasi (input capture) bazen siyah ekranda takiliyor (WebKit hatasi). Web'de sayfa ici kamera kullan. */
+(()=>{
+  const IOS=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  if(!IOS||window.Capacitor?.isNativePlatform?.()||!navigator.mediaDevices?.getUserMedia)return;
+  let box,stream,target;
+  const give=f=>{const t=target;close();if(!t||!f)return;Object.defineProperty(t,'files',{value:[f],configurable:true});t.dispatchEvent(new Event('change',{bubbles:true}));setTimeout(()=>{try{delete t.files}catch(e){}},0)};
+  const stop=()=>{if(stream){stream.getTracks().forEach(x=>x.stop());stream=null}};
+  function close(){stop();if(box){box.remove();box=null}target=null}
+  async function start(){
+    const v=box.querySelector('video'),m=box.querySelector('.cmsg');m.hidden=true;stop();
+    try{stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:{ideal:'environment'},width:{ideal:2560},height:{ideal:1920}}});
+      v.srcObject=stream;await v.play();box.querySelector('.shut').disabled=false}
+    catch(e){m.hidden=false;box.querySelector('.shut').disabled=true}
+  }
+  function open(inp){
+    target=inp;
+    box=document.createElement('div');box.className='cam';
+    box.innerHTML='<video playsinline muted autoplay></video><div class="cmsg" hidden>Kamera açılamadı. Aşağıdaki “Fotoğraf seç” ile çekebilir ya da galeriden seçebilirsin.</div><div class="cbar"><button class="btn" data-c="x">Kapat</button><button class="shut" data-c="shot" aria-label="Çek" disabled></button><span class="btn fileb">Fotoğraf seç<input type="file" accept="image/*"></span></div>';
+    document.body.appendChild(box);
+    box.querySelector('[data-c=x]').onclick=close;
+    box.querySelector('input').onchange=e=>give(e.target.files[0]);
+    box.querySelector('.shut').onclick=()=>{const v=box.querySelector('video');if(!v.videoWidth)return;
+      const c=document.createElement('canvas');c.width=v.videoWidth;c.height=v.videoHeight;c.getContext('2d').drawImage(v,0,0);
+      c.toBlob(b=>b&&give(new File([b],'kamera.jpg',{type:'image/jpeg'})),'image/jpeg',.92)};
+    start();
+  }
+  document.addEventListener('click',e=>{const t=e.target;if(t&&t.tagName==='INPUT'&&t.type==='file'&&t.hasAttribute('capture')&&!(box&&box.contains(t))){e.preventDefault();open(t)}},true);
+  document.addEventListener('visibilitychange',()=>{if(!box)return;if(document.hidden)stop();else start()});
+})();
 </script>
 </body>
 </html>
