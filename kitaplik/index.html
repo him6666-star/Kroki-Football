@@ -256,6 +256,11 @@ textarea.fin{height:auto;min-height:88px;padding:10px 12px;resize:vertical}
 .fam{list-style:none;padding:0;margin:14px 0 0}.fam li{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--line)}.fam li>span:nth-child(2){flex:1}.fam em{font-style:normal;font-size:12.5px;color:var(--mute);margin-left:6px}
 .fam .av{width:34px;height:34px;border-radius:50%;background:var(--soft);color:var(--soft-ink);display:grid;place-items:center;font-weight:600}
 .code{font:600 36px/1 var(--mono);letter-spacing:.18em;background:var(--bg);border:1px dashed var(--line);border-radius:12px;padding:16px;text-align:center;margin-bottom:8px}
+.qedit{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px;margin:8px 0}
+.quotes{list-style:none;padding:0;margin:8px 0 0}.quotes li{border-top:1px solid var(--line);padding:10px 0}
+.quotes blockquote{margin:0;padding-left:12px;border-left:3px solid var(--gold);font:500 16px/1.5 var(--serif);white-space:pre-wrap}
+.quotes .qm{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center;font-size:12.5px;color:var(--mute);margin-top:6px}.quotes .qm>span{white-space:nowrap}.quotes .qm .acts{flex-wrap:nowrap}
+a.btn{color:inherit;text-decoration:none}a.btn.wa{color:#fff}
 .remind{background:light-dark(#fff6e2,#33291a);border:1px solid light-dark(#f0d9a6,#5a4724);border-radius:14px;padding:14px 16px;margin-bottom:16px}
 .remind .rh{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;margin-bottom:6px}.remind .rh b{font:600 18px var(--serif)}
 .remind .ri{display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 0;border-top:1px solid light-dark(#f0d9a6,#5a4724)}
@@ -273,7 +278,8 @@ textarea.fin{height:auto;min-height:88px;padding:10px 12px;resize:vertical}
 .verdict .cov.l{width:88px}
 @media(max-width:420px){.verdict{grid-template-columns:minmax(0,1fr)}.verdict .cov.l{width:76px}}
 .check{display:flex;gap:10px;align-items:flex-start;margin-top:12px;font-size:15px}.check input{width:22px;height:22px;flex:none;accent-color:var(--green)}
-.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:60;background:var(--ink);color:var(--bg);border-radius:12px;padding:10px 12px 10px 16px;display:none;gap:12px;align-items:center;max-width:92vw}
+.toast{position:fixed;left:0;right:0;margin:0 auto;width:max-content;max-width:min(92vw,560px);bottom:24px;z-index:60;background:var(--ink);color:var(--bg);border-radius:12px;padding:10px 12px 10px 16px;display:none;gap:12px;align-items:center}
+.toast #toast-t{flex:1 1 auto;min-width:0}
 .toast.on{display:flex}.toast button{white-space:nowrap;flex:none;border:0;background:var(--gold);color:#fff;border-radius:8px;padding:8px 12px;font-weight:600}
 .note{background:light-dark(#fff6e2,#33291a);color:light-dark(#6b4c0e,#f0cf8a);border-radius:10px;padding:10px 14px;margin-bottom:16px;font-size:14px}
 .note:empty{display:none}
@@ -463,7 +469,8 @@ loan:`<svg class="ill" viewBox="0 0 320 170" aria-hidden="true"><ellipse cx="160
 
 /* ---------- state ---------- */
 let books={},meta={names:[],shelves:{}},photos={},B=null,user=null,unsub=[],fam=null;
-const PERSONAL=['status','page','rating','notes','statusAt','finishedAt','loan','loanHistory'];
+const PERSONAL=['status','page','rating','notes','statusAt','finishedAt','loan','loanHistory','quotes'];
+let qEdit=null;
 let view='map',curCase=null,sel=null,scrollSel=false,mapMode='diagram',q='',catFilter=null,sortBy='title',dirTab='publisher',readTab='okunuyor';
 let detailId=null,editMode=false,lastDeleted=null;
 
@@ -723,9 +730,10 @@ function renderDir(){
 }
 
 /* ---------- drawer ---------- */
-function openDrawer(id,edit){detailId=id;editMode=!!edit;renderDrawer();$('#drawer').classList.add('on');$('#scrim').classList.add('on')}
+function openDrawer(id,edit){if(!qEdit||qEdit.id!==id)qEdit=null;detailId=id;editMode=!!edit;renderDrawer();$('#drawer').classList.add('on');$('#scrim').classList.add('on')}
 function closeDrawer(){detailId=null;$('#drawer').classList.remove('on');$('#scrim').classList.remove('on')}
 function renderDrawer(){
+  if(qEdit&&!qEdit.busy&&$('#q-text')){qEdit.text=$('#q-text').value;const pg=$('#q-page');if(pg)qEdit.page=pg.value}
   const isNew=detailId==='__new';
   const b=isNew?{}:books[detailId];if(!b){closeDrawer();return}
   const c=colorOf(b);
@@ -760,8 +768,27 @@ function renderDrawer(){
   <div class="dsec"><small>Okuma Takibi</small><div class="seg3">${['okunacak','okunuyor','okundu'].map(s=>`<button data-st="${s}" aria-pressed="${b.status===s}">${stLabel[s]}</button>`).join('')}</div></div>
   <div class="dsec"><small style="display:flex;justify-content:space-between">Okunan Sayfa<span class="mono">${b.page||0}${b.pages?' / '+b.pages+' (%'+pct+')':''}</span></small><input class="fin mono" type="number" min="0" id="d-page" value="${b.page||0}" inputmode="numeric"></div>
   <div class="dsec"><small style="display:flex;justify-content:space-between;align-items:center">Değerlendirme<span class="stars">${[1,2,3,4,5].map(x=>`<button class="${(b.rating||0)>=x?'on':''}" data-rate="${x}" data-id="${esc(b.id)}" aria-label="${x} yıldız">★</button>`).join('')}</span></small></div>
-  <div class="dsec"><small>Okuma Notları / Alıntılar</small><textarea class="fin" id="d-notes" placeholder="Notunu yaz; dışarı tıklayınca kaydedilir.">${esc(b.notes||'')}</textarea></div>
+  <div class="dsec"><small style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">Alıntılar${(b.quotes||[]).length?' ('+b.quotes.length+')':''}<span class="acts" style="gap:6px"><span class="btn sm soft fileb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>Sayfadan alıntı<input type="file" accept="image/*" capture="environment" id="q-cam"></span><span class="btn sm fileb">Galeriden<input type="file" accept="image/*" id="q-gal"></span><button class="btn sm" data-d="q-new">Yaz</button></span></small>
+    ${quoteEditor(b)}
+    ${(b.quotes||[]).length?`<ul class="quotes">${b.quotes.map((q,i)=>`<li><blockquote>${esc(q.text)}</blockquote><div class="qm"><span class="mono">${q.page?'s. '+esc(q.page):''}</span><span>${esc(dstr(q.at))}</span><span class="acts" style="gap:4px;margin-left:auto"><button class="btn sm ghost" data-d="q-copy" data-i="${i}">Kopyala</button><a class="btn sm ghost" href="https://wa.me/?text=${encodeURIComponent(quoteText(b,q))}" target="_blank" rel="noopener">Paylaş</a><button class="btn sm ghost danger" data-d="q-del" data-i="${i}">Sil</button></span></div></li>`).reverse().join('')}</ul>`:(qEdit&&qEdit.id===b.id?'':'<p class="hint" style="margin:0">Altını çizdiğin bir paragrafın fotoğrafını çek; metni ve sayfa numarasını kitabın alıntılarına kaydedeyim.</p>')}</div>
+  <div class="dsec"><small>Okuma Notları</small><textarea class="fin" id="d-notes" placeholder="Notunu yaz; dışarı tıklayınca kaydedilir.">${esc(b.notes||'')}</textarea></div>
   <div class="dsec"><button class="btn danger sm" data-d="del">Kitabı sil</button></div>`;
+}
+const quoteText=(b,q)=>`“${q.text}” — ${b.title}${b.author?', '+b.author:''}${q.page?', s. '+q.page:''}`;
+function quoteEditor(b){
+  if(!qEdit||qEdit.id!==b.id)return '';
+  if(qEdit.busy)return `<div class="qedit"><p class="status">${esc(qEdit.busy)}</p></div>`;
+  return `<div class="qedit">${qEdit.note?`<p class="status ${qEdit.err?'err':''}" style="margin:0 0 8px">${esc(qEdit.note)}</p>`:''}<textarea class="fin" id="q-text" rows="6" placeholder="Alıntı metni">${esc(qEdit.text||'')}</textarea>
+    <div class="g2" style="margin-top:8px"><input class="fin mono" id="q-page" type="number" min="1" inputmode="numeric" placeholder="Sayfa no" value="${esc(qEdit.page||'')}"><span class="acts" style="gap:6px"><button class="btn pri" data-d="q-save">Kaydet</button><button class="btn" data-d="q-cancel">Vazgeç</button></span></div></div>`;
+}
+async function readQuote(id,f){
+  if(!f)return;qEdit={id,busy:'Sayfa hazırlanıyor…'};renderDrawer();
+  try{const blob=await shrink(f,2200,.9);qEdit={id,busy:'Altı çizili bölüm okunuyor…'};renderDrawer();
+    const st={textContent:''};const v=await askAI('quote',blob,null,st);
+    const text=String(v.text||'').trim();
+    qEdit={id,text,page:num(v.page)||'',note:!text?'Sayfada okunabilir metin bulunamadı; daha yakından ve düz çekmeyi dene ya da metni elle yaz.':v.marked===false?'İşaretli bir bölüm göremedim; sayfadaki belirgin paragrafı aldım. İstediğin kısmı bırakıp gerisini silebilirsin.':'Metni kontrol et, gerekirse düzelt ve kaydet.',err:!text};
+  }catch(e){qEdit={id,text:'',page:'',note:errText(e),err:true}}
+  if(detailId===id)renderDrawer();
 }
 async function patch(id,ch){const b=books[id];if(!b)return;try{await putBooks([{...b,...ch}])}catch(e){toast('Kaydedilemedi')}}
 function setStatus(id,s){const b=books[id];const ns=b.status===s?'':s;const ch={status:ns,statusAt:Date.now()};if(ns==='okundu')ch.finishedAt=Date.now();if(ns==='okundu'&&b.pages)ch.page=b.pages;patch(id,ch)}
@@ -774,6 +801,12 @@ $('#d-body').addEventListener('click',async e=>{
   if(t.dataset.d==='cancel'){editMode=false;renderDrawer();return}
   if(t.dataset.d==='del'){if(!t.dataset.arm){t.dataset.arm=1;t.textContent='Silinsin mi? Tekrar dokun';return}closeDrawer();return deleteBook(id)}
   if(t.dataset.d==='loan-edit')return openLoan(id);
+  if(t.dataset.d==='q-new'){qEdit={id,text:'',page:''};renderDrawer();setTimeout(()=>$('#q-text')&&$('#q-text').focus(),50);return}
+  if(t.dataset.d==='q-cancel'){qEdit=null;renderDrawer();return}
+  if(t.dataset.d==='q-save'){const text=($('#q-text').value||'').trim();if(!text){$('#q-text').focus();return}
+    const q={text,page:num($('#q-page').value),at:Date.now()};qEdit=null;await patch(id,{quotes:[...(books[id].quotes||[]),q]});renderDrawer();toast('Alıntı kaydedildi');return}
+  if(t.dataset.d==='q-copy'){const q=(books[id].quotes||[])[+t.dataset.i];if(q)navigator.clipboard.writeText(quoteText(books[id],q)).then(()=>toast('Alıntı kopyalandı'),()=>toast('Kopyalanamadı'));return}
+  if(t.dataset.d==='q-del'){const old=[...(books[id].quotes||[])];const nq=old.filter((_,i)=>i!==+t.dataset.i);await patch(id,{quotes:nq});undoFn=async()=>{await patch(id,{quotes:old});renderDrawer()};renderDrawer();toast('Alıntı silindi',true);return}
   if(t.dataset.d==='cover'){t.textContent='Aranıyor…';const ch=await lookMeta(books[id]);const got=[ch.cover&&'kapak',ch.isbn&&'ISBN',ch.pages&&'sayfa sayısı',ch.year&&'basım yılı',ch.publisher&&'yayınevi'].filter(Boolean);toast(got.length?'Eklendi: '+got.join(', '):'İnternette yeni bilgi bulunamadı');renderDrawer();return}
   if(t.dataset.d==='loan-back')return loanBack(id);
   if(t.dataset.d==='save')return saveEdit();
@@ -790,6 +823,7 @@ $('#d-body').addEventListener('click',async e=>{
 async function moveFix(old){const list=shelfBooks(old.bookcase,old.shelf);const ch=list.map((x,k)=>x.pos!==k+1?{...x,pos:k+1}:null).filter(Boolean);if(ch.length)await putBooks(ch)}
 $('#d-body').addEventListener('change',async e=>{
   const id=detailId,t=e.target,b=books[id];if(!b)return;
+  if(t.id==='q-cam'||t.id==='q-gal'){const f=t.files[0];t.value='';return readQuote(id,f)}
   if(t.id==='mv-case'){let c=t.value;if(c==='__new'){caseDialog('Yeni kitaplığın adı',async name=>{if(name){await moveBook(id,name,1,null);renderDrawer()}else renderDrawer()});return}
     await moveBook(id,c,b.shelf&&b.shelf<=shelfCount(c)?b.shelf:1,null);renderDrawer()}
   if(t.id==='mv-shelf'){if(!b.bookcase){toast('Önce kitaplık seç');return}const s=+t.value;await moveBook(id,b.bookcase,s||null,null);renderDrawer()}
@@ -1240,7 +1274,7 @@ const today=()=>new Date().toISOString().slice(0,10);
 const COLS=[['Kitap','title'],['Yazar','author'],['Yayınevi','publisher'],['Kategori','genre'],['ISBN','isbn'],['Sayfa','pages'],['Basım yılı','year'],['Kitaplık','bookcase'],['Raf','shelf'],['Sıra','pos'],['Durum','status'],['Okunan sayfa','page'],['Puan','rating'],['Notlar','notes']];
 async function exportExcel(){
   const X=await loadXLSX();
-  const rows=all().sort((a,b)=>coll.compare(a.title||'',b.title||'')).map(b=>{const o={};COLS.forEach(([h,k])=>o[h]=k==='status'?(stLabel[b.status]||''):(b[k]??''));o['Ödünç (kimde)']=b.loan?b.loan.to:'';o['Ödünç tarihi']=b.loan?new Date(b.loan.at).toLocaleDateString('tr-TR'):'';return o});
+  const rows=all().sort((a,b)=>coll.compare(a.title||'',b.title||'')).map(b=>{const o={};COLS.forEach(([h,k])=>o[h]=k==='status'?(stLabel[b.status]||''):(b[k]??''));o['Alıntılar']=(b.quotes||[]).map(q=>(q.page?`[s. ${q.page}] `:'')+q.text).join('\n\n');o['Ödünç (kimde)']=b.loan?b.loan.to:'';o['Ödünç tarihi']=b.loan?new Date(b.loan.at).toLocaleDateString('tr-TR'):'';return o});
   const ws=X.utils.json_to_sheet(rows);ws['!cols']=[{wch:34},{wch:22},{wch:24},{wch:14},{wch:15},{wch:7},{wch:9},{wch:14},{wch:5},{wch:5},{wch:10},{wch:9},{wch:6},{wch:40},{wch:14},{wch:12}];
   const wb=X.utils.book_new();X.utils.book_append_sheet(wb,ws,'Kitaplar');
   const out=X.write(wb,{bookType:'xlsx',type:'array'});

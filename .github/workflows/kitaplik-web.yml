@@ -83,6 +83,16 @@ jobs:
           d.text((80, 1000), 'İletişim Yayınları', font=s, fill=(60, 60, 60))
           d.text((80, 1080), 'ISBN 978-975-470-011-4', font=s, fill=(0, 0, 0))
           img.save('kapak.jpg', quality=88)
+          pg = Image.new('RGB', (1000, 1400), (250, 247, 240)); d = ImageDraw.Draw(pg)
+          s2 = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf', 34)
+          lines = ['Kitapların arasında geçen yıllar insana sabrı', 'öğretir; her sayfa bir öncekinin üstüne kurulur.', '', 'İnsan, bazen bir kitabın tek bir cümlesinde', 'bütün bir hayatı bulur ve o cümleyi bir daha', 'hiç unutmaz.', '', 'Akşam olunca odadaki lamba yandı ve rafların', 'gölgesi duvara uzandı.']
+          y = 140
+          for i, t in enumerate(lines):
+              d.text((90, y), t, font=s2, fill=(30, 30, 30))
+              if 3 <= i <= 5 and t: d.line([(88, y + 44), (90 + d.textlength(t, font=s2), y + 44)], fill=(200, 40, 40), width=4)
+              y += 62
+          d.text((480, 1300), '142', font=s2, fill=(60, 60, 60))
+          pg.save('sayfa.jpg', quality=88)
           PY
           node tools/kitaplik_aile_test.js || echo 'AILE TESTI BASARISIZ'
           node tools/kitaplik_test.js "$SITE.web.app" || {

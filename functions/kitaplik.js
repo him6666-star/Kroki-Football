@@ -21,6 +21,14 @@ Kurallar:
 Sadece şu JSON'u döndür:
 {"books":[{"title":"","author":"","publisher":"","genre":"","shelf":1,"position":1,"confidence":"high","box_2d":[0,0,0,0]}]}`;
 
+const QUOTE = `Bu fotoğraf okunmakta olan bir kitabın sayfası. Okuyucu bir bölümün altını çizmiş, fosforlu kalemle boyamış, kenarına çizgi çekmiş ya da parantez içine almış olabilir.
+Görev: İŞARETLİ bölümün metnini kelimesi kelimesine, sayfadaki yazımıyla aynen çıkar (Türkçe karakterleri doğru yaz, satır sonu tirelerini birleştir, satır sonlarını boşluğa çevir).
+- İşaretli birden fazla ayrı bölüm varsa hepsini sırayla, aralarına boş satır koyarak yaz.
+- Hiç işaret yoksa sayfadaki en belirgin tek paragrafı yaz ve "marked": false yap.
+- "page": sayfanın üstünde ya da altında görünen sayfa numarası; görünmüyorsa 0.
+- Metni özetleme, düzeltme, ekleme yapma.
+Sadece şu JSON'u döndür: {"text":"","page":0,"marked":true}`;
+
 const back = isbn => `Bu bir kitabın arka kapağının fotoğrafı.${isbn ? ' Barkoddan okunan ISBN: ' + isbn + '.' : ' Barkod okunamadı; fotoğrafta ISBN yazıyorsa onu da oku.'}
 Kapakta görünen yazılardan (ve ISBN'den, bu kitabı kesin tanıyorsan bilgilerinden) kitabın adını, yazarını, yayınevini ve türünü çıkar.
 Kapakta yazıyorsa ya da kesin biliyorsan sayfa sayısını ve basım yılını da ekle. "summary": kitabı tek cümlede anlatan kısa Türkçe özet (kapak yazısından ya da kesin bildiğin bilgiden; emin değilsen boş).
@@ -65,7 +73,7 @@ exports.kitaplikOku = onCall(
     const uid = req.auth && req.auth.uid;
     if (!uid) throw new HttpsError('unauthenticated', 'Giriş gerekli');
     const {kind, image, isbn} = req.data || {};
-    if (!['shelf', 'back'].includes(kind) || typeof image !== 'string' || image.length < 100 || image.length > 7e6)
+    if (!['shelf', 'back', 'quote'].includes(kind) || typeof image !== 'string' || image.length < 100 || image.length > 7e6)
       throw new HttpsError('invalid-argument', 'Geçersiz istek');
 
     // gunluk kota
@@ -82,7 +90,7 @@ exports.kitaplikOku = onCall(
 
     const cleanIsbn = String(isbn || '').replace(/[^0-9Xx]/g, '').slice(0, 13);
     try {
-      const out = parse(await gemini(kind === 'shelf' ? SHELF : back(cleanIsbn), image));
+      const out = parse(await gemini(kind === 'shelf' ? SHELF : kind === 'quote' ? QUOTE : back(cleanIsbn), image));
       return out;
     } catch (e) {
       if (e instanceof HttpsError) throw e;
@@ -116,7 +124,7 @@ exports.kitaplikHesapSil = onCall({region: 'europe-west1', maxInstances: 3, time
 const ADJ = 'ABCDEFGHJKLMNPRSTUVYZ23456789';
 async function copyLibrary(db, fromLib, toLib, uid) {
   const src = db.collection('kitaplik').doc(fromLib), dst = db.collection('kitaplik').doc(toLib);
-  const PERSONAL = ['status', 'page', 'rating', 'notes', 'statusAt', 'finishedAt', 'loan', 'loanHistory'];
+  const PERSONAL = ['status', 'page', 'rating', 'notes', 'statusAt', 'finishedAt', 'loan', 'loanHistory', 'quotes'];
   const [books, metaDst, metaSrc, mine] = await Promise.all([src.collection('books').get(), dst.collection('meta').doc('bookcases').get(),
     src.collection('meta').doc('bookcases').get(), src.collection('kisisel').doc(uid).collection('kitap').get()]);
   const myP = {}; mine.forEach(d => { myP[d.id] = d.data(); });

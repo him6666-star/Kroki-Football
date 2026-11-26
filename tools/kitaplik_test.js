@@ -23,6 +23,9 @@ const SITE = process.argv[2] || 'kitapligim.web.app';
     await new Promise(r => setTimeout(r, 20000));
   }
   console.log(JSON.stringify(j, null, 1));
+  const qr = await (await fetch('https://europe-west1-scribble-kick.cloudfunctions.net/kitaplikOku',
+    {method: 'POST', headers: {...ref, Authorization: 'Bearer ' + s.idToken}, body: JSON.stringify({data: {kind: 'quote', image: fs.readFileSync('sayfa.jpg').toString('base64')}})})).json();
+  console.log('alinti testi:', JSON.stringify(qr.result || qr.error));
   const del = await (await fetch('https://europe-west1-scribble-kick.cloudfunctions.net/kitaplikHesapSil',
     {method: 'POST', headers: {...ref, Authorization: 'Bearer ' + s.idToken}, body: JSON.stringify({data: {}})})).json();
   console.log('hesap silme:', JSON.stringify(del));
