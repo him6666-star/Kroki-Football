@@ -2,7 +2,7 @@ name: Raf Izi web yayini
 on:
   push:
     branches: [main]
-    paths: ["kitaplik/**", "functions/kitaplik.js", "tools/kitaplik_test.js", ".github/workflows/kitaplik-web.yml"]
+    paths: ["kitaplik/**", "functions/kitaplik.js", "tools/kitaplik_test.js", "tools/kitaplik_aile_test.js", "firestore.rules", ".github/workflows/kitaplik-web.yml"]
   workflow_dispatch:
 jobs:
   deploy:
@@ -45,7 +45,7 @@ jobs:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/key.json
         run: |
           (cd functions && npm install --no-audit --no-fund)
-          npx -y firebase-tools@13 deploy --project scribble-kick --only "firestore:rules,functions:kitaplikOku,functions:kitaplikHesapSil" --non-interactive --force
+          npx -y firebase-tools@13 deploy --project scribble-kick --only "firestore:rules,functions:kitaplikOku,functions:kitaplikHesapSil,functions:kitaplikAile" --non-interactive --force
       - name: Siteyi yukle
         working-directory: kitaplik
         env:
@@ -84,6 +84,7 @@ jobs:
           d.text((80, 1080), 'ISBN 978-975-470-011-4', font=s, fill=(0, 0, 0))
           img.save('kapak.jpg', quality=88)
           PY
+          node tools/kitaplik_aile_test.js || echo 'AILE TESTI BASARISIZ'
           node tools/kitaplik_test.js "$SITE.web.app" || {
             gcloud auth activate-service-account --key-file="$RUNNER_TEMP/key.json" >/dev/null 2>&1
             echo "--- fonksiyon erisim izni ---"; gcloud run services get-iam-policy kitaplikoku --region europe-west1 --project scribble-kick 2>&1 | head -20

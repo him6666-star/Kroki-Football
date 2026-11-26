@@ -192,12 +192,27 @@ service cloud.firestore {
       allow delete: if request.auth != null && request.auth.uid == resource.data.p1;
     }
 
-    // Kitapligim: her kullanici yalnizca kendi kitapligini okur/yazar
-    match /kitaplik/{uid} {
-      allow read, write: if request.auth != null && request.auth.uid == uid;
-      match /{rest=**} {
-        allow read, write: if request.auth != null && request.auth.uid == uid;
-      }
+    // Raf Izi (Kitapligim): kitaplik/{lib} = sahibinin uid'si; aile uyeleri kitaplik/{lib}.uyeler listesinde
+    function rafUye(lib) {
+      return request.auth != null && (request.auth.uid == lib ||
+        (exists(/databases/$(database)/documents/kitaplik/$(lib)) &&
+         request.auth.uid in get(/databases/$(database)/documents/kitaplik/$(lib)).data.get('uyeler', [])));
+    }
+    match /kitaplik/{lib} {
+      allow read: if rafUye(lib);
+      allow write: if request.auth != null && request.auth.uid == lib;
+      match /books/{id} { allow read, write: if rafUye(lib); }
+      match /meta/{id} { allow read, write: if rafUye(lib); }
+      match /photos/{id} { allow read, write: if rafUye(lib); }
+      // kisisel okuma / odunc bilgisi: yalnizca o kisi
+      match /kisisel/{uid}/{rest=**} { allow read, write: if request.auth != null && request.auth.uid == uid && rafUye(lib); }
+    }
+    match /kitaplikUye/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if false;
+    }
+    match /kitaplikDavet/{code} {
+      allow read, write: if false;
     }
     // Kitapligim gunluk tanima kotasi: yalnizca sunucu yazar
     match /kitaplikKota/{id} {

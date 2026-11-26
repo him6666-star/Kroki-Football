@@ -253,6 +253,9 @@ textarea.fin{height:auto;min-height:88px;padding:10px 12px;resize:vertical}
 .res .meta{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) 62px 62px;gap:6px;margin-top:4px}
 .tag{font-size:12px;font-weight:600;border-radius:6px;padding:1px 7px;justify-self:start}
 .tag.new{background:var(--soft);color:var(--soft-ink)}.tag.old{background:light-dark(#f4ecd8,#3a3322);color:var(--gold-ink)}.tag.low{background:#f8e0de;color:#8c1d16}
+.fam{list-style:none;padding:0;margin:14px 0 0}.fam li{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--line)}.fam li>span:nth-child(2){flex:1}.fam em{font-style:normal;font-size:12.5px;color:var(--mute);margin-left:6px}
+.fam .av{width:34px;height:34px;border-radius:50%;background:var(--soft);color:var(--soft-ink);display:grid;place-items:center;font-weight:600}
+.code{font:600 36px/1 var(--mono);letter-spacing:.18em;background:var(--bg);border:1px dashed var(--line);border-radius:12px;padding:16px;text-align:center;margin-bottom:8px}
 .remind{background:light-dark(#fff6e2,#33291a);border:1px solid light-dark(#f0d9a6,#5a4724);border-radius:14px;padding:14px 16px;margin-bottom:16px}
 .remind .rh{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;margin-bottom:6px}.remind .rh b{font:600 18px var(--serif)}
 .remind .ri{display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 0;border-top:1px solid light-dark(#f0d9a6,#5a4724)}
@@ -324,6 +327,7 @@ body.out .gate{display:flex}
       <button data-act="scan-bar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6v12M7 6v12M10 6v12M14 6v12M16 6v12M20 6v12"/></svg>Barkod okut</button>
       <button data-act="new"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>Elle ekle</button>
       <a class="mlink" href="gizlilik.html" target="_blank" rel="noopener">Gizlilik politikası</a>
+      <button data-act="family"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20a6 6 0 0 1 12 0M14 20a4.5 4.5 0 0 1 7.5-3.4"/></svg>Aile kitaplığı</button>
       <button data-act="data"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M7 10l5 5 5-5M4 19h16"/></svg>Yedek ve aktarma</button>
       <button data-act="del-account" id="m-delacc" style="color:#b3261e"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>Hesabımı ve verilerimi sil</button>
       <button data-act="logout" id="m-logout"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10"/></svg>Çıkış yap</button>
@@ -458,7 +462,8 @@ loan:`<svg class="ill" viewBox="0 0 320 170" aria-hidden="true"><ellipse cx="160
 };
 
 /* ---------- state ---------- */
-let books={},meta={names:[],shelves:{}},photos={},B=null,user=null,unsub=[];
+let books={},meta={names:[],shelves:{}},photos={},B=null,user=null,unsub=[],fam=null;
+const PERSONAL=['status','page','rating','notes','statusAt','finishedAt','loan','loanHistory'];
 let view='map',curCase=null,sel=null,scrollSel=false,mapMode='diagram',q='',catFilter=null,sortBy='title',dirTab='publisher',readTab='okunuyor';
 let detailId=null,editMode=false,lastDeleted=null;
 
@@ -526,7 +531,7 @@ function render(){
   ['map','cat','read','dir'].forEach(v=>$('#v-'+v).hidden=v!==view);
   const list=all();
   const authors=new Set(list.map(b=>norm(b.author)).filter(Boolean)).size,pubs=new Set(list.map(b=>norm(b.publisher)).filter(Boolean)).size,done=list.filter(b=>b.status==='okundu').length;
-  const st=`${list.length} kitap · ${authors} yazar · ${pubs} yayınevi · ${done} okundu`;
+  const st=`${list.length} kitap · ${authors} yazar · ${pubs} yayınevi · ${done} okundu`+(fam&&(fam.uyeler.length||!fam.owner)?` · aile kitaplığı (${fam.uyeler.length+1} kişi)`:'');
   $('#map-stats').textContent=st;$('#cat-stats').textContent=st;
   $('#q').placeholder=`Kitaplığında ara (${list.length} kitap): kitap adı, yazar, yayınevi veya ISBN…`;
   if(view==='map')renderMap();else if(view==='cat')renderCat();else if(view==='read'){renderRead();renderCharts()}else renderDir();
@@ -999,6 +1004,7 @@ document.addEventListener('click',async e=>{
     case 'check':$('#add-menu').hidden=true;openCheck();break;
     case 'scan-bar':$('#add-menu').hidden=true;if(!$('#b-case').value&&curCase)$('#b-case').value=curCase;openSheet('sh-bar');break;
     case 'new':$('#add-menu').hidden=true;openDrawer('__new',true);break;
+    case 'family':$('#add-menu').hidden=true;openFamily();break;
     case 'data':$('#add-menu').hidden=true;openData();break;
     case 'arrange':openArrange();break;
     case 'del-account':$('#add-menu').hidden=true;delAccountDialog();break;
@@ -1374,8 +1380,42 @@ function openArrange(){
   draw();
 }
 
+/* ---------- aile kitaplığı ---------- */
+function openFamily(prefill){
+  if(!B||!B.family){toast('Aile kitaplığı giriş yapınca çalışır.');return}
+  const f=fam||{owner:true,uyeler:[],adlar:{}};const me=user&&user.uid;
+  const nm=id=>id===me?'Sen':(f.adlar[id]||'Aile üyesi');
+  const people=[f.lib,...f.uyeler.filter(x=>x!==f.lib)];
+  const list=`<ul class="fam">${people.map(id=>`<li><span class="av">${esc((nm(id)[0]||'?').toLocaleUpperCase('tr'))}</span><span>${esc(nm(id))}${id===f.lib?' <em>kitaplık sahibi</em>':''}</span>${f.owner&&id!==me?`<button class="btn sm ghost danger" data-fam="cikar" data-uid="${esc(id)}">Çıkar</button>`:''}</li>`).join('')}</ul>`;
+  const join=`<div class="dsec"><small>Başka birinin kitaplığına katıl</small><div class="g2"><input class="fin mono" id="fm-code" placeholder="Davet kodu" value="${esc(prefill||'')}" autocapitalize="characters"><button class="btn pri" data-fam="katil">Katıl</button></div>
+    ${all().length?`<label class="check"><input type="checkbox" id="fm-tasi" checked><span>Kendi ${all().length} kitabımı da o kitaplığa kopyala (okuma ve ödünç bilgilerim benimle gelir)</span></label>`:''}</div>`;
+  let body;
+  if(f.owner){
+    body=`<p style="margin:0">${f.uyeler.length?`Kitaplığını ${f.uyeler.length} kişiyle paylaşıyorsun.`:'Evdekileri davet et: kendi Google hesaplarıyla aynı kitaplığı görsünler, kitap eklesinler, raf düzenlesinler.'} Okuma ve ödünç bilgileri herkesin kendine özel kalır.</p>
+      ${list}<div class="dsec"><small>Davet</small><div id="fm-inv"><button class="btn pri" data-fam="davet">Davet kodu oluştur</button></div></div>${f.uyeler.length?'':join}`;
+  }else{
+    body=`<p style="margin:0">Bir aile kitaplığındasın. Kitapları herkes görür ve ekleyebilir; okuma ve ödünç bilgilerin yalnızca sende.</p>${list}
+      <div class="dsec"><button class="btn danger" data-fam="ayril">Aile kitaplığından ayrıl</button><p class="hint">Ayrılınca kendi kitaplığına dönersin; bu kitaplıktaki okuma bilgilerin silinir.</p></div>`;
+  }
+  sheetHtml('sh-fam',`<div class="ph"><h2>Aile kitaplığı</h2><button class="xb" data-close aria-label="Kapat">×</button></div>${body}<p class="status" id="fm-st"></p>`);
+  $('#sh-fam').onclick=async e=>{const t=e.target.closest('[data-fam]');if(!t)return;const st=$('#fm-st');st.className='status';const op=t.dataset.fam;
+    if((op==='ayril'||op==='cikar')&&!t.dataset.arm){t.dataset.arm=1;t.textContent='Emin misin? Tekrar dokun';return}
+    t.disabled=true;st.textContent='Bekle…';
+    try{
+      if(op==='davet'){const r=await B.family('davet');const link='https://rafizi.web.app/?davet='+r.code;
+        const msg=`Raf İzi'de ev kitaplığımıza katıl! Şu bağlantıyı aç: ${link} ya da uygulamada Kitap Tara menüsü → Aile kitaplığı → kodu yaz: ${r.code} (7 gün geçerli)`;
+        $('#fm-inv').innerHTML=`<div class="code">${esc(r.code)}</div><p class="hint">Kod 7 gün geçerli. Katılan kişi kendi Google hesabıyla girer.</p><div class="acts"><a class="btn wa" href="https://wa.me/?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">${WA_SVG}WhatsApp'tan gönder</a><button class="btn" id="fm-copy">Mesajı kopyala</button></div>`;
+        $('#fm-copy').onclick=()=>navigator.clipboard.writeText(msg).then(()=>toast('Kopyalandı'),()=>toast('Kopyalanamadı'));st.textContent='';return}
+      if(op==='katil'){const code=($('#fm-code').value||'').trim();if(!code){st.textContent='Davet kodunu yaz.';t.disabled=false;return}
+        const r=await B.family('katil',{code,tasi:!!($('#fm-tasi')&&$('#fm-tasi').checked)});closeSheet();toast(`Aile kitaplığına katıldın${r.owner?' ('+r.owner+')':''}${r.copied?'; '+r.copied+' kitabın kopyalandı':''}`);return}
+      if(op==='ayril'){await B.family('ayril');closeSheet();toast('Aile kitaplığından ayrıldın; kendi kitaplığındasın');return}
+      if(op==='cikar'){await B.family('cikar',{kim:t.dataset.uid});st.textContent='Çıkarıldı.';return}
+    }catch(er){st.className='status err';st.textContent=er.message||'Olmadı, tekrar dene.';t.disabled=false}};
+}
+
 /* ---------- backends ---------- */
 $('#gate-ill').innerHTML=ILL.shelf;
+try{const dv=new URLSearchParams(location.search).get('davet');if(dv){sessionStorage.setItem('rafDavet',dv.toUpperCase());history.replaceState(null,'',location.pathname)}}catch(e){}
 const CFG={apiKey:"AIzaSyDST7X8QXynA2YJ6ZJZ1fWp1Ow2eJLylnQ",authDomain:"scribble-kick.firebaseapp.com",projectId:"scribble-kick",
   storageBucket:"scribble-kick.firebasestorage.app",messagingSenderId:"307843857448",appId:"1:307843857448:web:d35c242ae347a2ed72891d"};
 const clean=o=>JSON.parse(JSON.stringify(o));
@@ -1400,28 +1440,47 @@ if(window.firebase){
       $('#login-msg').textContent=e.code==='auth/popup-closed-by-user'?'Pencere kapatıldı.':e.code==='auth/unauthorized-domain'?'Bu adres henüz Google girişine açılmadı.':'Giriş yapılamadı, tekrar dene.'}
   };
   if(!isApp())auth.getRedirectResult().catch(()=>{});
+  const famCall=firebase.app().functions('europe-west1').httpsCallable('kitaplikAile',{timeout:120000});
+  let ptrUnsub=null;
   auth.onAuthStateChanged(u=>{
-    unsub.forEach(f=>f());unsub=[];books={};meta={names:[],shelves:{}};photos={};user=u;B=null;
-    document.body.classList.toggle('out',!u);
-    if(!u){render();return}
-    const root=fs.collection('kitaplik').doc(u.uid);
+    if(ptrUnsub){ptrUnsub();ptrUnsub=null}
+    user=u;document.body.classList.toggle('out',!u);
+    if(!u){unsub.forEach(f=>f());unsub=[];books={};meta={names:[],shelves:{}};photos={};B=null;fam=null;render();return}
+    // hangi kitaplıktayım? (aile üyesiysem sahibinin kitaplığı)
+    let curLib=null;
+    ptrUnsub=fs.collection('kitaplikUye').doc(u.uid).onSnapshot(s=>{const lib=(s.exists&&s.data().lib)||u.uid;if(lib!==curLib){curLib=lib;openLibrary(u,lib)}},()=>{if(!curLib){curLib=u.uid;openLibrary(u,u.uid)}});
+  });
+  function openLibrary(u,lib){
+    unsub.forEach(f=>f());unsub=[];books={};meta={names:[],shelves:{}};photos={};B=null;fam={lib,owner:lib===u.uid,uyeler:[],adlar:{}};
+    let shared={},personal={},pLoaded=false,sLoaded=false,migrated=false;
+    const isOwner=lib===u.uid;
+    const root=fs.collection('kitaplik').doc(lib),mine=root.collection('kisisel').doc(u.uid).collection('kitap');
+    const migrate=async()=>{migrated=true;const ids=Object.keys(shared).filter(id=>!personal[id]&&PERSONAL.some(k=>shared[id][k]!=null));if(!ids.length)return;
+      for(let i=0;i<ids.length;i+=200){const bt=fs.batch();ids.slice(i,i+200).forEach(id=>{const s={},p={};for(const[k,v]of Object.entries(shared[id]))(PERSONAL.includes(k)?p:s)[k]=v;bt.set(mine.doc(id),clean(p));bt.set(root.collection('books').doc(id),clean(s))});await bt.commit()}};
+    const rebuild=()=>{if(isOwner&&pLoaded&&sLoaded&&!migrated)migrate().catch(e=>console.warn('tasima',e));const nb={};for(const[id,s]of Object.entries(shared)){const base={...s};if(!isOwner||personal[id])PERSONAL.forEach(k=>delete base[k]);nb[id]={...base,...(personal[id]||{}),id}}books=nb;render();queueCovers();syncLoanNotifs();fillSpineColors()};
+    const split=x=>{const{id,...d}=x;const s={},p={};for(const[k,v]of Object.entries(d))(PERSONAL.includes(k)?p:s)[k]=v;return[id,clean(s),clean(p)]};
     B={
-      async putMany(list){for(let i=0;i<list.length;i+=400){const bt=fs.batch();list.slice(i,i+400).forEach(x=>{const{id,...d}=x;bt.set(root.collection('books').doc(id),clean(d))});await bt.commit()}},
-      remove:id=>root.collection('books').doc(id).delete(),
-      async removeMany(ids){for(let i=0;i<ids.length;i+=400){const bt=fs.batch();ids.slice(i,i+400).forEach(id=>bt.delete(root.collection('books').doc(id)));await bt.commit()}},
+      async putMany(list){for(let i=0;i<list.length;i+=200){const bt=fs.batch();list.slice(i,i+200).forEach(x=>{const[id,s,p]=split(x);bt.set(root.collection('books').doc(id),s,isOwner?undefined:{merge:true});bt.set(mine.doc(id),p)});await bt.commit()}},
+      async remove(id){await root.collection('books').doc(id).delete();await mine.doc(id).delete().catch(()=>{})},
+      async removeMany(ids){for(let i=0;i<ids.length;i+=200){const bt=fs.batch();ids.slice(i,i+200).forEach(id=>{bt.delete(root.collection('books').doc(id));bt.delete(mine.doc(id))});await bt.commit()}},
       setMeta:m=>root.collection('meta').doc('bookcases').set(clean(m)),
       putPhoto:(id,d)=>root.collection('photos').doc(id).set(clean(d)),
       delPhoto:id=>root.collection('photos').doc(id).delete(),
-      deleteAccount:async()=>{unsub.forEach(f=>f());unsub=[];await firebase.app().functions('europe-west1').httpsCallable('kitaplikHesapSil',{timeout:60000})({});await window._signOut()},
-      ai:async(kind,image,extra)=>{const r=await aiCall({kind,image,...extra});if(!r||!r.data)throw new Error('Yanıt anlaşılamadı, tekrar dene.');return r.data}
+      deleteAccount:async()=>{unsub.forEach(f=>f());unsub=[];await firebase.app().functions('europe-west1').httpsCallable('kitaplikHesapSil',{timeout:120000})({});await window._signOut()},
+      ai:async(kind,image,extra)=>{const r=await aiCall({kind,image,...extra});if(!r||!r.data)throw new Error('Yanıt anlaşılamadı, tekrar dene.');return r.data},
+      family:async(op,args)=>(await famCall({op,...(args||{})})).data
     };
     setNote('Kitaplar yükleniyor…');
     const t=setTimeout(()=>setNote('Kayıtlara şu an ulaşılamıyor; bağlantını kontrol et.'),10000);
     unsub.push(root.collection('books').onSnapshot(s=>{if(!s.metadata.fromCache){clearTimeout(t);setNote('')}
-      const nb={};s.docs.forEach(d=>{nb[d.id]={...d.data(),id:d.id}});books=nb;render();queueCovers();syncLoanNotifs();fillSpineColors()},e=>{clearTimeout(t);setNote('Kayıtlar okunamadı ('+e.code+').')}));
+      const nb={};s.docs.forEach(d=>{nb[d.id]=d.data()});shared=nb;sLoaded=true;if(pLoaded)rebuild()},e=>{clearTimeout(t);setNote('Kayıtlar okunamadı ('+e.code+').')}));
+    unsub.push(mine.onSnapshot(s=>{const p={};s.docs.forEach(d=>{p[d.id]=d.data()});personal=p;pLoaded=true;rebuild()},()=>{pLoaded=true;rebuild()}));
     unsub.push(root.collection('meta').doc('bookcases').onSnapshot(s=>{const d=s.exists?s.data():{};meta={names:Array.isArray(d.names)?d.names:[],shelves:d.shelves||{}};render()},()=>{}));
     unsub.push(root.collection('photos').onSnapshot(s=>{const p={};s.docs.forEach(d=>p[d.id]=d.data());photos=p;render();fillSpineColors()},()=>{}));
-  });
+    unsub.push(root.onSnapshot(s=>{const d=s.exists?s.data():{};fam={lib,owner:isOwner,uyeler:d.uyeler||[],adlar:d.adlar||{}};render();if($('#sh-fam')&&!$('#sh-fam').hidden&&$('#sheet').classList.contains('on'))openFamily()},()=>{}));
+    // davet bağlantısıyla gelindiyse
+    try{const c=sessionStorage.getItem('rafDavet');if(c){sessionStorage.removeItem('rafDavet');setTimeout(()=>openFamily(c),800)}}catch(e){}
+  }
 }else{
   // Önizleme: örnek kitaplarla, kayıt sadece bu sayfada
   $('#m-logout').hidden=true;$('#m-delacc').hidden=true;

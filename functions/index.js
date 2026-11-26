@@ -31,3 +31,4 @@ exports.weeklyPrizes = onSchedule(
 // Kitapligim (kitapligim.web.app) kitap tanima
 exports.kitaplikOku = require('./kitaplik').kitaplikOku;
 exports.kitaplikHesapSil = require('./kitaplik').kitaplikHesapSil;
+exports.kitaplikAile = require('./kitaplik').kitaplikAile;
