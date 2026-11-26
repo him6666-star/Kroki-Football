@@ -597,7 +597,8 @@ function renderRead(){
 
 /* ---------- covers: Google Books, then Open Library ---------- */
 const coverAsked=new Set();let coverBusy=0;const coverQ=[];
-const titleClose=(a,b)=>{a=norm(a);b=norm(b);return !!a&&!!b&&(a===b||a.startsWith(b)||b.startsWith(a))};
+const titleClose1=(a,b)=>{a=norm(a);b=norm(b);return !!a&&!!b&&(a===b||a.startsWith(b)||b.startsWith(a))};
+const titleClose=(a,b)=>[b,...String(b||'').split(/[:\-–]/).map(s=>s.trim()).filter(s=>s.length>3)].some(x=>titleClose1(a,x)||String(a||'').split(/[:\-–]/).some(y=>y.trim().length>3&&titleClose1(y,x)));
 const TR_ISBN=/^97(8975|8605|8625|8994)/;   // Türkiye yayınevi önekleri
 const META_V=2;
 async function getJSON(u){const r=await fetch(u);if(!r.ok)throw new Error(r.status);return r.json()}
@@ -609,7 +610,8 @@ async function lookMeta(b){
   const vol=(norm(b.title).match(/ (\d+)$/)||[])[1];   // cilt numarası (İnce Memed 1 gibi)
   const volOk=t=>!vol||new RegExp('(^| )'+vol+'( |$)').test(norm(t))&&!/ cilt| set| takim/.test(norm(t)+' ');
   // 1) Google Books
-  const gq=isbn0?['isbn:'+isbn0]:[`intitle:${b.title}${lastName?' inauthor:'+lastName:''}`,`${b.title} ${b.author||''}`.trim()];
+  const parts=String(b.title).split(/[:\-–]/).map(s=>s.trim()).filter(s=>s.length>3).sort((x,y)=>y.length-x.length);
+  const gq=isbn0?['isbn:'+isbn0]:[`intitle:${b.title}${lastName?' inauthor:'+lastName:''}`,`${b.title} ${b.author||''}`.trim(),...(parts.length>1?[`${parts[0]} ${lastName}`.trim()]:[])];
   for(const q of gq){
     try{const j=await getJSON('https://www.googleapis.com/books/v1/volumes?maxResults=8&q='+encodeURIComponent(q));
       for(const it of j.items||[]){const v=it.volumeInfo||{};const full=[v.title,v.subtitle].filter(Boolean).join(' ');
