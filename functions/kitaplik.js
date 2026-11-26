@@ -72,7 +72,8 @@ exports.kitaplikOku = onCall(
   async req => {
     const uid = req.auth && req.auth.uid;
     if (!uid) throw new HttpsError('unauthenticated', 'Giriş gerekli');
-    const {kind, image, isbn} = req.data || {};
+    const {kind, image, isbn, lang} = req.data || {};
+    const EN_NOTE = lang === 'en' ? '\nIMPORTANT: The user reads the app in English. Write "genre" and "summary" in English (keep book titles, author and publisher names exactly as printed).' : '';
     if (!['shelf', 'back', 'quote'].includes(kind) || typeof image !== 'string' || image.length < 100 || image.length > 7e6)
       throw new HttpsError('invalid-argument', 'Geçersiz istek');
 
@@ -90,7 +91,7 @@ exports.kitaplikOku = onCall(
 
     const cleanIsbn = String(isbn || '').replace(/[^0-9Xx]/g, '').slice(0, 13);
     try {
-      const out = parse(await gemini(kind === 'shelf' ? SHELF : kind === 'quote' ? QUOTE : back(cleanIsbn), image));
+      const out = parse(await gemini((kind === 'shelf' ? SHELF : kind === 'quote' ? QUOTE : back(cleanIsbn)) + (kind === 'quote' ? '' : EN_NOTE), image));
       return out;
     } catch (e) {
       if (e instanceof HttpsError) throw e;

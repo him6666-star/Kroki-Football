@@ -301,7 +301,7 @@ body.out .gate{display:flex}
   .stats{grid-template-columns:repeat(2,minmax(0,1fr))}.stats div:nth-child(3){border-left:0}.stats div:nth-child(n+3){border-top:1px solid var(--line)}
   .rrow{grid-template-columns:50px minmax(0,1fr)}.ractions{grid-column:2;justify-content:flex-start;margin-top:8px}
   .casebar .acts{width:100%}.casebar .seg{flex:1 1 100%}.casebar .seg button{flex:1;justify-content:center}.casebar .acts>.btn{flex:1}
-  .phead .acts{width:100%}.phead .acts .btn{flex:1}
+  .phead .acts{width:100%;flex-wrap:wrap}.phead .acts .btn{flex:1 1 calc(50% - 8px)}.phead .acts .btn:first-child{flex-basis:100%}
   .res .meta{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
 }
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
@@ -335,6 +335,7 @@ body.out .gate{display:flex}
       <a class="mlink" href="gizlilik.html" target="_blank" rel="noopener">Gizlilik politikası</a>
       <button data-act="family"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20a6 6 0 0 1 12 0M14 20a4.5 4.5 0 0 1 7.5-3.4"/></svg>Aile kitaplığı</button>
       <button data-act="data"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M7 10l5 5 5-5M4 19h16"/></svg>Yedek ve aktarma</button>
+      <button data-act="lang"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.5 3 14.5 0 18M12 3c-3 3.5-3 14.5 0 18"/></svg><span data-notr id="m-lang">English</span></button>
       <button data-act="del-account" id="m-delacc" style="color:#b3261e"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>Hesabımı ve verilerimi sil</button>
       <button data-act="logout" id="m-logout"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10"/></svg>Çıkış yap</button>
     </div>
@@ -440,9 +441,40 @@ body.out .gate{display:flex}
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-functions-compat.js"></script>
 <script>
+/* ---------- dil / language ---------- */
+window.RAF_LANG=(()=>{try{const s=localStorage.getItem('rafLang');if(s==='tr'||s==='en')return s}catch(e){}return /^tr\b/i.test(navigator.language||'')?'tr':'en'})();
+document.documentElement.lang=window.RAF_LANG;
+</script>
+<script src="lang-en.js"></script>
+<script>
 {
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const LANG=window.RAF_LANG,EN=LANG==='en';
+const DICT=window.RAF_EN||{exact:{},phrases:[],patterns:[]};
+const EXM=new Map(Object.entries(DICT.exact||{}));
+const PHR=(DICT.phrases||[]).slice().sort((a,b)=>b[0].length-a[0].length);
+const PAT=(DICT.patterns||[]);
+function t(s){
+  if(!EN||s==null)return s;s=String(s);const m=s.match(/^(\s*)([\s\S]*?)(\s*)$/);const core=m[2];if(!core)return s;
+  if(EXM.has(core))return m[1]+EXM.get(core)+m[3];
+  let o=core;for(const[a,b]of PHR)if(o.includes(a))o=o.split(a).join(b);
+  for(const[re,rep]of PAT)o=o.replace(re,rep);
+  if(EXM.has(o))return m[1]+EXM.get(o)+m[3];
+  return m[1]+o+m[3];
+}
+if(EN){
+  const SKIP={SCRIPT:1,STYLE:1,TEXTAREA:1};const AT=['placeholder','aria-label','title'];
+  const txt=n=>{const p=n.parentElement;if(!p||SKIP[p.tagName]||p.closest('[data-notr]'))return;const v=t(n.data);if(v!==n.data)n.data=v};
+  const el=n=>{if(n.closest('[data-notr]'))return;for(const a of AT){const v=n.getAttribute(a);if(v){const w=t(v);if(w!==v)n.setAttribute(a,w)}}if(n.tagName==='OPTION'&&!n.closest('[data-notr]')){}};
+  const tree=r=>{if(r.nodeType===3)return txt(r);if(r.nodeType!==1)return;el(r);const w=document.createTreeWalker(r,5);let c;while(c=w.nextNode()){if(c.nodeType===3)txt(c);else el(c)}};
+  window.__trTree=tree;
+  new MutationObserver(ms=>{for(const m of ms){if(m.type==='characterData')txt(m.target);else if(m.type==='attributes')el(m.target);else m.addedNodes.forEach(tree)}})
+    .observe(document.documentElement,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:AT});
+  document.title=t(document.title);
+  {const ml=document.getElementById('m-lang');if(ml)ml.textContent='Türkçe'}
+  tree(document.body);
+}
 const TR={'ç':'c','ğ':'g','ı':'i','ö':'o','ş':'s','ü':'u','â':'a','î':'i','û':'u'};
 const norm=s=>String(s||'').toLocaleLowerCase('tr').replace(/[çğıöşüâîû]/g,c=>TR[c]).normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,' ').trim();
 const slug=s=>norm(s).replace(/ /g,'-')||'kitaplik';
@@ -452,10 +484,11 @@ const hash=s=>{let h=7;for(const c of String(s))h=(h*31+c.charCodeAt(0))|0;retur
 const PAL=['#24493a','#22385e','#6a2433','#d6cdb9','#2a3340','#b57a33','#3f5a4b','#7a3b2e','#454b68','#8c6d3f','#5b2c45','#2f5e63'];
 const colorOf=b=>PAL[hash((b.title||'')+(b.author||''))%PAL.length];
 const coverHtml=(b,sz)=>{const c=colorOf(b);return b.cover?`<img class="cov ${sz||''}" src="${esc(b.cover)}" alt="" loading="lazy" data-cv="${esc(b.id)}">`:genCover(b,sz)};
-const genCover=(b,sz)=>{const c=colorOf(b);return `<span class="cov gen ${sz||''}" style="--c:${c};--t:${inkOf(c)}" aria-hidden="true"><b>${esc(b.title)}</b><i>${esc(b.author||'')}</i></span>`};
+const genCover=(b,sz)=>{const c=colorOf(b);return `<span class="cov gen ${sz||''}" style="--c:${c};--t:${inkOf(c)}" aria-hidden="true"><b data-notr>${esc(b.title)}</b><i data-notr>${esc(b.author||'')}</i></span>`};
 document.addEventListener('error',e=>{const t=e.target;if(t&&t.tagName==='IMG'&&t.classList.contains('cov')&&!t.dataset.dead){t.dataset.dead=1;const b=books[t.dataset.cv];const sz=[...t.classList].filter(x=>x!=='cov').join(' ');const w=document.createElement('span');w.innerHTML=b?genCover(b,sz):'';if(w.firstChild)t.replaceWith(w.firstChild)}},true);
 const inkOf=c=>{const n=parseInt(c.slice(1),16);return((n>>16)*.299+((n>>8)&255)*.587+(n&255)*.114)>160?'#2a2418':'#fff'};
-const fmt=n=>new Intl.NumberFormat('tr-TR').format(n||0);
+const LOC=EN?'en-US':'tr-TR';
+const fmt=n=>new Intl.NumberFormat(LOC).format(n||0);
 const ICON={pin:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>',
  arrow:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
  check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m5 12 5 5 9-10"/></svg>'};
@@ -480,11 +513,12 @@ const newId=()=>'b'+Date.now().toString(36)+Math.random().toString(36).slice(2,7
 const same=(a,b)=>norm(a)===norm(b);
 function caseList(){const out=[];for(const n of [...(meta.names||[]),...all().map(b=>b.bookcase)])if(n&&!out.some(x=>same(x,n)))out.push(n);return out}
 const caseName=n=>{n=(n||'').trim();return caseList().find(c=>same(c,n))||n};
-const caseLabel=n=>/kitapl[ıi]|k[üu]t[üu]phane/i.test(n)?n:n+' Kitaplığı';
+const caseLabel=n=>EN?(/bookcase|library|shelf|kitapl[ıi]|k[üu]t[üu]phane/i.test(n)?n:n+' bookcase'):(/kitapl[ıi]|k[üu]t[üu]phane/i.test(n)?n:n+' Kitaplığı');
 const inCase=n=>all().filter(b=>same(b.bookcase,n));
 function shelfCount(n){return Math.max(1,(meta.shelves||{})[slug(n)]||0,...inCase(n).map(b=>b.shelf||0))}
 const shelfBooks=(n,s)=>inCase(n).filter(b=>b.shelf===s).sort((a,b)=>(a.pos||999)-(b.pos||999)||coll.compare(a.title||'',b.title||''));
 function locText(b){
+  if(EN){if(!b.bookcase)return 'No location yet';let s=caseLabel(b.bookcase);if(!b.shelf)return s+' · shelf unknown';s+=' · shelf '+b.shelf+' (from top)';if(b.pos)s+=' · book '+b.pos+' from left';return s}
   if(!b.bookcase)return 'Yeri girilmemiş';
   let s=caseLabel(b.bookcase);
   if(!b.shelf)return s+' · raf belirsiz';
@@ -492,10 +526,10 @@ function locText(b){
   if(b.pos)s+=' · Soldan '+b.pos+'. kitap';
   return s;
 }
-const dstr=t=>t?new Date(t).toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'}):'';
+const dstr=x=>x?new Date(x).toLocaleDateString(LOC,{day:'numeric',month:'long',year:'numeric'}):'';
 const daysSince=t=>Math.max(0,Math.round((Date.now()-t)/864e5));
 const loanText=b=>b.loan?`kimde: ${b.loan.to} · verildi: ${dstr(b.loan.at)} (${daysSince(b.loan.at)} gün)`:'';
-const locShort=b=>b.bookcase?(caseLabel(b.bookcase)+(b.shelf?' · '+b.shelf+'. Raf'+(b.pos?' · #'+b.pos:''):'')):'Yeri yok';
+const locShort=b=>b.bookcase?(caseLabel(b.bookcase)+(b.shelf?(EN?' · Shelf '+b.shelf:' · '+b.shelf+'. Raf')+(b.pos?' · #'+b.pos:''):'')):(EN?'No location':'Yeri yok');
 function matches(b,qq){const hay=norm([b.title,b.author,b.publisher,b.genre,b.isbn].join(' '));return qq.split(' ').every(w=>hay.includes(w))}
 function findExisting(title,isbn){const t=norm(title),i=(isbn||'').replace(/\D/g,'');return all().find(b=>(i&&b.isbn&&b.isbn.replace(/\D/g,'')===i)||(t&&norm(b.title)===t))}
 
@@ -549,7 +583,7 @@ function render(){
 
 function spineHtml(b,i,hit){
   const c=b.spine||colorOf(b),h=158+hash(b.id+'h')%38,w=b.pages?Math.max(28,Math.min(64,Math.round(22+b.pages/16))):34+hash(b.title||'')%16;
-  return `<div class="spine${hit?' hit':''}${b.loan?' loan':''}" data-id="${esc(b.id)}" style="--c:${c};--t:${inkOf(c)};--h:${h}px;--w:${w}px" role="button" tabindex="0" aria-label="${esc(b.title)}, ${i}. kitap${b.loan?', ödünçte':''}">${hit?'<span class="here">BURADA</span>':b.loan?'<span class="lt">ÖDÜNÇ</span>':''}<span class="num">${i}</span><span class="tt">${esc(b.title)}</span><span class="ft"></span></div>`;
+  return `<div class="spine${hit?' hit':''}${b.loan?' loan':''}" data-id="${esc(b.id)}" style="--c:${c};--t:${inkOf(c)};--h:${h}px;--w:${w}px" role="button" tabindex="0" aria-label="${esc(b.title)}, ${i}. kitap${b.loan?', ödünçte':''}">${hit?'<span class="here">BURADA</span>':b.loan?'<span class="lt">ÖDÜNÇ</span>':''}<span class="num">${i}</span><span class="tt" data-notr>${esc(b.title)}</span><span class="ft"></span></div>`;
 }
 function shelfHtml(n,s,hitId,cls){
   const row=shelfBooks(n,s);
@@ -561,7 +595,7 @@ function renderMap(){
   $('#pills').innerHTML=cases.map(c=>`<button class="pill" data-case="${esc(c)}" aria-current="${same(c,curCase)}">${esc(caseLabel(c))} <span>(${inCase(c).length})</span></button>`).join('')+`<button class="pill add" data-act="add-case">+ Kitaplık Ekle</button>`;
   $$('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.mode===mapMode));
   const sb=sel&&books[sel];
-  $('#selbar').innerHTML=sb?`<div class="selbar"><div style="display:flex;gap:14px;align-items:center">${coverHtml(sb,'s')}<div><small>Seçili Kitabın Raf Konumu</small><h3>${esc(sb.title)} <span>— ${esc(sb.author||'')}</span></h3><div class="loc">${ICON.pin.replace('<svg','<svg width="14" height="14" style="vertical-align:-2px"')} ${esc(locText(sb))}</div>${sb.loan?`<div class="loc" style="color:#fff">Şu an ödünçte · ${esc(loanText(sb))}</div>`:''}</div></div><div class="acts">${sb.photoId&&photos[sb.photoId]?'<button class="btn sm" data-act="sel-photo">Fotoğrafta Gör</button>':''}<button class="btn sm w" data-act="sel-detail">Detaylar</button><button class="x" data-act="sel-clear" aria-label="Seçimi kaldır">×</button></div></div>`:'';
+  $('#selbar').innerHTML=sb?`<div class="selbar"><div style="display:flex;gap:14px;align-items:center">${coverHtml(sb,'s')}<div><small>Seçili Kitabın Raf Konumu</small><h3 data-notr>${esc(sb.title)} <span>— ${esc(sb.author||'')}</span></h3><div class="loc">${ICON.pin.replace('<svg','<svg width="14" height="14" style="vertical-align:-2px"')} ${esc(locText(sb))}</div>${sb.loan?`<div class="loc" style="color:#fff">Şu an ödünçte · ${esc(loanText(sb))}</div>`:''}</div></div><div class="acts">${sb.photoId&&photos[sb.photoId]?'<button class="btn sm" data-act="sel-photo">Fotoğrafta Gör</button>':''}<button class="btn sm w" data-act="sel-detail">Detaylar</button><button class="x" data-act="sel-clear" aria-label="Seçimi kaldır">×</button></div></div>`:'';
   $('#remind').innerHTML=remindHtml();
   renderSugg();
   const bd=$('#board');
@@ -572,12 +606,12 @@ function renderMap(){
   let h=`<div class="bhead"><div><h2>${esc(caseLabel(curCase))}</h2><span class="sub">${n} raf · ${bs.length} kitap kayıtlı</span></div><p class="hint">${mapMode==='diagram'?'Yerini değiştirmek için kitabı sürükle (telefonda basılı tut) · Detay için dokun':'Kutulara dokununca kitabın detayı açılır'}</p></div>`;
   if(mapMode==='photo'){
     const ps=Object.entries(photos).filter(([,p])=>same(p.case,curCase)).sort((a,b)=>(a[1].top||1)-(b[1].top||1));
-    h+=ps.length?ps.map(([pid,p])=>photoHtml(pid,p,sel)+`<p class="pcap">Üstteki raf: ${p.top||1}. raf · ${p.at?new Date(p.at).toLocaleDateString('tr-TR'):''}</p>`).join('')
+    h+=ps.length?ps.map(([pid,p])=>photoHtml(pid,p,sel)+`<p class="pcap">Üstteki raf: ${p.top||1}. raf · ${p.at?new Date(p.at).toLocaleDateString(LOC):''}</p>`).join('')
       :`<div class="emptyst"><p>Bu kitaplık için kayıtlı fotoğraf yok. “Bu Kitaplığı Tara” ile çektiğin fotoğraflar burada kitapların işaretli hâliyle görünür.</p></div>`;
   }else{
     for(let s=1;s<=n;s++)h+=`<div class="shead"><span class="mono">${s}. Raf</span><span>${shelfBooks(curCase,s).length} kitap</span></div>`+shelfHtml(curCase,s,sel);
     const loose=bs.filter(b=>!b.shelf);
-    h+=`<div class="loose" data-shelf="0"><div class="lbl">Rafı belirsiz kitaplar${loose.length?'':' · bir kitabı rafından çıkarmak için buraya sürükle'}</div><div class="chips">${loose.map(b=>`<span class="chipb" data-id="${esc(b.id)}" role="button" tabindex="0">${esc(b.title)}</span>`).join('')}</div></div>`;
+    h+=`<div class="loose" data-shelf="0"><div class="lbl">Rafı belirsiz kitaplar${loose.length?'':' · bir kitabı rafından çıkarmak için buraya sürükle'}</div><div class="chips">${loose.map(b=>`<span class="chipb" data-id="${esc(b.id)}" role="button" tabindex="0" data-notr>${esc(b.title)}</span>`).join('')}</div></div>`;
     h+=`<div class="bfoot"><button class="btn sm soft" data-act="arrange">Düzenleme önerisi</button><button class="btn sm" data-act="add-shelf">+ Raf ekle</button>${n>1&&!shelfBooks(curCase,n).length?'<button class="btn sm ghost" data-act="del-shelf">Boş olan son rafı kaldır</button>':''}<button class="btn sm ghost" data-act="rename-case">Kitaplığın adını değiştir</button><button class="btn sm ghost danger" data-act="del-case">Kitaplığı sil</button></div>`;
   }
   bd.innerHTML=h;
@@ -591,7 +625,7 @@ function renderSugg(){
   const box=$('#sugg'),qq=norm(q);
   if(!qq||view!=='map'){box.hidden=true;return}
   const r=all().filter(b=>matches(b,qq)).sort((a,b)=>coll.compare(a.title||'',b.title||'')).slice(0,7);
-  box.innerHTML=r.length?r.map((b,i)=>`<button data-pick="${esc(b.id)}" class="${i?'':'on'}">${coverHtml(b,'xs')}<span><b>${esc(b.title)}</b></span><span class="l mono">${esc(locShort(b))}</span><span class="sub">${esc([b.author,b.publisher].filter(Boolean).join(' · '))}</span></button>`).join(''):`<div style="padding:12px 14px" class="sub">“${esc(q)}” ile eşleşen kitap yok.</div>`;
+  box.innerHTML=r.length?r.map((b,i)=>`<button data-pick="${esc(b.id)}" class="${i?'':'on'}">${coverHtml(b,'xs')}<span><b data-notr>${esc(b.title)}</b></span><span class="l mono">${esc(locShort(b))}</span><span class="sub">${esc([b.author,b.publisher].filter(Boolean).join(' · '))}</span></button>`).join(''):`<div style="padding:12px 14px" class="sub">“${esc(q)}” ile eşleşen kitap yok.</div>`;
   box.hidden=false;
 }
 function select(id){const b=books[id];if(!b)return;sel=id;if(b.bookcase)curCase=caseName(b.bookcase);view='map';q='';$('#q').value='';$('#sugg').hidden=true;scrollSel=true;closeDrawer();render();window.scrollTo({top:0,behavior:'smooth'})}
@@ -605,7 +639,7 @@ function renderCat(){
   rows.sort(by==='new'?(a,b)=>(b.addedAt||0)-(a.addedAt||0):(a,b)=>coll.compare(a[by]||'~',b[by]||'~')||coll.compare(a.title||'',b.title||''));
   const nLoan=all().filter(b=>b.loan).length;
   $('#catf').innerHTML=catFilter?`<span class="fchip">${catFilter.k==='loan'?(catFilter.v?'Ödünç: '+esc(catFilter.v):'Ödünçtekiler'):esc({author:'Yazar',publisher:'Yayınevi',genre:'Kategori'}[catFilter.k])+': '+esc(catFilter.v||'belirtilmemiş')}<button data-act="clr-filter" aria-label="Filtreyi kaldır">×</button></span>`:`<span class="sub">${rows.length} kitap</span>${nLoan?` <button class="btn sm" data-act="loan-filter">Ödünçtekiler (${nLoan})</button>`:''}`;
-  $('#catlist').innerHTML=rows.length?rows.map(b=>`<button class="card" data-open="${esc(b.id)}">${coverHtml(b)}<span class="t">${esc(b.title)}</span><span class="sub">${esc([b.author,b.publisher,b.genre].filter(Boolean).join(' · ')||'—')}</span><span class="mono loc">${esc(locShort(b))}</span>${b.loan?`<span class="badge loan">Ödünçte · ${esc(b.loan.to)}</span>`:b.status?`<span class="badge ${b.status}">${esc(stLabel[b.status])}</span>`:''}</button>`).join('')
+  $('#catlist').innerHTML=rows.length?rows.map(b=>`<button class="card" data-open="${esc(b.id)}">${coverHtml(b)}<span class="t" data-notr>${esc(b.title)}</span><span class="sub">${esc([b.author,b.publisher,b.genre].filter(Boolean).join(' · ')||'—')}</span><span class="mono loc">${esc(locShort(b))}</span>${b.loan?`<span class="badge loan">Ödünçte · ${esc(b.loan.to)}</span>`:b.status?`<span class="badge ${b.status}">${esc(stLabel[b.status])}</span>`:''}</button>`).join('')
     :`<div class="emptyst">${all().length?'Eşleşen kitap yok.':ILL.shelf+'Henüz kitap eklenmedi.'}</div>`;
 }
 const stLabel={okunacak:'Okunacak',okunuyor:'Okunuyor',okundu:'Okundu'};
@@ -628,7 +662,7 @@ function renderRead(){
     else if(b.status==='okunacak')act=`<button class="btn soft sm" data-start="${esc(b.id)}">Okumaya başla</button>`;
     else if(!b.status)act=`<button class="btn sm" data-queue="${esc(b.id)}">Okunacaklara ekle</button><button class="btn soft sm" data-start="${esc(b.id)}">Okumaya başla</button><button class="btn sm" data-finish="${esc(b.id)}">Okudum</button>`;
     else act=`<span class="stars" aria-label="Puan">${[1,2,3,4,5].map(n=>`<button class="${(b.rating||0)>=n?'on':''}" data-rate="${n}" data-id="${esc(b.id)}" aria-label="${n} yıldız">★</button>`).join('')}</span>`;
-    return `<div class="rrow">${coverHtml(b,'s')}<div><button class="t" data-open="${esc(b.id)}">${esc(b.title)}</button><div class="m">${esc([b.author,b.publisher,b.genre].filter(Boolean).join(' · '))} · <span class="mono">${esc(locShort(b))}</span></div>
+    return `<div class="rrow">${coverHtml(b,'s')}<div><button class="t" data-open="${esc(b.id)}" data-notr>${esc(b.title)}</button><div class="m">${esc([b.author,b.publisher,b.genre].filter(Boolean).join(' · '))} · <span class="mono">${esc(locShort(b))}</span></div>
       ${b.status==='okunuyor'&&b.pages?`<div class="prog"><span>Sayfa ${b.page||0} / ${b.pages}</span><span>%${pct}</span></div><div class="bar"><i style="width:${pct}%"></i></div>`:b.status==='okunuyor'?`<div class="prog"><span>Sayfa ${b.page||0}${b.pages?'':' · toplam sayfa sayısını detaydan gir'}</span></div>`:''}
       ${b.notes?`<p class="quote">“${esc(b.notes.slice(0,160))}${b.notes.length>160?'…':''}”</p>`:''}</div>
       <div class="ractions">${act}<button class="btn sm" data-show="${esc(b.id)}">${ICON.pin.replace('<svg','<svg width="16" height="16"')}Rafta Göster</button></div></div>`;
@@ -700,7 +734,7 @@ function renderCharts(){
   const now=new Date(),months=[];
   for(let i=11;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);months.push({y:d.getFullYear(),m:d.getMonth(),n:0,p:0})}
   done.forEach(b=>{const t=new Date(b.finishedAt||b.statusAt||0);const x=months.find(o=>o.y===t.getFullYear()&&o.m===t.getMonth());if(x){x.n++;x.p+=b.pages||0}});
-  const mx=Math.max(1,...months.map(o=>o.n)),MN=['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
+  const mx=Math.max(1,...months.map(o=>o.n)),MN=EN?['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']:['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
   const yearN=months.reduce((s,o)=>s+o.n,0),yearP=months.reduce((s,o)=>s+o.p,0);
   const grp=(arr,k)=>{const m=new Map();arr.forEach(b=>{const v=(b[k]||'').trim();if(v){const key=norm(v);m.set(key,{n:(m.get(key)||{}).n||v,c:((m.get(key)||{}).c||0)+1})}});return[...m.values()].sort((a,b)=>b.c-a.c).slice(0,6)};
   const bars=rows=>{const top=Math.max(1,...rows.map(r=>r.c));return rows.length?rows.map(r=>`<div class="hbar"><span class="n">${esc(r.n)}</span><span class="tr"><i style="width:${Math.round(r.c/top*100)}%"></i></span><span class="v">${r.c}</span></div>`).join(''):`<p class="sub">Henüz veri yok.</p>`};
@@ -717,7 +751,7 @@ function renderDir(){
     $('#dtabs').innerHTML=tabs.map(([k,t])=>`<button data-dt="${k}" aria-pressed="${dirTab===k}">${t}${k==='loan'?' ('+m.size+')':''}</button>`).join('');
     const g=[...m.values()].sort((a,b)=>Math.min(...a.list.map(x=>x.loan.at))-Math.min(...b.list.map(x=>x.loan.at)));
     {const at=$('#dtabs [aria-pressed=true]');if(at)at.scrollIntoView({block:'nearest',inline:'nearest'})}
-    $('#dirgrid').innerHTML=g.length?g.map(x=>{const old=Math.min(...x.list.map(b=>b.loan.at));return `<button class="dcard" data-loanto="${esc(x.name)}"><h3>${esc(x.name)}</h3>${ICON.arrow}<div class="covrow" style="margin-top:12px">${x.list.slice(0,5).map(b=>coverHtml(b,'xs')).join('')}</div><div class="c">${x.list.length} kitap · en eskisi ${daysSince(old)} gündür</div><p>${esc(x.list.map(b=>b.title).join(', '))}</p></button>`}).join('')
+    $('#dirgrid').innerHTML=g.length?g.map(x=>{const old=Math.min(...x.list.map(b=>b.loan.at));return `<button class="dcard" data-loanto="${esc(x.name)}"><h3 data-notr>${esc(x.name)}</h3>${ICON.arrow}<div class="covrow" style="margin-top:12px">${x.list.slice(0,5).map(b=>coverHtml(b,'xs')).join('')}</div><div class="c">${x.list.length} kitap · en eskisi ${daysSince(old)} gündür</div><p>${esc(x.list.map(b=>b.title).join(', '))}</p></button>`}).join('')
       :`<div class="emptyst">${ILL.loan}Şu an ödünç verdiğin kitap yok. Bir kitabın üstüne basılı tutup “Ödünç ver”i seçebilirsin.</div>`;
     return;
   }
@@ -725,7 +759,7 @@ function renderDir(){
   $('#dtabs').innerHTML=tabs.map(([k,t])=>`<button data-dt="${k}" aria-pressed="${dirTab===k}">${t}${k==='loan'?' ('+new Set(all().filter(b=>b.loan).map(b=>norm(b.loan.to))).size+')':' ('+groups(k).filter(x=>x.name).length+')'}</button>`).join('');
   const g=groups(dirTab).sort((a,b)=>b.list.length-a.list.length||coll.compare(a.name,b.name));
   const miss={publisher:'Yayınevi belirtilmemiş',author:'Yazarı belirtilmemiş',genre:'Kategorisi belirtilmemiş'}[dirTab];
-  $('#dirgrid').innerHTML=g.length?g.sort((a,b)=>(a.name?0:1)-(b.name?0:1)).map(x=>{const t=x.list.map(b=>b.title).sort(coll.compare);return `<button class="dcard" data-group="${esc(x.name)}" data-empty="${x.name?'':'1'}"><h3>${esc(x.name||miss)}</h3>${ICON.arrow}<div class="covrow" style="margin-top:12px">${x.list.slice(0,5).map(b=>coverHtml(b,'xs')).join('')}</div><div class="c">${x.list.length} kitap · ${x.list.filter(b=>b.status==='okundu').length} okundu</div><p>${esc(t.slice(0,3).join(', '))}${t.length>3?' +'+(t.length-3):''}</p></button>`}).join('')
+  $('#dirgrid').innerHTML=g.length?g.sort((a,b)=>(a.name?0:1)-(b.name?0:1)).map(x=>{const t=x.list.map(b=>b.title).sort(coll.compare);return `<button class="dcard" data-group="${esc(x.name)}" data-empty="${x.name?'':'1'}"><h3 data-notr>${esc(x.name||miss)}</h3>${ICON.arrow}<div class="covrow" style="margin-top:12px">${x.list.slice(0,5).map(b=>coverHtml(b,'xs')).join('')}</div><div class="c">${x.list.length} kitap · ${x.list.filter(b=>b.status==='okundu').length} okundu</div><p>${esc(t.slice(0,3).join(', '))}${t.length>3?' +'+(t.length-3):''}</p></button>`}).join('')
     :`<div class="emptyst">Henüz gruplanacak bilgi yok.</div>`;
 }
 
@@ -753,7 +787,7 @@ function renderDrawer(){
   const cases=caseList(),n=b.bookcase?shelfCount(b.bookcase):1,ph=b.photoId&&photos[b.photoId];
   const rows=[['Yazar',b.author],['Yayınevi',b.publisher],['Kategori',b.genre],['ISBN',b.isbn,1],['Sayfa Sayısı',b.pages,1],['Basım Yılı',b.year,1]];
   const pct=b.pages?Math.min(100,Math.round((b.page||0)/b.pages*100)):null;
-  $('#d-body').innerHTML=`<div class="dtop">${coverHtml(b,'l')}<div><h2>${esc(b.title)}</h2><div class="au">${esc([b.author,b.publisher].filter(Boolean).join(' · ')||'Yazar bilgisi yok')}</div><button class="btn sm ghost" data-d="cover" style="margin-top:6px;padding-left:0">${b.cover&&b.isbn&&b.pages?'Bilgileri yenile':'İnternetten tamamla'}</button></div></div>
+  $('#d-body').innerHTML=`<div class="dtop">${coverHtml(b,'l')}<div><h2 data-notr>${esc(b.title)}</h2><div class="au">${esc([b.author,b.publisher].filter(Boolean).join(' · ')||'Yazar bilgisi yok')}</div><button class="btn sm ghost" data-d="cover" style="margin-top:6px;padding-left:0">${b.cover&&b.isbn&&b.pages?'Bilgileri yenile':'İnternetten tamamla'}</button></div></div>
   <div class="lcard"><div class="row"><div><small>Kitaplıktaki Konumu</small><div class="loc">${ICON.pin}<span>${esc(locText(b))}</span></div></div>${b.bookcase?'<button class="btn pri sm" data-d="show">Rafta Göster</button>':''}</div>
     ${ph?photoHtml(b.photoId,ph,b.id,b.id):b.bookcase&&b.shelf?shelfHtml(b.bookcase,b.shelf,b.id,'mini'):''}
     <div class="move"><small>Yerini değiştir</small>
@@ -762,7 +796,7 @@ function renderDrawer(){
       <div class="r2"><button class="btn" data-mv="left" ${!b.shelf||b.pos<=1?'disabled':''}>◀ Sola</button><button class="btn" data-mv="right" ${!b.shelf||b.pos>=shelfBooks(b.bookcase,b.shelf).length?'disabled':''}>Sağa ▶</button><button class="btn" data-mv="up" ${!b.shelf||b.shelf<=1?'disabled':''}>▲ Üst raf</button><button class="btn" data-mv="down" ${!b.shelf?'disabled':''}>▼ Alt raf</button></div>
     </div></div>
   <div class="dsec"><small>Ödünç</small>${b.loan?`<div class="loanbox">Kimde: <b>${esc(b.loan.to)}</b><div class="sub">${esc(dstr(b.loan.at))} tarihinde verdin · ${daysSince(b.loan.at)} gün oldu</div>${b.loan.note?`<div style="margin-top:6px">${esc(b.loan.note)}</div>`:''}${dueAt(b.loan)?`<div class="sub" style="margin-top:4px">Hatırlatma: ${esc(dstr(dueAt(b.loan)))}</div>`:''}<div class="acts"><button class="btn pri sm" data-d="loan-back">Geri geldi</button><a class="btn sm wa" href="${esc(waLink(b))}" target="_blank" rel="noopener">${WA_SVG}Hatırlat</a><button class="btn sm" data-d="loan-edit">Düzenle</button></div></div>`:`<button class="btn sm" data-d="loan-edit">Ödünç ver</button>`}
-    ${(b.loanHistory||[]).length?`<ul class="hist">${b.loanHistory.slice(-5).reverse().map(x=>`<li>${esc(x.to)} · ${esc(dstr(x.at))} – ${esc(dstr(x.back))}</li>`).join('')}</ul>`:''}</div>
+    ${(b.loanHistory||[]).length?`<ul class="hist">${b.loanHistory.slice(-5).reverse().map(x=>`<li data-notr>${esc(x.to)} · ${esc(dstr(x.at))} – ${esc(dstr(x.back))}</li>`).join('')}</ul>`:''}</div>
   <dl class="ftable">${rows.map(([k,v,m])=>`<div><dt>${k}</dt><dd class="${m?'mono':''}">${esc(v||'—')}</dd></div>`).join('')}</dl>
   ${b.summary?`<div class="dsec"><small>Özet</small><div>${esc(b.summary)}</div></div>`:''}
   <div class="dsec"><small>Okuma Takibi</small><div class="seg3">${['okunacak','okunuyor','okundu'].map(s=>`<button data-st="${s}" aria-pressed="${b.status===s}">${stLabel[s]}</button>`).join('')}</div></div>
@@ -770,11 +804,11 @@ function renderDrawer(){
   <div class="dsec"><small style="display:flex;justify-content:space-between;align-items:center">Değerlendirme<span class="stars">${[1,2,3,4,5].map(x=>`<button class="${(b.rating||0)>=x?'on':''}" data-rate="${x}" data-id="${esc(b.id)}" aria-label="${x} yıldız">★</button>`).join('')}</span></small></div>
   <div class="dsec"><small style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">Alıntılar${(b.quotes||[]).length?' ('+b.quotes.length+')':''}<span class="acts" style="gap:6px"><span class="btn sm soft fileb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>Sayfadan alıntı<input type="file" accept="image/*" capture="environment" id="q-cam"></span><span class="btn sm fileb">Galeriden<input type="file" accept="image/*" id="q-gal"></span><button class="btn sm" data-d="q-new">Yaz</button></span></small>
     ${quoteEditor(b)}
-    ${(b.quotes||[]).length?`<ul class="quotes">${b.quotes.map((q,i)=>`<li><blockquote>${esc(q.text)}</blockquote><div class="qm"><span class="mono">${q.page?'s. '+esc(q.page):''}</span><span>${esc(dstr(q.at))}</span><span class="acts" style="gap:4px;margin-left:auto"><button class="btn sm ghost" data-d="q-copy" data-i="${i}">Kopyala</button><a class="btn sm ghost" href="https://wa.me/?text=${encodeURIComponent(quoteText(b,q))}" target="_blank" rel="noopener">Paylaş</a><button class="btn sm ghost danger" data-d="q-del" data-i="${i}">Sil</button></span></div></li>`).reverse().join('')}</ul>`:(qEdit&&qEdit.id===b.id?'':'<p class="hint" style="margin:0">Altını çizdiğin bir paragrafın fotoğrafını çek; metni ve sayfa numarasını kitabın alıntılarına kaydedeyim.</p>')}</div>
+    ${(b.quotes||[]).length?`<ul class="quotes">${b.quotes.map((q,i)=>`<li><blockquote data-notr>${esc(q.text)}</blockquote><div class="qm"><span class="mono">${q.page?'s. '+esc(q.page):''}</span><span>${esc(dstr(q.at))}</span><span class="acts" style="gap:4px;margin-left:auto"><button class="btn sm ghost" data-d="q-copy" data-i="${i}">Kopyala</button><a class="btn sm ghost" href="https://wa.me/?text=${encodeURIComponent(quoteText(b,q))}" target="_blank" rel="noopener">Paylaş</a><button class="btn sm ghost danger" data-d="q-del" data-i="${i}">Sil</button></span></div></li>`).reverse().join('')}</ul>`:(qEdit&&qEdit.id===b.id?'':'<p class="hint" style="margin:0">Altını çizdiğin bir paragrafın fotoğrafını çek; metni ve sayfa numarasını kitabın alıntılarına kaydedeyim.</p>')}</div>
   <div class="dsec"><small>Okuma Notları</small><textarea class="fin" id="d-notes" placeholder="Notunu yaz; dışarı tıklayınca kaydedilir.">${esc(b.notes||'')}</textarea></div>
   <div class="dsec"><button class="btn danger sm" data-d="del">Kitabı sil</button></div>`;
 }
-const quoteText=(b,q)=>`“${q.text}” — ${b.title}${b.author?', '+b.author:''}${q.page?', s. '+q.page:''}`;
+const quoteText=(b,q)=>`“${q.text}” — ${b.title}${b.author?', '+b.author:''}${q.page?(EN?', p. ':', s. ')+q.page:''}`;
 function quoteEditor(b){
   if(!qEdit||qEdit.id!==b.id)return '';
   if(qEdit.busy)return `<div class="qedit"><p class="status">${esc(qEdit.busy)}</p></div>`;
@@ -871,7 +905,7 @@ function openLoan(id){
   const today=new Date(Date.now()-new Date().getTimezoneOffset()*6e4).toISOString().slice(0,10);
   const d0=L.at?new Date(L.at-new Date(L.at).getTimezoneOffset()*6e4).toISOString().slice(0,10):today;
   sheetHtml('sh-loan',`<div class="ph"><h2>${L.to?'Ödünç bilgisini düzenle':'Ödünç ver'}</h2><button class="xb" data-close aria-label="Kapat">×</button></div>
-    <p class="sub" style="margin:0">${esc(b.title)}</p>
+    <p class="sub" style="margin:0" data-notr>${esc(b.title)}</p>
     <label class="flab" for="l-to">Kime verdin?</label><input class="fin" id="l-to" list="dl-people" value="${esc(L.to||'')}" placeholder="ör. Ayşe">
     <datalist id="dl-people">${people().map(p=>`<option value="${esc(p)}">`).join('')}</datalist>
     <label class="flab" for="l-at">Ne zaman verdin?</label><input class="fin" id="l-at" type="date" value="${d0}" max="${today}">
@@ -898,7 +932,7 @@ function sheetHtml(id,html){
 }
 function bookMenu(id){
   const b=books[id];if(!b)return;
-  sheetHtml('sh-bmenu',`<div class="ph"><h2 style="font-size:21px">${esc(b.title)}</h2><button class="xb" data-close aria-label="Kapat">×</button></div>
+  sheetHtml('sh-bmenu',`<div class="ph"><h2 style="font-size:21px" data-notr>${esc(b.title)}</h2><button class="xb" data-close aria-label="Kapat">×</button></div>
     <div class="sub">${esc(locText(b))}${b.loan?' · Ödünçte, '+esc(loanText(b)):''}</div>
     <div class="bmenu">
       <button class="btn" data-bm="open">Detayları aç</button>
@@ -1039,6 +1073,7 @@ document.addEventListener('click',async e=>{
     case 'check':$('#add-menu').hidden=true;openCheck();break;
     case 'scan-bar':$('#add-menu').hidden=true;if(!$('#b-case').value&&curCase)$('#b-case').value=curCase;openSheet('sh-bar');break;
     case 'new':$('#add-menu').hidden=true;openDrawer('__new',true);break;
+    case 'lang':try{localStorage.setItem('rafLang',EN?'tr':'en')}catch(e){}location.reload();break;
     case 'family':$('#add-menu').hidden=true;openFamily();break;
     case 'data':$('#add-menu').hidden=true;openData();break;
     case 'arrange':openArrange();break;
@@ -1082,7 +1117,7 @@ const toDataURL=blob=>new Promise((ok,no)=>{const r=new FileReader();r.onload=()
 async function askAI(kind,blob,extra,st){
   if(!B||!B.ai)throw new Error('Kitap tanıma bu önizlemede kapalı; yayındaki sitede çalışır.');
   st.textContent=kind==='shelf'?'Kitaplar okunuyor… (10–40 sn sürebilir)':'Bilgiler okunuyor…';
-  return await B.ai(kind,(await toDataURL(blob)).split(',')[1],extra||{});
+  return await B.ai(kind,(await toDataURL(blob)).split(',')[1],{...(extra||{}),lang:LANG});
 }
 const errText=e=>{const c=e&&String(e.code||'').replace('functions/','');return c==='resource-exhausted'?'Bugünlük tanıma hakkın doldu, yarın tekrar dene.':c==='unauthenticated'?'Önce giriş yapmalısın.':c==='deadline-exceeded'?'Yanıt gecikti; tekrar dene ya da rafları ayrı ayrı çek.':c==='internal'||c==='unavailable'?'Tanıma servisine ulaşılamadı, biraz sonra tekrar dene.':(e&&e.message)||'Bir hata oldu.'};
 
@@ -1206,7 +1241,7 @@ const nextBtn=`<span class="btn pri fileb">${'<svg viewBox="0 0 24 24" fill="non
 function verdictYes(b,kind,info){
   const st=b.status==='okundu'?'Bunu okudun.':b.status==='okunuyor'?'Şu an okuyorsun.':b.status==='okunacak'?'Okunacaklar listende.':'';
   return `<div class="verdict yes">${coverHtml(b,'l')}<div><div class="vt">${ICON.check.replace('<svg','<svg width="26" height="26"')}Bu kitap sende var</div>
-    <h3>${esc(b.title)}</h3><div class="sub">${esc([b.author,b.publisher].filter(Boolean).join(' · '))}</div>
+    <h3 data-notr>${esc(b.title)}</h3><div class="sub">${esc([b.author,b.publisher].filter(Boolean).join(' · '))}</div>
     <div class="vloc">${ICON.pin.replace('<svg','<svg width="16" height="16"')}${esc(locText(b))}</div>
     ${kind==='edition'?`<p class="vnote">Barkod farklı: sendeki başka bir baskısı olabilir${info&&info.publisher?' (okuttuğun: '+esc(info.publisher)+')':''}.</p>`:''}
     ${b.loan?`<p class="vnote">Şu an ödünçte, ${esc(loanText(b))}.</p>`:''}${st?`<p class="vnote">${st}</p>`:''}
@@ -1216,7 +1251,7 @@ function verdictNo(info,isbn){
   const fake={id:'_',title:info&&info.title||'Bilinmeyen kitap',author:info&&info.author||''};
   const cov=info&&info.cover?`<img class="cov l" src="${esc(info.cover)}" alt="">`:genCover(fake,'l');
   return `<div class="verdict no">${cov}<div><div class="vt"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 6l12 12M18 6 6 18"/></svg>Sende yok</div>
-    <h3>${esc(fake.title)}</h3><div class="sub">${esc([fake.author,info&&info.publisher].filter(Boolean).join(' · ')||(isbn?'ISBN '+isbn:''))}</div>
+    <h3 data-notr>${esc(fake.title)}</h3><div class="sub">${esc([fake.author,info&&info.publisher].filter(Boolean).join(' · ')||(isbn?'ISBN '+isbn:''))}</div>
     ${info?'':`<p class="vnote">Bu barkodla internette kitap bilgisi bulunamadı; kitaplığında da yok.</p>`}
     <div class="acts"><button class="btn" data-c="add" data-isbn="${esc(isbn||'')}">Aldım, kitaplığa ekle</button>${nextBtn}</div></div></div>`;
 }
@@ -1266,23 +1301,24 @@ async function saveFile(name,blob){
   if(isNative()&&P&&P.Filesystem&&P.Share){
     const b64=(await new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(String(r.result));r.onerror=no;r.readAsDataURL(blob)})).split(',')[1];
     const w=await P.Filesystem.writeFile({path:name,data:b64,directory:'CACHE'});
-    await P.Share.share({title:name,files:[w.uri],dialogTitle:'Dosyayı kaydet ya da gönder'});return;
+    await P.Share.share({title:name,files:[w.uri],dialogTitle:t('Dosyayı kaydet ya da gönder')});return;
   }
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},4000);
 }
 const today=()=>new Date().toISOString().slice(0,10);
-const COLS=[['Kitap','title'],['Yazar','author'],['Yayınevi','publisher'],['Kategori','genre'],['ISBN','isbn'],['Sayfa','pages'],['Basım yılı','year'],['Kitaplık','bookcase'],['Raf','shelf'],['Sıra','pos'],['Durum','status'],['Okunan sayfa','page'],['Puan','rating'],['Notlar','notes']];
+const COLS0=[['Kitap','title'],['Yazar','author'],['Yayınevi','publisher'],['Kategori','genre'],['ISBN','isbn'],['Sayfa','pages'],['Basım yılı','year'],['Kitaplık','bookcase'],['Raf','shelf'],['Sıra','pos'],['Durum','status'],['Okunan sayfa','page'],['Puan','rating'],['Notlar','notes']];
+const COLS=EN?COLS0.map(([h,k])=>[({Kitap:'Title',Yazar:'Author','Yayınevi':'Publisher',Kategori:'Category',ISBN:'ISBN',Sayfa:'Pages','Basım yılı':'Year','Kitaplık':'Bookcase',Raf:'Shelf','Sıra':'Position',Durum:'Status','Okunan sayfa':'Pages read',Puan:'Rating',Notlar:'Notes'})[h]||h,k]):COLS0;
 async function exportExcel(){
   const X=await loadXLSX();
-  const rows=all().sort((a,b)=>coll.compare(a.title||'',b.title||'')).map(b=>{const o={};COLS.forEach(([h,k])=>o[h]=k==='status'?(stLabel[b.status]||''):(b[k]??''));o['Alıntılar']=(b.quotes||[]).map(q=>(q.page?`[s. ${q.page}] `:'')+q.text).join('\n\n');o['Ödünç (kimde)']=b.loan?b.loan.to:'';o['Ödünç tarihi']=b.loan?new Date(b.loan.at).toLocaleDateString('tr-TR'):'';return o});
+  const rows=all().sort((a,b)=>coll.compare(a.title||'',b.title||'')).map(b=>{const o={};COLS.forEach(([h,k])=>o[h]=k==='status'?t(stLabel[b.status]||''):(b[k]??''));o[EN?'Quotes':'Alıntılar']=(b.quotes||[]).map(q=>(q.page?`[s. ${q.page}] `:'')+q.text).join('\n\n');o[EN?'Lent to':'Ödünç (kimde)']=b.loan?b.loan.to:'';o[EN?'Lent on':'Ödünç tarihi']=b.loan?new Date(b.loan.at).toLocaleDateString(LOC):'';return o});
   const ws=X.utils.json_to_sheet(rows);ws['!cols']=[{wch:34},{wch:22},{wch:24},{wch:14},{wch:15},{wch:7},{wch:9},{wch:14},{wch:5},{wch:5},{wch:10},{wch:9},{wch:6},{wch:40},{wch:14},{wch:12}];
-  const wb=X.utils.book_new();X.utils.book_append_sheet(wb,ws,'Kitaplar');
+  const wb=X.utils.book_new();X.utils.book_append_sheet(wb,ws,EN?'Books':'Kitaplar');
   const out=X.write(wb,{bookType:'xlsx',type:'array'});
-  await saveFile(`raf-izi-kitapligim-${today()}.xlsx`,new Blob([out],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
+  await saveFile(EN?`raf-izi-library-${today()}.xlsx`:`raf-izi-kitapligim-${today()}.xlsx`,new Blob([out],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
 }
 async function exportBackup(){
   const data={app:'raf-izi',v:1,at:new Date().toISOString(),meta,books:all().map(b=>{const c={...b};delete c.photoId;delete c.box;return c})};
-  await saveFile(`raf-izi-yedek-${today()}.json`,new Blob([JSON.stringify(data)],{type:'application/json'}));
+  await saveFile(EN?`raf-izi-backup-${today()}.json`:`raf-izi-yedek-${today()}.json`,new Blob([JSON.stringify(data)],{type:'application/json'}));
 }
 /* içe aktarma: Raf İzi yedeği (.json), Excel / CSV, Goodreads dışa aktarımı */
 const HMAP={title:['kitap','kitap adi','title','baslik','ad','eser'],author:['yazar','author','authors','yazarlar'],publisher:['yayinevi','publisher','yayinci'],genre:['kategori','tur','genre'],
@@ -1343,12 +1379,12 @@ function openData(){
 const REM_DEF=30;
 const dueAt=L=>{const d=L.remindDays==null?REM_DEF:L.remindDays;if(!d)return null;return Math.max(L.at+d*864e5,L.snoozeUntil||0)};
 const overdue=()=>all().filter(b=>b.loan&&dueAt(b.loan)&&dueAt(b.loan)<=Date.now()).sort((a,b)=>a.loan.at-b.loan.at);
-function waText(b){return `Merhaba ${b.loan.to}, ${dstr(b.loan.at)} tarihinde verdiğim “${b.title}” kitabı sende duruyor mu? Bitirdiysen uygun bir zamanda geri alabilir miyim? Teşekkürler!`}
+function waText(b){if(EN)return `Hi ${b.loan.to}, do you still have “${b.title}” that I lent you on ${dstr(b.loan.at)}? If you've finished it, could I get it back sometime? Thanks!`;return `Merhaba ${b.loan.to}, ${dstr(b.loan.at)} tarihinde verdiğim “${b.title}” kitabı sende duruyor mu? Bitirdiysen uygun bir zamanda geri alabilir miyim? Teşekkürler!`}
 const waLink=b=>'https://wa.me/?text='+encodeURIComponent(waText(b));
 const WA_SVG='<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.5 0-3-.4-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6.5-.1 1.5-.6 1.7-1.2s.2-1.1.2-1.2-.3-.2-.5-.3z"/></svg>';
 function remindHtml(){
   const o=overdue();if(!o.length)return '';
-  return `<div class="remind"><div class="rh"><b>Geri isteme zamanı</b><span class="sub">${o.length} kitap uzun süredir ödünçte</span></div>${o.slice(0,4).map(b=>`<div class="ri">${coverHtml(b,'xs')}<div><b>${esc(b.title)}</b><div class="sub">Kimde: ${esc(b.loan.to)} · ${daysSince(b.loan.at)} gündür</div></div>
+  return `<div class="remind"><div class="rh"><b>Geri isteme zamanı</b><span class="sub">${o.length} kitap uzun süredir ödünçte</span></div>${o.slice(0,4).map(b=>`<div class="ri">${coverHtml(b,'xs')}<div><b data-notr>${esc(b.title)}</b><div class="sub">Kimde: ${esc(b.loan.to)} · ${daysSince(b.loan.at)} gündür</div></div>
     <div class="acts"><a class="btn sm wa" href="${esc(waLink(b))}" target="_blank" rel="noopener">${WA_SVG}Hatırlat</a><button class="btn sm" data-rm="back" data-id="${esc(b.id)}">Geri geldi</button><button class="btn sm ghost" data-rm="snooze" data-id="${esc(b.id)}">7 gün sonra</button></div></div>`).join('')}${o.length>4?`<p class="sub" style="margin:8px 0 0">+${o.length-4} kitap daha: Dizin → Ödünç verdiklerim</p>`:''}</div>`;
 }
 document.addEventListener('click',e=>{const t=e.target.closest('[data-rm]');if(!t)return;const id=t.dataset.id;
@@ -1361,7 +1397,7 @@ function syncLoanNotifs(ask){
   clearTimeout(notifT);notifT=setTimeout(async()=>{try{
     if(ask&&!notifAsked){notifAsked=true;await LN.requestPermissions()}
     const pend=(await LN.getPending()).notifications||[];const mine=pend.filter(n=>n.id>=1e8&&n.id<2e9);if(mine.length)await LN.cancel({notifications:mine.map(n=>({id:n.id}))});
-    const list=all().filter(b=>b.loan&&dueAt(b.loan)&&dueAt(b.loan)>Date.now()+6e4).map(b=>({id:1e8+hash(b.id)%9e8,title:'Ödünç hatırlatma',body:`“${b.title}” ${b.loan.to} adlı kişide; geri istemek ister misin?`,schedule:{at:new Date(dueAt(b.loan)),allowWhileIdle:true},extra:{id:b.id}}));
+    const list=all().filter(b=>b.loan&&dueAt(b.loan)&&dueAt(b.loan)>Date.now()+6e4).map(b=>({id:1e8+hash(b.id)%9e8,title:t('Ödünç hatırlatma'),body:EN?`“${b.title}” is with ${b.loan.to}. Would you like to ask for it back?`:`“${b.title}” ${b.loan.to} adlı kişide; geri istemek ister misin?`,schedule:{at:new Date(dueAt(b.loan)),allowWhileIdle:true},extra:{id:b.id}}));
     if(list.length)await LN.schedule({notifications:list.slice(0,60)});
   }catch(e){console.warn('bildirim',e)}},1500);
 }
@@ -1421,7 +1457,7 @@ function openFamily(prefill){
   const f=fam||{owner:true,uyeler:[],adlar:{}};const me=user&&user.uid;
   const nm=id=>id===me?'Sen':(f.adlar[id]||'Aile üyesi');
   const people=[f.lib,...f.uyeler.filter(x=>x!==f.lib)];
-  const list=`<ul class="fam">${people.map(id=>`<li><span class="av">${esc((nm(id)[0]||'?').toLocaleUpperCase('tr'))}</span><span>${esc(nm(id))}${id===f.lib?' <em>kitaplık sahibi</em>':''}</span>${f.owner&&id!==me?`<button class="btn sm ghost danger" data-fam="cikar" data-uid="${esc(id)}">Çıkar</button>`:''}</li>`).join('')}</ul>`;
+  const list=`<ul class="fam">${people.map(id=>`<li><span class="av">${esc((nm(id)[0]||'?').toLocaleUpperCase('tr'))}</span><span data-notr>${esc(nm(id))}${id===f.lib?' <em>kitaplık sahibi</em>':''}</span>${f.owner&&id!==me?`<button class="btn sm ghost danger" data-fam="cikar" data-uid="${esc(id)}">Çıkar</button>`:''}</li>`).join('')}</ul>`;
   const join=`<div class="dsec"><small>Başka birinin kitaplığına katıl</small><div class="g2"><input class="fin mono" id="fm-code" placeholder="Davet kodu" value="${esc(prefill||'')}" autocapitalize="characters"><button class="btn pri" data-fam="katil">Katıl</button></div>
     ${all().length?`<label class="check"><input type="checkbox" id="fm-tasi" checked><span>Kendi ${all().length} kitabımı da o kitaplığa kopyala (okuma ve ödünç bilgilerim benimle gelir)</span></label>`:''}</div>`;
   let body;
@@ -1438,7 +1474,7 @@ function openFamily(prefill){
     t.disabled=true;st.textContent='Bekle…';
     try{
       if(op==='davet'){const r=await B.family('davet');const link='https://rafizi.web.app/?davet='+r.code;
-        const msg=`Raf İzi'de ev kitaplığımıza katıl! Şu bağlantıyı aç: ${link} ya da uygulamada Kitap Tara menüsü → Aile kitaplığı → kodu yaz: ${r.code} (7 gün geçerli)`;
+        const msg=EN?`Join our home library on Raf İzi! Open this link: ${link} or in the app go to Scan Book menu → Family library → enter the code: ${r.code} (valid for 7 days)`:`Raf İzi'de ev kitaplığımıza katıl! Şu bağlantıyı aç: ${link} ya da uygulamada Kitap Tara menüsü → Aile kitaplığı → kodu yaz: ${r.code} (7 gün geçerli)`;
         $('#fm-inv').innerHTML=`<div class="code">${esc(r.code)}</div><p class="hint">Kod 7 gün geçerli. Katılan kişi kendi Google hesabıyla girer.</p><div class="acts"><a class="btn wa" href="https://wa.me/?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">${WA_SVG}WhatsApp'tan gönder</a><button class="btn" id="fm-copy">Mesajı kopyala</button></div>`;
         $('#fm-copy').onclick=()=>navigator.clipboard.writeText(msg).then(()=>toast('Kopyalandı'),()=>toast('Kopyalanamadı'));st.textContent='';return}
       if(op==='katil'){const code=($('#fm-code').value||'').trim();if(!code){st.textContent='Davet kodunu yaz.';t.disabled=false;return}
