@@ -1652,7 +1652,7 @@ render();
         :'Kamera izni kapalı. Adres çubuğundaki “aA” → Web Sitesi Ayarları → Kamera: İzin Ver yap (ya da Ayarlar → Safari → Kamera → İzin Ver), sonra sayfayı yenile.')
       :n==='NotReadableError'?'Kamera başka bir uygulama tarafından kullanılıyor. Diğer uygulamaları kapatıp tekrar dene.'
       :'Kamera açılamadı. Aşağıdaki “Fotoğraf seç” ile galeriden seçebilirsin.';
-    m.insertAdjacentHTML('beforeend','<br><small style="opacity:.6">('+n+')</small><br><button class="btn" data-c="re" style="margin-top:14px">Tekrar dene</button>');
+    m.insertAdjacentHTML('beforeend','<br><small style="opacity:.6">('+n+')</small><br><button class="btn pri" data-c="re" style="margin-top:14px">'+(n==='NotAllowedError'&&!inApp?'İzin ver':'Tekrar dene')+'</button>');
     m.querySelector('[data-c=re]').onclick=start;m.hidden=false
   }
   function open(inp){
