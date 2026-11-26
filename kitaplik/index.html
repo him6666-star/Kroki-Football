@@ -598,34 +598,52 @@ function renderRead(){
 /* ---------- covers: Google Books, then Open Library ---------- */
 const coverAsked=new Set();let coverBusy=0;const coverQ=[];
 const titleClose=(a,b)=>{a=norm(a);b=norm(b);return !!a&&!!b&&(a===b||a.startsWith(b)||b.startsWith(a))};
-async function lookCover(b,force){
-  if(!b)return false;
-  const isbn=(b.isbn||'').replace(/[^0-9Xx]/g,'');
-  let cover='',ch={coverTried:Date.now()};
+const TR_ISBN=/^97(8975|8605|8625|8994)/;   // Türkiye yayınevi önekleri
+const META_V=2;
+async function getJSON(u){const r=await fetch(u);if(!r.ok)throw new Error(r.status);return r.json()}
+/* Google Books + Open Library: kapak, ISBN, sayfa sayısı, basım yılı, yayınevi (yalnızca boş alanlar doldurulur) */
+async function lookMeta(b){
+  const isbn0=(b.isbn||'').replace(/[^0-9Xx]/g,'');
+  const lastName=(b.author||'').trim().split(/\s+/).pop()||'';
+  const cand=[];   // {src,title,isbn,trIsbn,pages,year,publisher,cover,tr}
+  // 1) Google Books
+  const gq=isbn0?['isbn:'+isbn0]:[`intitle:${b.title}${lastName?' inauthor:'+lastName:''}`,`${b.title} ${b.author||''}`.trim()];
+  for(const q of gq){
+    try{const j=await getJSON('https://www.googleapis.com/books/v1/volumes?maxResults=8&q='+encodeURIComponent(q));
+      for(const it of j.items||[]){const v=it.volumeInfo||{};const full=[v.title,v.subtitle].filter(Boolean).join(' ');
+        if(!isbn0&&!titleClose(v.title,b.title)&&!titleClose(full,b.title))continue;
+        const ids=(v.industryIdentifiers||[]).map(x=>x.identifier.replace(/[^0-9X]/g,''));const i13=ids.find(x=>x.length===13)||'';
+        const im=v.imageLinks&&(v.imageLinks.thumbnail||v.imageLinks.smallThumbnail);
+        cand.push({src:'g',isbn:i13,trIsbn:TR_ISBN.test(i13)||v.language==='tr',pages:v.pageCount||0,year:parseInt(v.publishedDate)||0,publisher:v.publisher||'',
+          cover:im?im.replace(/^http:/,'https:').replace('&edge=curl',''):'',tr:v.language==='tr',summary:v.language==='tr'?(v.description||''):''})}
+    }catch(e){}
+    if(cand.some(c=>c.isbn&&c.pages))break;
+  }
+  // 2) Open Library
   try{
-    const q=isbn?'isbn:'+isbn:'intitle:'+b.title+(b.author?' inauthor:'+b.author:'');
-    const r=await fetch('https://www.googleapis.com/books/v1/volumes?maxResults=5&q='+encodeURIComponent(q));
-    const j=await r.json();
-    const items=(j.items||[]).filter(x=>x.volumeInfo&&(isbn||titleClose(x.volumeInfo.title,b.title)));
-    const it=items.find(x=>x.volumeInfo.imageLinks)||items[0];
-    if(it){const v=it.volumeInfo;
-      const im=v.imageLinks&&(v.imageLinks.thumbnail||v.imageLinks.smallThumbnail);
-      if(im)cover=im.replace(/^http:/,'https:').replace('&edge=curl','');
-      if(!b.pages&&v.pageCount)ch.pages=v.pageCount;
-      if(!b.year&&v.publishedDate&&parseInt(v.publishedDate))ch.year=parseInt(v.publishedDate);
-      if(!b.publisher&&v.publisher)ch.publisher=v.publisher;
-      if(!b.author&&v.authors)ch.author=v.authors.join(', ');
-      if(!isbn){const id=(v.industryIdentifiers||[]).find(x=>x.type==='ISBN_13');if(id)ch.isbn=id.identifier}
-      if(!b.summary&&v.description&&v.language==='tr'){const s=v.description.replace(/<[^>]+>/g,'');ch.summary=s.length>320?s.slice(0,s.lastIndexOf('.',320)+1||320):s}}
+    const u=isbn0?`https://openlibrary.org/search.json?isbn=${isbn0}&limit=3`:`https://openlibrary.org/search.json?title=${encodeURIComponent(b.title)}${lastName?'&author='+encodeURIComponent(lastName):''}&limit=6`;
+    const j=await getJSON(u+'&fields=title,isbn,number_of_pages_median,first_publish_year,publisher,cover_i,language');
+    for(const d of j.docs||[]){if(!isbn0&&!titleClose(d.title,b.title))continue;
+      const is=(d.isbn||[]).filter(x=>x.length===13);const tri=is.find(x=>TR_ISBN.test(x));
+      cand.push({src:'o',isbn:tri||'',trIsbn:!!tri,pages:d.number_of_pages_median||0,year:d.first_publish_year||0,publisher:'',
+        cover:d.cover_i?`https://covers.openlibrary.org/b/id/${d.cover_i}-M.jpg`:'',tr:(d.language||[]).includes('tur')})}
   }catch(e){}
-  if(!cover&&(isbn||ch.isbn))cover='https://covers.openlibrary.org/b/isbn/'+(isbn||ch.isbn)+'-M.jpg?default=false';
-  if(cover)ch.cover=cover;
-  if(!books[b.id])return false;
+  const ch={metaV:META_V,coverTried:Date.now()};
+  const pick=f=>{const c=cand.find(x=>x.tr&&x[f])||cand.find(x=>x[f]);return c?c[f]:null};
+  if(!isbn0){const c=cand.find(x=>x.isbn&&x.trIsbn);if(c)ch.isbn=c.isbn}
+  if(!b.pages){const c=cand.find(x=>x.pages&&x.trIsbn)||cand.find(x=>x.pages);if(c)ch.pages=c.pages}
+  if(!b.year){const y=pick('year');if(y)ch.year=y}
+  if(!b.publisher){const c=cand.find(x=>x.publisher&&x.tr);if(c)ch.publisher=c.publisher}
+  if(!b.summary){const c=cand.find(x=>x.summary);if(c){const s=c.summary.replace(/<[^>]+>/g,'');ch.summary=s.length>320?s.slice(0,s.lastIndexOf('.',320)+1||320):s}}
+  if(!b.cover){const c=cand.find(x=>x.cover&&x.src==='g')||cand.find(x=>x.cover);
+    if(c)ch.cover=c.cover;else if(isbn0||ch.isbn)ch.cover='https://covers.openlibrary.org/b/isbn/'+(isbn0||ch.isbn)+'-M.jpg?default=false'}
+  if(!books[b.id])return {};
   try{await putBooks([{...books[b.id],...ch}])}catch(e){books[b.id]={...books[b.id],...ch};render()}
-  return !!cover;
+  return ch;
 }
+async function lookCover(b){const ch=await lookMeta(b);return ch}
 function queueCovers(){
-  for(const b of all())if(!b.cover&&!b.coverTried&&!coverAsked.has(b.id)&&coverAsked.size<80){coverAsked.add(b.id);coverQ.push(b.id)}
+  for(const b of all())if(b.metaV!==META_V&&(!b.cover||!b.isbn||!b.pages)&&!coverAsked.has(b.id)&&coverAsked.size<200){coverAsked.add(b.id);coverQ.push(b.id)}
   pumpCovers();
 }
 function pumpCovers(){
@@ -689,7 +707,7 @@ function renderDrawer(){
   const cases=caseList(),n=b.bookcase?shelfCount(b.bookcase):1,ph=b.photoId&&photos[b.photoId];
   const rows=[['Yazar',b.author],['Yayınevi',b.publisher],['Kategori',b.genre],['ISBN',b.isbn,1],['Sayfa Sayısı',b.pages,1],['Basım Yılı',b.year,1]];
   const pct=b.pages?Math.min(100,Math.round((b.page||0)/b.pages*100)):null;
-  $('#d-body').innerHTML=`<div class="dtop">${coverHtml(b,'l')}<div><h2>${esc(b.title)}</h2><div class="au">${esc([b.author,b.publisher].filter(Boolean).join(' · ')||'Yazar bilgisi yok')}</div><button class="btn sm ghost" data-d="cover" style="margin-top:6px;padding-left:0">${b.cover?'Kapağı yenile':'Kapak ara'}</button></div></div>
+  $('#d-body').innerHTML=`<div class="dtop">${coverHtml(b,'l')}<div><h2>${esc(b.title)}</h2><div class="au">${esc([b.author,b.publisher].filter(Boolean).join(' · ')||'Yazar bilgisi yok')}</div><button class="btn sm ghost" data-d="cover" style="margin-top:6px;padding-left:0">${b.cover&&b.isbn&&b.pages?'Bilgileri yenile':'İnternetten tamamla'}</button></div></div>
   <div class="lcard"><div class="row"><div><small>Kitaplıktaki Konumu</small><div class="loc">${ICON.pin}<span>${esc(locText(b))}</span></div></div>${b.bookcase?'<button class="btn pri sm" data-d="show">Rafta Göster</button>':''}</div>
     ${ph?photoHtml(b.photoId,ph,b.id,b.id):b.bookcase&&b.shelf?shelfHtml(b.bookcase,b.shelf,b.id,'mini'):''}
     <div class="move"><small>Yerini değiştir</small>
@@ -718,7 +736,7 @@ $('#d-body').addEventListener('click',async e=>{
   if(t.dataset.d==='cancel'){editMode=false;renderDrawer();return}
   if(t.dataset.d==='del'){if(!t.dataset.arm){t.dataset.arm=1;t.textContent='Silinsin mi? Tekrar dokun';return}closeDrawer();return deleteBook(id)}
   if(t.dataset.d==='loan-edit')return openLoan(id);
-  if(t.dataset.d==='cover'){t.textContent='Aranıyor…';const ok=await lookCover(books[id],true);toast(ok?'Kapak bulundu':'Kapak bulunamadı');renderDrawer();return}
+  if(t.dataset.d==='cover'){t.textContent='Aranıyor…';const ch=await lookMeta(books[id]);const got=[ch.cover&&'kapak',ch.isbn&&'ISBN',ch.pages&&'sayfa sayısı',ch.year&&'basım yılı',ch.publisher&&'yayınevi'].filter(Boolean);toast(got.length?'Eklendi: '+got.join(', '):'İnternette yeni bilgi bulunamadı');renderDrawer();return}
   if(t.dataset.d==='loan-back')return loanBack(id);
   if(t.dataset.d==='save')return saveEdit();
   if(t.dataset.st)return setStatus(id,t.dataset.st);

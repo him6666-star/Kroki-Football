@@ -65,6 +65,9 @@ jobs:
           printf '<!DOCTYPE html><meta charset="utf-8"><title>Raf İzi</title><meta http-equiv="refresh" content="0;url=https://%s.web.app/"><a href="https://%s.web.app/">Raf İzi yeni adresinde</a>' "$SITE" "$SITE" > public/index.html
           printf '{"hosting":{"site":"kitapligim-app","public":"public","redirects":[{"source":"**","destination":"https://%s.web.app/","type":301}]}}' "$SITE" > firebase.json
           npx -y firebase-tools@13 deploy --project scribble-kick --only hosting --non-interactive
+      - name: Kitap bilgisi (ISBN/sayfa/kapak) arama testi
+        continue-on-error: true
+        run: node tools/kitaplik_meta_test.js
       - name: Kitap tanima testi
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/key.json
