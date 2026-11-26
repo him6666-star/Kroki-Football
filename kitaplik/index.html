@@ -312,6 +312,11 @@ body.out .gate{display:flex}
 .cam .shut{width:72px;height:72px;border-radius:50%;border:4px solid #fff;background:rgba(255,255,255,.25);flex:none;padding:0}
 .cam .shut:active{background:#fff}
 .cam .cmsg{position:absolute;left:20px;right:20px;top:40%;text-align:center;font-size:15px;line-height:1.5}
+.sg{border:1px solid var(--line,#e3e0d8);border-radius:14px;padding:12px 14px;margin:10px 0;background:var(--card,#fff)}
+.sg h4{margin:0;font-size:15.5px;line-height:1.3}.sg .by{font-size:13px;opacity:.75;margin-top:2px}
+.sg .why{font-size:13.5px;line-height:1.45;margin:8px 0 10px}.sg .acts{gap:6px;flex-wrap:wrap}
+.sg .chip{display:inline-block;font-size:11.5px;padding:2px 8px;border-radius:99px;background:rgba(16,77,43,.09);margin-left:6px;vertical-align:1px}
+.sg.saved{border-color:#104d2b}.sgx{font-size:13px;opacity:.7;text-align:center;padding:14px 0}
 </style>
 </head>
 <body>
@@ -340,6 +345,7 @@ body.out .gate{display:flex}
       <button data-act="scan-bar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6v12M7 6v12M10 6v12M14 6v12M16 6v12M20 6v12"/></svg>Barkod okut</button>
       <button data-act="new"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>Elle ekle</button>
       <a class="mlink" href="gizlilik.html" target="_blank" rel="noopener">Gizlilik politikası</a>
+      <button data-act="suggest"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.5 6.7 19.4l1.2-6L3.4 9.3l6-.7z"/></svg>Bana kitap öner</button>
       <button data-act="family"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20a6 6 0 0 1 12 0M14 20a4.5 4.5 0 0 1 7.5-3.4"/></svg>Aile kitaplığı</button>
       <button data-act="data"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M7 10l5 5 5-5M4 19h16"/></svg>Yedek ve aktarma</button>
       <button data-act="lang"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.5 3 14.5 0 18M12 3c-3 3.5-3 14.5 0 18"/></svg><span data-notr id="m-lang">English</span></button>
@@ -381,7 +387,7 @@ body.out .gate{display:flex}
   </section>
 
   <section id="v-read" hidden>
-    <div class="phead"><div><h1>Okuma Listesi</h1><p>Okuduğun kitapların sayfa ilerlemesini, puanlarını ve notlarını buradan takip et.</p></div></div>
+    <div class="phead"><div><h1>Okuma Listesi</h1><p>Okuduğun kitapların sayfa ilerlemesini, puanlarını ve notlarını buradan takip et.</p></div><div class="acts"><button class="btn pri" data-act="suggest"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.5 6.7 19.4l1.2-6L3.4 9.3l6-.7z"/></svg>Bana kitap öner</button></div></div>
     <div class="stats" id="rstats"></div>
     <div class="seg" id="rtabs" style="margin-bottom:16px"></div>
     <div class="rlist" id="rlist"></div>
@@ -1084,6 +1090,7 @@ document.addEventListener('click',async e=>{
     case 'family':$('#add-menu').hidden=true;openFamily();break;
     case 'data':$('#add-menu').hidden=true;openData();break;
     case 'arrange':openArrange();break;
+    case 'suggest':openSuggest();break;
     case 'del-account':$('#add-menu').hidden=true;delAccountDialog();break;
     case 'logout':$('#add-menu').hidden=true;if(window._signOut)window._signOut();break;
     case 'sel-clear':sel=null;render();break;
@@ -1546,7 +1553,9 @@ if(window.firebase){
       delPhoto:id=>root.collection('photos').doc(id).delete(),
       deleteAccount:async()=>{unsub.forEach(f=>f());unsub=[];await firebase.app().functions('europe-west1').httpsCallable('kitaplikHesapSil',{timeout:120000})({});await window._signOut()},
       ai:async(kind,image,extra)=>{const r=await aiCall({kind,image,...extra});if(!r||!r.data)throw new Error('Yanıt anlaşılamadı, tekrar dene.');return r.data},
-      family:async(op,args)=>(await famCall({op,...(args||{})})).data
+      family:async(op,args)=>(await famCall({op,...(args||{})})).data,
+      getPref:async k=>{const d=await root.collection('kisisel').doc(u.uid).collection('ayar').doc(k).get();return d.exists?d.data():null},
+      setPref:(k,v)=>root.collection('kisisel').doc(u.uid).collection('ayar').doc(k).set(clean(v))
     };
     setNote('Kitaplar yükleniyor…');
     const t=setTimeout(()=>setNote('Kayıtlara şu an ulaşılamıyor; bağlantını kontrol et.'),10000);
@@ -1579,8 +1588,47 @@ if(window.firebase){
   B={putMany:async()=>{},remove:async()=>{},removeMany:async()=>{},setMeta:async()=>{},putPhoto:async(id,d)=>{photos[id]=d},delPhoto:async id=>{delete photos[id]},ai:null};
   sel='d3';scrollSel=false;
 }
+/* ---- Kitap onerisi ---- */
+let SG=null;
+async function sgLoad(){if(SG)return SG;SG={last:[],wish:[],skip:[],wishText:''};try{const d=B&&B.getPref?await B.getPref('oneri'):null;if(d)SG={...SG,...d}}catch(e){}return SG}
+const sgSave=()=>{try{if(B&&B.setPref)B.setPref('oneri',SG).catch(()=>{})}catch(e){}};
+const sgKey=x=>norm(x.title);
+function sgCard(x,i,saved){const k=sgKey(x),own=findExisting(x.title);
+  return `<div class="sg${saved?' saved':''}"><h4 data-notr>${esc(x.title)}${x.genre?`<span class="chip">${esc(x.genre)}</span>`:''}</h4><div class="by" data-notr>${esc(x.author)}${x.year?' · '+x.year:''}</div>${x.why?`<p class="why" data-notr>${esc(x.why)}</p>`:''}
+  <div class="acts">${own?'<span class="hint" style="margin:0">Bu kitap zaten kitaplığında</span>':saved?`<button class="btn sm" data-sg="unwish" data-k="${esc(k)}">Listeden çıkar</button>`:`<button class="btn sm pri" data-sg="wish" data-i="${i}">İstek listeme ekle</button><button class="btn sm soft" data-sg="read" data-i="${i}">Okudum</button><button class="btn sm soft" data-sg="skip" data-i="${i}">İlgilenmiyorum</button>`}
+  <a class="btn sm soft" target="_blank" rel="noopener" href="https://www.google.com/search?q=${encodeURIComponent(x.title+' '+x.author+(LANG==='en'?' book':' kitap'))}">Ara</a></div></div>`}
+function sgRender(busy,err){
+  const read=all().filter(b=>b.status==='okundu'||b.rating>0);
+  const wish=SG.wish||[],last=(SG.last||[]).filter(x=>!wish.some(w=>sgKey(w)===sgKey(x)));
+  sheetHtml('sh-sug',`<div class="ph"><h2>Sana önerilenler</h2><button class="xb" data-close aria-label="Kapat">×</button></div>
+  ${read.length<3?`<p class="hint">Öneri yapabilmem için en az 3 kitabı “Okundu” olarak işaretle ya da puan ver. Şu an ${read.length} kitap var.</p>`:`<p class="hint">Okuduğun ${read.length} kitaba ve verdiğin puanlara bakarak öneriyorum. Kitaplığında olanlar önerilmez.</p>`}
+  <div class="dsec" style="margin-top:6px"><small>Ne tür bir şey istersin? (isteğe bağlı)</small>
+   <input id="sg-wish" maxlength="200" placeholder="ör. kısa ve sürükleyici, bilim kurgu, yerli yazar" value="${esc(SG.wishText||'')}" style="width:100%;margin-top:6px">
+   <div class="acts" style="margin-top:10px"><button class="btn pri" id="sg-go" ${read.length<3||busy?'disabled':''}>${busy?'Düşünüyorum…':last.length?'Yeni öneriler getir':'Öner'}</button></div>
+   ${err?`<p class="status">${esc(err)}</p>`:''}</div>
+  ${last.length?`<div class="dsec"><small>Öneriler</small>${last.map(x=>sgCard(x,SG.last.indexOf(x),false)).join('')}</div>`:busy?'':''}
+  <div class="dsec"><small>İstek listen${wish.length?' ('+wish.length+')':''}</small>${wish.length?wish.map((x,i)=>sgCard(x,i,true)).join(''):'<p class="sgx">Beğendiğin önerileri buraya kaydedebilirsin.</p>'}</div>`);
+  $('#sg-go')&&($('#sg-go').onclick=sgAsk);
+}
+async function sgAsk(){
+  if(!B||!B.ai)return toast('Önce giriş yapmalısın.');
+  SG.wishText=($('#sg-wish')?.value||'').trim();sgRender(true);
+  const l=all(),read=l.filter(b=>b.status==='okundu'||b.rating>0).sort((a,b)=>(b.rating||0)-(a.rating||0)||(b.finishedAt||0)-(a.finishedAt||0)).slice(0,80).map(b=>({t:b.title,a:b.author||'',r:b.rating||0,g:b.genre||''}));
+  const own=l.map(b=>b.title).filter(Boolean).slice(0,600),skip=[...(SG.skip||[]),...(SG.wish||[]).map(x=>x.title),...(SG.last||[]).map(x=>x.title)].slice(-200);
+  try{const r=await B.ai('suggest',null,{read,own,skip,wish:SG.wishText,lang:LANG});SG.last=(r&&r.items)||[];sgSave();sgRender(false,SG.last.length?'':'Şu an öneri bulunamadı, birazdan tekrar dene.')}
+  catch(e){const m=String(e&&e.message||'');sgRender(false,/limit|exhausted/i.test(m)?'Bugünlük yapay zekâ hakkın doldu, yarın tekrar dene.':'Öneri alınamadı, tekrar dene.')}
+}
+async function openSuggest(){await sgLoad();sgRender(false);openSheet('sh-sug')}
+document.addEventListener('click',e=>{const t=e.target.closest('[data-sg]');if(!t||!SG)return;const a=t.dataset.sg,x=SG.last[+t.dataset.i];
+  if(a==='wish'&&x){SG.wish=[x,...(SG.wish||[]).filter(w=>sgKey(w)!==sgKey(x))].slice(0,100);toast('İstek listene eklendi')}
+  else if((a==='skip'||a==='read')&&x){SG.skip=[...(SG.skip||[]),x.title].slice(-200);SG.last=SG.last.filter(y=>y!==x);toast(a==='read'?'Not aldım, benzerlerini önereceğim':'Bunu bir daha önermeyeceğim')}
+  else if(a==='unwish'){SG.wish=(SG.wish||[]).filter(w=>sgKey(w)!==t.dataset.k)}
+  else return;
+  sgSave();sgRender(false)});
+
 render();
 }
+
 
 /* iPhone/iPad: sistem kamerasi (input capture) bazen siyah ekranda takiliyor (WebKit hatasi). Web'de sayfa ici kamera kullan. */
 (()=>{
@@ -1598,7 +1646,10 @@ render();
     box.querySelector('.shut').disabled=true;const n=(err&&err.name)||'?';
     const inApp=/FBAN|FBAV|Instagram|WhatsApp|Line\/|GSA\/|Twitter|TikTok|Snapchat|LinkedInApp/i.test(navigator.userAgent);
     m.textContent=inApp?'Bu uygulamanın içindeki tarayıcı kameraya izin vermiyor. Sağ üstteki menüden “Safari’de aç” deyip tekrar dene.'
-      :n==='NotAllowedError'?'Kamera izni kapalı. Adres çubuğundaki “aA” → Web Sitesi Ayarları → Kamera: İzin Ver yap (ya da Ayarlar → Safari → Kamera → İzin Ver), sonra sayfayı yenile.'
+      :n==='NotAllowedError'?(/CriOS/.test(navigator.userAgent)?'Chrome’un kamera izni kapalı. iPhone’da Ayarlar → Chrome → Kamera’yı aç, sonra bu sayfayı yenile.'
+        :/FxiOS/.test(navigator.userAgent)?'Firefox’un kamera izni kapalı. iPhone’da Ayarlar → Firefox → Kamera’yı aç, sonra bu sayfayı yenile.'
+        :/EdgiOS/.test(navigator.userAgent)?'Edge’in kamera izni kapalı. iPhone’da Ayarlar → Edge → Kamera’yı aç, sonra bu sayfayı yenile.'
+        :'Kamera izni kapalı. Adres çubuğundaki “aA” → Web Sitesi Ayarları → Kamera: İzin Ver yap (ya da Ayarlar → Safari → Kamera → İzin Ver), sonra sayfayı yenile.')
       :n==='NotReadableError'?'Kamera başka bir uygulama tarafından kullanılıyor. Diğer uygulamaları kapatıp tekrar dene.'
       :'Kamera açılamadı. Aşağıdaki “Fotoğraf seç” ile galeriden seçebilirsin.';
     m.insertAdjacentHTML('beforeend','<br><small style="opacity:.6">('+n+')</small><br><button class="btn" data-c="re" style="margin-top:14px">Tekrar dene</button>');

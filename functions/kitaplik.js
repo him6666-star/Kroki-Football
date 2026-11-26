@@ -35,7 +35,7 @@ Kapakta yazıyorsa ya da kesin biliyorsan sayfa sayısını ve basım yılını 
 Emin olmadığın alanı boş bırak; tahmin uydurma. Türkçe karakterleri doğru yaz.
 Sadece şu JSON'u döndür: {"title":"","author":"","publisher":"","genre":"","isbn":"","pages":0,"year":0,"summary":"","confidence":"high"}`;
 
-async function gemini(prompt, b64) {
+async function gemini(prompt, b64, temperature) {
   if (!ai) {
     const {GoogleGenAI} = await import('@google/genai');
     ai = new GoogleGenAI({vertexai: true, project: PROJECT, location: 'global'});
@@ -46,8 +46,8 @@ async function gemini(prompt, b64) {
     try {
       const r = await ai.models.generateContent({
         model,
-        contents: [{role: 'user', parts: [{inlineData: {mimeType: 'image/jpeg', data: b64}}, {text: prompt}]}],
-        config: {responseMimeType: 'application/json', temperature: 0.1},
+        contents: [{role: 'user', parts: b64 ? [{inlineData: {mimeType: 'image/jpeg', data: b64}}, {text: prompt}] : [{text: prompt}]}],
+        config: {responseMimeType: 'application/json', temperature: temperature || 0.1},
       });
       goodModel = model;
       return r.text;
@@ -59,6 +59,27 @@ async function gemini(prompt, b64) {
     }
   }
   throw last;
+}
+
+
+const nrm = t => String(t || '').toLocaleLowerCase('tr').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9ıçğöşü ]/g, ' ').replace(/\s+/g, ' ').trim();
+const cut = (a, n, m) => (Array.isArray(a) ? a : []).slice(0, n).map(x => String(x || '').slice(0, m));
+function suggestPrompt(d, lang) {
+  const read = (Array.isArray(d.read) ? d.read : []).slice(0, 80).map(b => `- ${String(b.t || '').slice(0, 90)} — ${String(b.a || '').slice(0, 60)}${b.r ? ' (puan ' + Math.max(0, Math.min(5, +b.r || 0)) + '/5)' : ''}${b.g ? ' [' + String(b.g).slice(0, 30) + ']' : ''}`).join('\n');
+  const own = cut(d.own, 600, 70).join('; '), skip = cut(d.skip, 200, 70).join('; '), wish = String(d.wish || '').slice(0, 200);
+  const en = lang === 'en';
+  return `Sen iyi okumuş, samimi bir kitapçısın. Bir okurun okuduğu kitaplara ve verdiği puanlara bakıp ona 8 kitap öner.
+Okurun okudukları (puanı yüksek olanlar zevkini daha iyi gösterir, düşük puanlılara benzeyenlerden kaçın):
+${read}
+${wish ? '\nOkurun şu anki isteği: ' + wish + '\n' : ''}
+Kurallar:
+- Sadece gerçekten var olan, yayımlanmış kitaplar öner. Uydurma kitap ya da yanlış yazar eşleştirmesi kesinlikle olmasın.
+- Şu kitaplar okurun kitaplığında zaten var, bunları ÖNERME: ${own || '(yok)'}
+- Okur bunları istemediğini söyledi, bunları da ÖNERME: ${skip || '(yok)'}
+- Karışık olsun: 2-3 tanesi sevdiği yazarların okumadığı başka kitapları, geri kalanı ona benzeyen ama yeni yazarlar. Aynı yazardan en fazla 2 kitap.
+- ${en ? 'The reader uses the app in English: give the commonly used English title (original title if originally English) and write "why" and "genre" in English.' : 'Okur Türkçe okuyor: kitabın Türkçede yaygın kullanılan adını ver (çevirisi varsa çeviri adı), "why" ve "genre" Türkçe olsun. Türkçeye çevrilmiş ya da Türkçe yazılmış kitapları tercih et.'}
+- "why" en fazla 2 kısa cümle: okurun okuduğu hangi kitaplara neden benzediğini, sıcak ve somut biçimde anlat (spoiler verme).
+Sadece şu JSON'u döndür: {"items":[{"title":"","author":"","year":0,"genre":"","why":""}]}`;
 }
 
 function parse(t) {
@@ -74,7 +95,7 @@ exports.kitaplikOku = onCall(
     if (!uid) throw new HttpsError('unauthenticated', 'Giriş gerekli');
     const {kind, image, isbn, lang} = req.data || {};
     const EN_NOTE = lang === 'en' ? '\nIMPORTANT: The user reads the app in English. Write "genre" and "summary" in English (keep book titles, author and publisher names exactly as printed).' : '';
-    if (!['shelf', 'back', 'quote'].includes(kind) || typeof image !== 'string' || image.length < 100 || image.length > 7e6)
+    if (kind !== 'suggest' && (!['shelf', 'back', 'quote'].includes(kind) || typeof image !== 'string' || image.length < 100 || image.length > 7e6))
       throw new HttpsError('invalid-argument', 'Geçersiz istek');
 
     // gunluk kota
@@ -90,6 +111,22 @@ exports.kitaplikOku = onCall(
     if (n > DAILY_LIMIT) throw new HttpsError('resource-exhausted', 'Günlük limit doldu');
 
     const cleanIsbn = String(isbn || '').replace(/[^0-9Xx]/g, '').slice(0, 13);
+    if (kind === 'suggest') {
+      const d = req.data || {};
+      if (!Array.isArray(d.read) || !d.read.length) throw new HttpsError('invalid-argument', 'Önce okuduğun birkaç kitabı işaretle');
+      try {
+        const out = parse(await gemini(suggestPrompt(d, lang), null, 0.8));
+        const ban = new Set([...cut(d.own, 600, 70), ...cut(d.skip, 200, 70), ...d.read.map(b => String(b.t || ''))].map(nrm));
+        const seen = new Set();
+        const items = (Array.isArray(out.items) ? out.items : []).filter(x => x && x.title && x.author).map(x => ({title: String(x.title).slice(0, 120), author: String(x.author).slice(0, 80), year: +x.year || 0, genre: String(x.genre || '').slice(0, 40), why: String(x.why || '').slice(0, 300)}))
+          .filter(x => { const k = nrm(x.title); if (!k || ban.has(k) || seen.has(k)) return false; seen.add(k); return true; }).slice(0, 8);
+        return {items};
+      } catch (e) {
+        if (e instanceof HttpsError) throw e;
+        console.error('oneri hata', e);
+        throw new HttpsError('unavailable', 'Öneri servisi yanıt vermedi');
+      }
+    }
     try {
       const out = parse(await gemini((kind === 'shelf' ? SHELF : kind === 'quote' ? QUOTE : back(cleanIsbn)) + (kind === 'quote' ? '' : EN_NOTE), image));
       return out;
