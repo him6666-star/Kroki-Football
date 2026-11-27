@@ -62,12 +62,13 @@ async function gemini(prompt, b64, temperature) {
 }
 
 
+const LANG_NAMES = {en: 'English', es: 'Spanish', pt: 'Brazilian Portuguese', de: 'German', fr: 'French', id: 'Indonesian'};
 const nrm = t => String(t || '').toLocaleLowerCase('tr').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9ıçğöşü ]/g, ' ').replace(/\s+/g, ' ').trim();
 const cut = (a, n, m) => (Array.isArray(a) ? a : []).slice(0, n).map(x => String(x || '').slice(0, m));
 function suggestPrompt(d, lang) {
   const read = (Array.isArray(d.read) ? d.read : []).slice(0, 80).map(b => `- ${String(b.t || '').slice(0, 90)} — ${String(b.a || '').slice(0, 60)}${b.r ? ' (puan ' + Math.max(0, Math.min(5, +b.r || 0)) + '/5)' : ''}${b.g ? ' [' + String(b.g).slice(0, 30) + ']' : ''}`).join('\n');
   const own = cut(d.own, 600, 70).join('; '), skip = cut(d.skip, 200, 70).join('; '), wish = String(d.wish || '').slice(0, 200);
-  const en = lang === 'en';
+  const LN = LANG_NAMES[lang];
   return `Sen iyi okumuş, samimi bir kitapçısın. Bir okurun okuduğu kitaplara ve verdiği puanlara bakıp ona 8 kitap öner.
 Okurun okudukları (puanı yüksek olanlar zevkini daha iyi gösterir, düşük puanlılara benzeyenlerden kaçın):
 ${read}
@@ -77,7 +78,7 @@ Kurallar:
 - Şu kitaplar okurun kitaplığında zaten var, bunları ÖNERME: ${own || '(yok)'}
 - Okur bunları istemediğini söyledi, bunları da ÖNERME: ${skip || '(yok)'}
 - Karışık olsun: 2-3 tanesi sevdiği yazarların okumadığı başka kitapları, geri kalanı ona benzeyen ama yeni yazarlar. Aynı yazardan en fazla 2 kitap.
-- ${en ? 'The reader uses the app in English: give the commonly used English title (original title if originally English) and write "why" and "genre" in English.' : 'Okur Türkçe okuyor: kitabın Türkçede yaygın kullanılan adını ver (çevirisi varsa çeviri adı), "why" ve "genre" Türkçe olsun. Türkçeye çevrilmiş ya da Türkçe yazılmış kitapları tercih et.'}
+- ${LN ? `The reader uses the app in ${LN}: give the title commonly used in ${LN} editions (the original title if there is no ${LN} edition), prefer books available in ${LN}, and write "why" and "genre" in ${LN}.` : 'Okur Türkçe okuyor: kitabın Türkçede yaygın kullanılan adını ver (çevirisi varsa çeviri adı), "why" ve "genre" Türkçe olsun. Türkçeye çevrilmiş ya da Türkçe yazılmış kitapları tercih et.'}
 - "why" en fazla 2 kısa cümle: okurun okuduğu hangi kitaplara neden benzediğini, sıcak ve somut biçimde anlat (spoiler verme).
 Sadece şu JSON'u döndür: {"items":[{"title":"","author":"","year":0,"genre":"","why":""}]}`;
 }
@@ -94,7 +95,8 @@ exports.kitaplikOku = onCall(
     const uid = req.auth && req.auth.uid;
     if (!uid) throw new HttpsError('unauthenticated', 'Giriş gerekli');
     const {kind, image, isbn, lang} = req.data || {};
-    const EN_NOTE = lang === 'en' ? '\nIMPORTANT: The user reads the app in English. Write "genre" and "summary" in English (keep book titles, author and publisher names exactly as printed).' : '';
+    const LN = LANG_NAMES[lang];
+    const EN_NOTE = LN ? `\nIMPORTANT: The user reads the app in ${LN}. Write "genre" and "summary" in ${LN} (keep book titles, author and publisher names exactly as printed).` : '';
     if (kind !== 'suggest' && (!['shelf', 'back', 'quote'].includes(kind) || typeof image !== 'string' || image.length < 100 || image.length > 7e6))
       throw new HttpsError('invalid-argument', 'Geçersiz istek');
 

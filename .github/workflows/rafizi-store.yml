@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       lang:
-        description: "Dil (or. en-US)"
+        description: "Diller, virgulle (or. en-US,de-DE)"
         default: "en-US"
 jobs:
   listing:
@@ -14,4 +14,7 @@ jobs:
       - name: Play'e yukle
         env:
           PLAY_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
-        run: python tools/play_listing.py com.fairridegames.rafizi "${{ github.event.inputs.lang }}" "kitaplik-android/store/${{ github.event.inputs.lang }}"
+        run: |
+          for L in $(echo "${{ github.event.inputs.lang }}" | tr ',' ' '); do
+            python tools/play_listing.py com.fairridegames.rafizi "$L" "kitaplik-android/store/$L"
+          done

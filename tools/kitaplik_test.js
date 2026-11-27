@@ -27,7 +27,7 @@ const SITE = process.argv[2] || 'kitapligim.web.app';
     {method: 'POST', headers: {...ref, Authorization: 'Bearer ' + s.idToken}, body: JSON.stringify({data: {kind: 'quote', image: fs.readFileSync('sayfa.jpg').toString('base64')}})})).json();
   console.log('alinti testi:', JSON.stringify(qr.result || qr.error));
   const read = [['Suç ve Ceza','Fyodor Dostoyevski',5],['Kürk Mantolu Madonna','Sabahattin Ali',5],['1984','George Orwell',4],['Tutunamayanlar','Oğuz Atay',5]].map(([t,a,r]) => ({t, a, r}));
-  for (const lang of ['tr', 'en']) {
+  for (const lang of ['tr', 'en', 'de']) {
     const sg = await (await fetch('https://europe-west1-scribble-kick.cloudfunctions.net/kitaplikOku', {method: 'POST', headers: {...ref, Authorization: 'Bearer ' + s.idToken}, body: JSON.stringify({data: {kind: 'suggest', read, own: ['Suç ve Ceza', 'Beyaz Geceler'], skip: [], wish: '', lang}})})).json();
     console.log('oneri testi (' + lang + '):', JSON.stringify(sg.result || sg.error, null, 1));
   }

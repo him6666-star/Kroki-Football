@@ -221,8 +221,8 @@ body.dragon,body.dragon *{cursor:grabbing!important}
 .move{margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
 .move small{display:block;margin-bottom:6px}
 .move .r{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:6px}
-.move .r2{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:6px}
-.move .btn{padding:0 6px;font-size:13.5px;min-height:38px}
+.move .r2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-top:6px}
+.move .btn{padding:4px 6px;font-size:13px;min-height:38px;white-space:normal;line-height:1.15;text-align:center}
 .ftable{margin-top:14px}
 .ftable div{display:flex;justify-content:space-between;gap:16px;padding:11px 0;border-bottom:1px solid var(--line);font-size:14.5px}
 .ftable dt{color:var(--mute)}.ftable dd{margin:0;text-align:right;font-weight:500}
@@ -301,7 +301,7 @@ body.out .gate{display:flex}
   .stats{grid-template-columns:repeat(2,minmax(0,1fr))}.stats div:nth-child(3){border-left:0}.stats div:nth-child(n+3){border-top:1px solid var(--line)}
   .rrow{grid-template-columns:50px minmax(0,1fr)}.ractions{grid-column:2;justify-content:flex-start;margin-top:8px}
   .casebar .acts{width:100%}.casebar .seg{flex:1 1 100%}.casebar .seg button{flex:1;justify-content:center}.casebar .acts>.btn{flex:1}
-  .phead .acts{width:100%;flex-wrap:wrap}.phead .acts .btn{flex:1 1 calc(50% - 8px)}.phead .acts .btn:first-child{flex-basis:100%}
+  .phead .acts{width:100%;flex-wrap:wrap}.phead .acts .btn{flex:1 1 calc(50% - 8px);white-space:normal;line-height:1.2;text-align:center;padding:6px 10px}.phead .acts .btn:first-child{flex-basis:100%}
   .res .meta{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
 }
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
@@ -317,6 +317,7 @@ body.out .gate{display:flex}
 .sg .why{font-size:13.5px;line-height:1.45;margin:8px 0 10px}.sg .acts{gap:6px;flex-wrap:wrap}
 .sg .chip{display:inline-block;font-size:11.5px;padding:2px 8px;border-radius:99px;background:rgba(16,77,43,.09);margin-left:6px;vertical-align:1px}
 .sg.saved{border-color:#104d2b}.sgx{font-size:13px;opacity:.7;text-align:center;padding:14px 0}
+.langs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}.langs .btn{justify-content:center}
 </style>
 </head>
 <body>
@@ -455,23 +456,25 @@ body.out .gate{display:flex}
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-functions-compat.js"></script>
 <script>
 /* ---------- dil / language ---------- */
-window.RAF_LANG=(()=>{try{const s=localStorage.getItem('rafLang');if(s==='tr'||s==='en')return s}catch(e){}return /^tr\b/i.test(navigator.language||'')?'tr':'en'})();
+window.RAF_LANGS={tr:'Türkçe',en:'English',es:'Español',pt:'Português',de:'Deutsch',fr:'Français',id:'Bahasa Indonesia'};
+window.RAF_LANG=(()=>{const L=window.RAF_LANGS;try{const s=localStorage.getItem('rafLang');if(L[s])return s}catch(e){}
+  for(const l of (navigator.languages&&navigator.languages.length?navigator.languages:[navigator.language||''])){let c=String(l).slice(0,2).toLowerCase();if(c==='in')c='id';if(L[c])return c}return 'en'})();
 document.documentElement.lang=window.RAF_LANG;
 </script>
-<script src="lang-en.js"></script>
+<script>if(window.RAF_LANG!=='tr')document.write('<script src="lang-'+window.RAF_LANG+'.js"><\/script>')</script>
 <script>
 {
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const LANG=window.RAF_LANG,EN=LANG==='en';
-const DICT=window.RAF_EN||{exact:{},phrases:[],patterns:[]};
+const LANG=window.RAF_LANG,EN=LANG!=='tr';
+const DICT=window.RAF_EN||{exact:{},phrases:[],patterns:[]},X=DICT.x||{};
 const EXM=new Map(Object.entries(DICT.exact||{}));
 const PHR=(DICT.phrases||[]).slice().sort((a,b)=>b[0].length-a[0].length);
-const PAT=(DICT.patterns||[]);
+const PAT0=(DICT.patterns||[]).filter(([r])=>r.source[0]==='^'),PAT=(DICT.patterns||[]).filter(([r])=>r.source[0]!=='^');
 function t(s){
   if(!EN||s==null)return s;s=String(s);const m=s.match(/^(\s*)([\s\S]*?)(\s*)$/);const core=m[2];if(!core)return s;
   if(EXM.has(core))return m[1]+EXM.get(core)+m[3];
-  let o=core;for(const[a,b]of PHR)if(o.includes(a))o=o.split(a).join(b);
+  let o=core;for(const[re,rep]of PAT0)o=o.replace(re,rep);if(o!==core&&!/[ğışİĞŞ]/.test(o))return m[1]+o+m[3];for(const[a,b]of PHR)if(o.includes(a))o=o.split(a).join(b);
   for(const[re,rep]of PAT)o=o.replace(re,rep);
   if(EXM.has(o))return m[1]+EXM.get(o)+m[3];
   return m[1]+o+m[3];
@@ -485,7 +488,6 @@ if(EN){
   new MutationObserver(ms=>{for(const m of ms){if(m.type==='characterData')txt(m.target);else if(m.type==='attributes')el(m.target);else m.addedNodes.forEach(tree)}})
     .observe(document.documentElement,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:AT});
   document.title=t(document.title);
-  {const ml=document.getElementById('m-lang');if(ml)ml.textContent='Türkçe'}
   tree(document.body);
 }
 const TR={'ç':'c','ğ':'g','ı':'i','ö':'o','ş':'s','ü':'u','â':'a','î':'i','û':'u'};
@@ -500,7 +502,7 @@ const coverHtml=(b,sz)=>{const c=colorOf(b);return b.cover?`<img class="cov ${sz
 const genCover=(b,sz)=>{const c=colorOf(b);return `<span class="cov gen ${sz||''}" style="--c:${c};--t:${inkOf(c)}" aria-hidden="true"><b data-notr>${esc(b.title)}</b><i data-notr>${esc(b.author||'')}</i></span>`};
 document.addEventListener('error',e=>{const t=e.target;if(t&&t.tagName==='IMG'&&t.classList.contains('cov')&&!t.dataset.dead){t.dataset.dead=1;const b=books[t.dataset.cv];const sz=[...t.classList].filter(x=>x!=='cov').join(' ');const w=document.createElement('span');w.innerHTML=b?genCover(b,sz):'';if(w.firstChild)t.replaceWith(w.firstChild)}},true);
 const inkOf=c=>{const n=parseInt(c.slice(1),16);return((n>>16)*.299+((n>>8)&255)*.587+(n&255)*.114)>160?'#2a2418':'#fff'};
-const LOC=EN?'en-US':'tr-TR';
+const LOC=EN?X.loc:'tr-TR';{const ml=document.getElementById('m-lang');if(ml)ml.textContent=window.RAF_LANGS[LANG]}
 const fmt=n=>new Intl.NumberFormat(LOC).format(n||0);
 const ICON={pin:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>',
  arrow:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
@@ -526,12 +528,12 @@ const newId=()=>'b'+Date.now().toString(36)+Math.random().toString(36).slice(2,7
 const same=(a,b)=>norm(a)===norm(b);
 function caseList(){const out=[];for(const n of [...(meta.names||[]),...all().map(b=>b.bookcase)])if(n&&!out.some(x=>same(x,n)))out.push(n);return out}
 const caseName=n=>{n=(n||'').trim();return caseList().find(c=>same(c,n))||n};
-const caseLabel=n=>EN?(/bookcase|library|shelf|kitapl[ıi]|k[üu]t[üu]phane/i.test(n)?n:n+' bookcase'):(/kitapl[ıi]|k[üu]t[üu]phane/i.test(n)?n:n+' Kitaplığı');
+const caseLabel=n=>EN?X.caseLabel(n):(/kitapl[ıi]|k[üu]t[üu]phane/i.test(n)?n:n+' Kitaplığı');
 const inCase=n=>all().filter(b=>same(b.bookcase,n));
 function shelfCount(n){return Math.max(1,(meta.shelves||{})[slug(n)]||0,...inCase(n).map(b=>b.shelf||0))}
 const shelfBooks=(n,s)=>inCase(n).filter(b=>b.shelf===s).sort((a,b)=>(a.pos||999)-(b.pos||999)||coll.compare(a.title||'',b.title||''));
 function locText(b){
-  if(EN){if(!b.bookcase)return 'No location yet';let s=caseLabel(b.bookcase);if(!b.shelf)return s+' · shelf unknown';s+=' · shelf '+b.shelf+' (from top)';if(b.pos)s+=' · book '+b.pos+' from left';return s}
+  if(EN)return X.locText(b,caseLabel);
   if(!b.bookcase)return 'Yeri girilmemiş';
   let s=caseLabel(b.bookcase);
   if(!b.shelf)return s+' · raf belirsiz';
@@ -542,7 +544,7 @@ function locText(b){
 const dstr=x=>x?new Date(x).toLocaleDateString(LOC,{day:'numeric',month:'long',year:'numeric'}):'';
 const daysSince=t=>Math.max(0,Math.round((Date.now()-t)/864e5));
 const loanText=b=>b.loan?`kimde: ${b.loan.to} · verildi: ${dstr(b.loan.at)} (${daysSince(b.loan.at)} gün)`:'';
-const locShort=b=>b.bookcase?(caseLabel(b.bookcase)+(b.shelf?(EN?' · Shelf '+b.shelf:' · '+b.shelf+'. Raf')+(b.pos?' · #'+b.pos:''):'')):(EN?'No location':'Yeri yok');
+const locShort=b=>b.bookcase?(caseLabel(b.bookcase)+(b.shelf?(EN?X.shelfShort(b.shelf):' · '+b.shelf+'. Raf')+(b.pos?' · #'+b.pos:''):'')):(EN?X.noLoc:'Yeri yok');
 function matches(b,qq){const hay=norm([b.title,b.author,b.publisher,b.genre,b.isbn].join(' '));return qq.split(' ').every(w=>hay.includes(w))}
 function findExisting(title,isbn){const t=norm(title),i=(isbn||'').replace(/\D/g,'');return all().find(b=>(i&&b.isbn&&b.isbn.replace(/\D/g,'')===i)||(t&&norm(b.title)===t))}
 
@@ -747,7 +749,7 @@ function renderCharts(){
   const now=new Date(),months=[];
   for(let i=11;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);months.push({y:d.getFullYear(),m:d.getMonth(),n:0,p:0})}
   done.forEach(b=>{const t=new Date(b.finishedAt||b.statusAt||0);const x=months.find(o=>o.y===t.getFullYear()&&o.m===t.getMonth());if(x){x.n++;x.p+=b.pages||0}});
-  const mx=Math.max(1,...months.map(o=>o.n)),MN=EN?['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']:['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
+  const mx=Math.max(1,...months.map(o=>o.n)),MN=EN?X.months:['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
   const yearN=months.reduce((s,o)=>s+o.n,0),yearP=months.reduce((s,o)=>s+o.p,0);
   const grp=(arr,k)=>{const m=new Map();arr.forEach(b=>{const v=(b[k]||'').trim();if(v){const key=norm(v);m.set(key,{n:(m.get(key)||{}).n||v,c:((m.get(key)||{}).c||0)+1})}});return[...m.values()].sort((a,b)=>b.c-a.c).slice(0,6)};
   const bars=rows=>{const top=Math.max(1,...rows.map(r=>r.c));return rows.length?rows.map(r=>`<div class="hbar"><span class="n">${esc(r.n)}</span><span class="tr"><i style="width:${Math.round(r.c/top*100)}%"></i></span><span class="v">${r.c}</span></div>`).join(''):`<p class="sub">Henüz veri yok.</p>`};
@@ -821,7 +823,7 @@ function renderDrawer(){
   <div class="dsec"><small>Okuma Notları</small><textarea class="fin" id="d-notes" placeholder="Notunu yaz; dışarı tıklayınca kaydedilir.">${esc(b.notes||'')}</textarea></div>
   <div class="dsec"><button class="btn danger sm" data-d="del">Kitabı sil</button></div>`;
 }
-const quoteText=(b,q)=>`“${q.text}” — ${b.title}${b.author?', '+b.author:''}${q.page?(EN?', p. ':', s. ')+q.page:''}`;
+const quoteText=(b,q)=>`“${q.text}” — ${b.title}${b.author?', '+b.author:''}${q.page?(EN?X.pageAbbr:', s. ')+q.page:''}`;
 function quoteEditor(b){
   if(!qEdit||qEdit.id!==b.id)return '';
   if(qEdit.busy)return `<div class="qedit"><p class="status">${esc(qEdit.busy)}</p></div>`;
@@ -967,7 +969,7 @@ function delAccountDialog(){
     <p class="sub">Google hesabının kendisi etkilenmez. Ayrıntılar: <a href="hesap-silme.html" target="_blank" rel="noopener">hesap silme</a></p>
     <label class="flab" for="da-c">Onaylamak için <b>SİL</b> yaz</label><input class="fin" id="da-c" autocomplete="off">
     <div class="acts" style="margin-top:16px"><button class="btn danger" id="da-ok" style="border-color:#b3261e" disabled>Hesabımı kalıcı olarak sil</button><button class="btn" data-close>Vazgeç</button></div><p class="status" id="da-st"></p>`);
-  $('#da-c').oninput=e=>{$('#da-ok').disabled=e.target.value.trim().toLocaleUpperCase('tr')!=='SİL'};
+  $('#da-c').oninput=e=>{const w=e.target.value.trim();$('#da-ok').disabled=!(w.toLocaleUpperCase('tr')==='SİL'||w.toUpperCase()===t('SİL').toUpperCase())};
   $('#da-ok').onclick=async()=>{const st=$('#da-st');$('#da-ok').disabled=true;st.className='status';st.textContent='Siliniyor…';
     try{if(!B||!B.deleteAccount)throw new Error('Bu önizlemede hesap silme kapalı.');await B.deleteAccount();closeSheet();toast('Hesabın ve tüm verilerin silindi')}
     catch(e){st.className='status err';st.textContent='Silinemedi: '+(e.message||e.code);$('#da-ok').disabled=false}};
@@ -1086,7 +1088,7 @@ document.addEventListener('click',async e=>{
     case 'check':$('#add-menu').hidden=true;openCheck();break;
     case 'scan-bar':$('#add-menu').hidden=true;if(!$('#b-case').value&&curCase)$('#b-case').value=curCase;openSheet('sh-bar');break;
     case 'new':$('#add-menu').hidden=true;openDrawer('__new',true);break;
-    case 'lang':try{localStorage.setItem('rafLang',EN?'tr':'en')}catch(e){}location.reload();break;
+    case 'lang':openLang();break;
     case 'family':$('#add-menu').hidden=true;openFamily();break;
     case 'data':$('#add-menu').hidden=true;openData();break;
     case 'arrange':openArrange();break;
@@ -1321,18 +1323,18 @@ async function saveFile(name,blob){
 }
 const today=()=>new Date().toISOString().slice(0,10);
 const COLS0=[['Kitap','title'],['Yazar','author'],['Yayınevi','publisher'],['Kategori','genre'],['ISBN','isbn'],['Sayfa','pages'],['Basım yılı','year'],['Kitaplık','bookcase'],['Raf','shelf'],['Sıra','pos'],['Durum','status'],['Okunan sayfa','page'],['Puan','rating'],['Notlar','notes']];
-const COLS=EN?COLS0.map(([h,k])=>[({Kitap:'Title',Yazar:'Author','Yayınevi':'Publisher',Kategori:'Category',ISBN:'ISBN',Sayfa:'Pages','Basım yılı':'Year','Kitaplık':'Bookcase',Raf:'Shelf','Sıra':'Position',Durum:'Status','Okunan sayfa':'Pages read',Puan:'Rating',Notlar:'Notes'})[h]||h,k]):COLS0;
+const COLS=EN?COLS0.map(([h,k])=>[X.cols[h]||h,k]):COLS0;
 async function exportExcel(){
   const X=await loadXLSX();
-  const rows=all().sort((a,b)=>coll.compare(a.title||'',b.title||'')).map(b=>{const o={};COLS.forEach(([h,k])=>o[h]=k==='status'?t(stLabel[b.status]||''):(b[k]??''));o[EN?'Quotes':'Alıntılar']=(b.quotes||[]).map(q=>(q.page?`[s. ${q.page}] `:'')+q.text).join('\n\n');o[EN?'Lent to':'Ödünç (kimde)']=b.loan?b.loan.to:'';o[EN?'Lent on':'Ödünç tarihi']=b.loan?new Date(b.loan.at).toLocaleDateString(LOC):'';return o});
+  const rows=all().sort((a,b)=>coll.compare(a.title||'',b.title||'')).map(b=>{const o={};COLS.forEach(([h,k])=>o[h]=k==='status'?t(stLabel[b.status]||''):(b[k]??''));o[EN?X.colQuotes:'Alıntılar']=(b.quotes||[]).map(q=>(q.page?`[s. ${q.page}] `:'')+q.text).join('\n\n');o[EN?X.colLentTo:'Ödünç (kimde)']=b.loan?b.loan.to:'';o[EN?X.colLentOn:'Ödünç tarihi']=b.loan?new Date(b.loan.at).toLocaleDateString(LOC):'';return o});
   const ws=X.utils.json_to_sheet(rows);ws['!cols']=[{wch:34},{wch:22},{wch:24},{wch:14},{wch:15},{wch:7},{wch:9},{wch:14},{wch:5},{wch:5},{wch:10},{wch:9},{wch:6},{wch:40},{wch:14},{wch:12}];
-  const wb=X.utils.book_new();X.utils.book_append_sheet(wb,ws,EN?'Books':'Kitaplar');
+  const wb=X.utils.book_new();X.utils.book_append_sheet(wb,ws,EN?X.sheet:'Kitaplar');
   const out=X.write(wb,{bookType:'xlsx',type:'array'});
-  await saveFile(EN?`raf-izi-library-${today()}.xlsx`:`raf-izi-kitapligim-${today()}.xlsx`,new Blob([out],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
+  await saveFile(EN?`raf-izi-${X.fileLib}-${today()}.xlsx`:`raf-izi-kitapligim-${today()}.xlsx`,new Blob([out],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
 }
 async function exportBackup(){
   const data={app:'raf-izi',v:1,at:new Date().toISOString(),meta,books:all().map(b=>{const c={...b};delete c.photoId;delete c.box;return c})};
-  await saveFile(EN?`raf-izi-backup-${today()}.json`:`raf-izi-yedek-${today()}.json`,new Blob([JSON.stringify(data)],{type:'application/json'}));
+  await saveFile(EN?`raf-izi-${X.fileBak}-${today()}.json`:`raf-izi-yedek-${today()}.json`,new Blob([JSON.stringify(data)],{type:'application/json'}));
 }
 /* içe aktarma: Raf İzi yedeği (.json), Excel / CSV, Goodreads dışa aktarımı */
 const HMAP={title:['kitap','kitap adi','title','baslik','ad','eser'],author:['yazar','author','authors','yazarlar'],publisher:['yayinevi','publisher','yayinci'],genre:['kategori','tur','genre'],
@@ -1393,7 +1395,7 @@ function openData(){
 const REM_DEF=30;
 const dueAt=L=>{const d=L.remindDays==null?REM_DEF:L.remindDays;if(!d)return null;return Math.max(L.at+d*864e5,L.snoozeUntil||0)};
 const overdue=()=>all().filter(b=>b.loan&&dueAt(b.loan)&&dueAt(b.loan)<=Date.now()).sort((a,b)=>a.loan.at-b.loan.at);
-function waText(b){if(EN)return `Hi ${b.loan.to}, do you still have “${b.title}” that I lent you on ${dstr(b.loan.at)}? If you've finished it, could I get it back sometime? Thanks!`;return `Merhaba ${b.loan.to}, ${dstr(b.loan.at)} tarihinde verdiğim “${b.title}” kitabı sende duruyor mu? Bitirdiysen uygun bir zamanda geri alabilir miyim? Teşekkürler!`}
+function waText(b){if(EN)return X.wa(b.loan.to,b.title,dstr(b.loan.at));return `Merhaba ${b.loan.to}, ${dstr(b.loan.at)} tarihinde verdiğim “${b.title}” kitabı sende duruyor mu? Bitirdiysen uygun bir zamanda geri alabilir miyim? Teşekkürler!`}
 const waLink=b=>'https://wa.me/?text='+encodeURIComponent(waText(b));
 const WA_SVG='<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.5 0-3-.4-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6.5-.1 1.5-.6 1.7-1.2s.2-1.1.2-1.2-.3-.2-.5-.3z"/></svg>';
 function remindHtml(){
@@ -1411,7 +1413,7 @@ function syncLoanNotifs(ask){
   clearTimeout(notifT);notifT=setTimeout(async()=>{try{
     if(ask&&!notifAsked){notifAsked=true;await LN.requestPermissions()}
     const pend=(await LN.getPending()).notifications||[];const mine=pend.filter(n=>n.id>=1e8&&n.id<2e9);if(mine.length)await LN.cancel({notifications:mine.map(n=>({id:n.id}))});
-    const list=all().filter(b=>b.loan&&dueAt(b.loan)&&dueAt(b.loan)>Date.now()+6e4).map(b=>({id:1e8+hash(b.id)%9e8,title:t('Ödünç hatırlatma'),body:EN?`“${b.title}” is with ${b.loan.to}. Would you like to ask for it back?`:`“${b.title}” ${b.loan.to} adlı kişide; geri istemek ister misin?`,schedule:{at:new Date(dueAt(b.loan)),allowWhileIdle:true},extra:{id:b.id}}));
+    const list=all().filter(b=>b.loan&&dueAt(b.loan)&&dueAt(b.loan)>Date.now()+6e4).map(b=>({id:1e8+hash(b.id)%9e8,title:t('Ödünç hatırlatma'),body:EN?X.notif(b.title,b.loan.to):`“${b.title}” ${b.loan.to} adlı kişide; geri istemek ister misin?`,schedule:{at:new Date(dueAt(b.loan)),allowWhileIdle:true},extra:{id:b.id}}));
     if(list.length)await LN.schedule({notifications:list.slice(0,60)});
   }catch(e){console.warn('bildirim',e)}},1500);
 }
@@ -1488,7 +1490,7 @@ function openFamily(prefill){
     t.disabled=true;st.textContent='Bekle…';
     try{
       if(op==='davet'){const r=await B.family('davet');const link='https://rafizi.web.app/?davet='+r.code;
-        const msg=EN?`Join our home library on Raf İzi! Open this link: ${link} or in the app go to Scan Book menu → Family library → enter the code: ${r.code} (valid for 7 days)`:`Raf İzi'de ev kitaplığımıza katıl! Şu bağlantıyı aç: ${link} ya da uygulamada Kitap Tara menüsü → Aile kitaplığı → kodu yaz: ${r.code} (7 gün geçerli)`;
+        const msg=EN?X.invite(link,r.code):`Raf İzi'de ev kitaplığımıza katıl! Şu bağlantıyı aç: ${link} ya da uygulamada Kitap Tara menüsü → Aile kitaplığı → kodu yaz: ${r.code} (7 gün geçerli)`;
         $('#fm-inv').innerHTML=`<div class="code">${esc(r.code)}</div><p class="hint">Kod 7 gün geçerli. Katılan kişi kendi Google hesabıyla girer.</p><div class="acts"><a class="btn wa" href="https://wa.me/?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">${WA_SVG}WhatsApp'tan gönder</a><button class="btn" id="fm-copy">Mesajı kopyala</button></div>`;
         $('#fm-copy').onclick=()=>navigator.clipboard.writeText(msg).then(()=>toast('Kopyalandı'),()=>toast('Kopyalanamadı'));st.textContent='';return}
       if(op==='katil'){const code=($('#fm-code').value||'').trim();if(!code){st.textContent='Davet kodunu yaz.';t.disabled=false;return}
@@ -1581,13 +1583,19 @@ if(window.firebase){
    ['Dune','Frank Herbert','Ace','Science fiction','Living room',3,688,'okunuyor',410,'Still unmatched as ecology and politics.'],['Fahrenheit 451','Ray Bradbury','Simon & Schuster','Science fiction','Living room',3,249,'okundu'],['The Dispossessed','Ursula K. Le Guin','Harper Voyager','Science fiction','Living room',3,387,'okunacak'],
    ['Sapiens','Yuval Noah Harari','Harper','History','Study',1,464,'okundu'],['Guns, Germs, and Steel','Jared Diamond','W. W. Norton','History','Study',1,528,'okunuyor',190],['A Brief History of Time','Stephen Hawking','Bantam','Science','Study',1,212,'okunacak'],['Cosmos','Carl Sagan','Ballantine Books','Science','Study',2,396,'okunacak'],['Meditations','Marcus Aurelius','Modern Library','Philosophy','Study',2,304,'okundu'],['The Republic','Plato','Penguin Classics','Philosophy','Study',2,416],['Thinking, Fast and Slow','Daniel Kahneman','Farrar, Straus and Giroux','Psychology','Study',2,499]];
   const pos={};
+  if(EN&&LANG!=='en'&&X.sample){const G={Classic:'Klasik',Novel:'Roman',Dystopia:'Distopya','Science fiction':'Bilim Kurgu',History:'Tarih',Science:'Bilim',Philosophy:'Felsefe',Psychology:'Psikoloji'},CS={'Living room':X.sample.cases[0],Study:X.sample.cases[1]},NT={'The Salinas Valley descriptions are stunning.':X.sample.notes[0],'Still unmatched as ecology and politics.':X.sample.notes[1]};
+    SE.forEach(r=>{r[3]=G[r[3]]?t(G[r[3]]):r[3];r[4]=CS[r[4]]||r[4];if(r[9])r[9]=NT[r[9]]||r[9]})}
   (EN?SE:S).forEach(([title,author,publisher,genre,bc,shelf,pages,status,page,notes],i)=>{const k=bc+shelf;pos[k]=(pos[k]||0)+1;const id='d'+i;
     books[id]={id,title,author,publisher,genre,bookcase:bc,shelf,pos:pos[k],pages,status:status||'',page:page||(status==='okundu'?pages:0),notes:notes||'',rating:status==='okundu'?4+(i%2):0,source:i%3?'fotoğraf':'barkod',addedAt:Date.now()-i*864e5,statusAt:Date.now()-i*36e5,finishedAt:Date.now()-i*17*864e5,isbn:'97897'+String(5e7+i*7919).slice(0,8)}});
   books.d12.loan={to:EN?'Emma':'Ayşe',at:Date.now()-12*864e5,note:'Bitirince getirecek'};
-  meta=EN?{names:['Living room','Study'],shelves:{'living-room':3,study:2}}:{names:['Salon','Çalışma Odası'],shelves:{salon:3,'calisma-odasi':2}};
+  meta=EN?(()=>{const c=LANG!=='en'&&X.sample?X.sample.cases:['Living room','Study'];return {names:c,shelves:{[slug(c[0])]:3,[slug(c[1])]:2}}})():{names:['Salon','Çalışma Odası'],shelves:{salon:3,'calisma-odasi':2}};
   B={putMany:async()=>{},remove:async()=>{},removeMany:async()=>{},setMeta:async()=>{},putPhoto:async(id,d)=>{photos[id]=d},delPhoto:async id=>{delete photos[id]},ai:null};
   sel='d3';scrollSel=false;
 }
+
+function openLang(){const L=window.RAF_LANGS;
+  sheetHtml('sh-lang',`<div class="ph"><h2>Dil</h2><button class="xb" data-close aria-label="Kapat">×</button></div><div class="langs" data-notr>${Object.entries(L).map(([k,v])=>`<button class="btn${k===LANG?' pri':''}" data-lang="${k}">${v}</button>`).join('')}</div>`);openSheet('sh-lang')}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-lang]');if(!b)return;try{localStorage.setItem('rafLang',b.dataset.lang)}catch(x){}location.reload()});
 /* ---- Kitap onerisi ---- */
 let SG=null;
 async function sgLoad(){if(SG)return SG;SG={last:[],wish:[],skip:[],wishText:''};try{const d=B&&B.getPref?await B.getPref('oneri'):null;if(d)SG={...SG,...d}}catch(e){}return SG}
@@ -1596,7 +1604,7 @@ const sgKey=x=>norm(x.title);
 function sgCard(x,i,saved){const k=sgKey(x),own=findExisting(x.title);
   return `<div class="sg${saved?' saved':''}"><h4 data-notr>${esc(x.title)}${x.genre?`<span class="chip">${esc(x.genre)}</span>`:''}</h4><div class="by" data-notr>${esc(x.author)}${x.year?' · '+x.year:''}</div>${x.why?`<p class="why" data-notr>${esc(x.why)}</p>`:''}
   <div class="acts">${own?'<span class="hint" style="margin:0">Bu kitap zaten kitaplığında</span>':saved?`<button class="btn sm" data-sg="unwish" data-k="${esc(k)}">Listeden çıkar</button>`:`<button class="btn sm pri" data-sg="wish" data-i="${i}">İstek listeme ekle</button><button class="btn sm soft" data-sg="read" data-i="${i}">Okudum</button><button class="btn sm soft" data-sg="skip" data-i="${i}">İlgilenmiyorum</button>`}
-  <a class="btn sm soft" target="_blank" rel="noopener" href="https://www.google.com/search?q=${encodeURIComponent(x.title+' '+x.author+(LANG==='en'?' book':' kitap'))}">Ara</a></div></div>`}
+  <a class="btn sm soft" target="_blank" rel="noopener" href="https://www.google.com/search?q=${encodeURIComponent(x.title+' '+x.author+(EN?' '+X.bookWord:' kitap'))}">Ara</a></div></div>`}
 function sgRender(busy,err){
   const read=all().filter(b=>b.status==='okundu'||b.rating>0);
   const wish=SG.wish||[],last=(SG.last||[]).filter(x=>!wish.some(w=>sgKey(w)===sgKey(x)));
