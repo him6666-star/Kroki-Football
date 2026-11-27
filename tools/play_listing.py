@@ -12,9 +12,12 @@ eid = svc.edits().insert(packageName=pkg, body={}).execute()['id']
 det = svc.edits().details().get(packageName=pkg, editId=eid).execute()
 print('varsayilan dil:', det.get('defaultLanguage'))
 print('mevcut diller:', [l['language'] for l in svc.edits().listings().list(packageName=pkg, editId=eid).execute().get('listings', [])])
-L = json.load(open(os.path.join(d, 'listing.json')))
-svc.edits().listings().update(packageName=pkg, editId=eid, language=lang, body={**L, 'language': lang}).execute()
-print('metinler yazildi:', lang)
+if os.path.exists(os.path.join(d, 'listing.json')):
+    L = json.load(open(os.path.join(d, 'listing.json')))
+    svc.edits().listings().update(packageName=pkg, editId=eid, language=lang, body={**L, 'language': lang}).execute()
+    print('metinler yazildi:', lang)
+else:
+    print('metinlere dokunulmadi (listing.json yok):', lang)
 for t in ['featureGraphic', 'phoneScreenshots']:
     svc.edits().images().deleteall(packageName=pkg, editId=eid, language=lang, imageType=t).execute()
 svc.edits().images().upload(packageName=pkg, editId=eid, language=lang, imageType='featureGraphic', media_body=MediaFileUpload(os.path.join(d, 'feature.png'), mimetype='image/png')).execute()
