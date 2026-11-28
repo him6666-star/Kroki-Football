@@ -66,6 +66,31 @@ h3{font-size:13px;color:var(--mut);font-weight:600;margin:18px 0 4px;text-transf
 #toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#000d;padding:10px 16px;border-radius:12px;font-size:14px;z-index:20;opacity:0;transition:opacity .25s;pointer-events:none;max-width:86vw;text-align:center}
 #toast.show{opacity:1}
 #volBadge{font-size:12px;color:var(--mut)}
+.seg{display:flex;margin:0 16px 4px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:3px}
+.seg button{flex:1;height:34px;background:transparent;border-radius:9px;font-size:13px;color:var(--mut);font-weight:600}
+.seg button.act{background:var(--key2);color:var(--txt)}
+body.tvp .tabs{display:none}
+.tp-row{display:flex;gap:10px;margin:10px 0}.tp-row>button{flex:1;height:46px;display:grid;place-items:center;font-size:13px}
+.tp-brand{font-weight:800;font-size:15px;letter-spacing:-.02em;background:#d0d4da!important;color:#2b2f36!important}
+.tp-brand sup{color:#f5b400;font-size:15px}
+.tp-pwr{color:#ff4d6d!important;font-weight:600}
+.tp-nav{display:grid;grid-template-columns:1fr 1.1fr 1fr;grid-template-rows:64px 64px 64px;gap:6px;margin:14px 0;padding:8px;background:var(--card);border:1px solid var(--line);border-radius:20px}
+.tp-nav button{display:grid;place-items:center;font-size:13px}
+.tp-nav .y{background:#f5b400;color:#3a2c00}.tp-nav .y:active{background:#d99f00}
+.tp-nav .ok{background:#ffcf33;color:#3a2c00;font-weight:800;font-size:17px;border-radius:50%}
+.tp-mid{display:flex;gap:12px;margin:10px 0}.tp-mid .rk{flex:1}
+.tp-mid .rk>div{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;height:100%}
+.tp-mid .rk button{flex:1;min-height:48px;border-radius:0;background:transparent;font-size:22px}
+.tp-mid .rk button:active{background:#ffffff10;transform:none}
+.tp-mid .rk .cap{text-align:center;font-size:12px;color:var(--mut)}
+.tp-mid .cen{display:flex;flex-direction:column;gap:10px;justify-content:center}
+.tp-mid .cen button{width:56px;height:56px;border-radius:50%}
+.tp-col{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+.tp-col button{height:30px}.tp-col span{display:block;text-align:center;font-size:11px;color:var(--mut);margin-top:4px}
+.tp-num{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.tp-num button{height:48px;font-size:20px}
+.tp-num small{font-size:10px;color:var(--mut);margin-left:3px}
+#atvCode{font-size:28px;text-align:center;letter-spacing:.3em;text-transform:uppercase;font-family:ui-monospace,monospace}
 </style>
 </head>
 <body>
@@ -75,6 +100,7 @@ h3{font-size:13px;color:var(--mut);font-weight:600;margin:18px 0 4px;text-transf
   <span id="volBadge"></span>
   <button class="icon" id="setBtn" aria-label="Ayarlar"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
 </header>
+<div class="seg" id="devSeg"><button data-dev="lg" class="act">LG TV</button><button data-dev="tvp">TV+ kutusu</button></div>
 
 <main>
 <!-- KUMANDA -->
@@ -154,6 +180,55 @@ h3{font-size:13px;color:var(--mut);font-weight:600;margin:18px 0 4px;text-transf
     <button data-btn="YELLOW" style="background:#f9a825"></button><button data-btn="BLUE" style="background:#1565c0"></button>
   </div>
 </section>
+<!-- TV+ KUTUSU -->
+<section class="view" id="v-tvp">
+  <div class="tp-row">
+    <button data-act="inputs" title="TV kaynağı"><svg viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="m10 17 5-5-5-5M15 12H3"/></svg></button>
+    <button class="tp-brand" data-atv="3">TV<sup>+</sup></button>
+    <button class="tp-pwr" data-act="power">tv ⏻</button>
+  </div>
+  <div class="tp-row">
+    <button data-atv="88"><svg viewBox="0 0 24 24"><path d="M19 20 9 12l10-8zM5 19V5"/></svg></button>
+    <button data-atv="86"><svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="1"/></svg></button>
+    <button data-atv="87"><svg viewBox="0 0 24 24"><path d="m5 4 10 8-10 8zM19 5v14"/></svg></button>
+  </div>
+  <div class="tp-row">
+    <button data-atv="89" data-rep><svg viewBox="0 0 24 24"><path d="m11 19-9-7 9-7zM22 19l-9-7 9-7z"/></svg></button>
+    <button data-atv="85"><svg viewBox="0 0 24 24"><path d="m4 4 9 8-9 8z"/><path d="M16 5v14M20 5v14"/></svg></button>
+    <button data-atv="90" data-rep><svg viewBox="0 0 24 24"><path d="m13 19 9-7-9-7zM2 19l9-7-9-7z"/></svg></button>
+  </div>
+  <div class="tp-nav">
+    <button data-atv="82">menü</button>
+    <button class="y" data-atv="19" data-rep><svg viewBox="0 0 24 24"><path d="m6 15 6-6 6 6"/></svg></button>
+    <button data-atv="4">geri</button>
+    <button class="y" data-atv="21" data-rep><svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></button>
+    <button class="ok" data-atv="23">OK</button>
+    <button class="y" data-atv="22" data-rep><svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></button>
+    <button data-atv="165">bilgi</button>
+    <button class="y" data-atv="20" data-rep><svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button>
+    <button data-atv="111">çıkış</button>
+  </div>
+  <div class="tp-mid">
+    <div class="rk"><div><button data-act="volUp" data-rep>+</button><div class="cap">ses</div><button data-act="volDown" data-rep>−</button></div></div>
+    <div class="cen">
+      <button data-atv="130" style="color:#ff4d6d;font-weight:800">R</button>
+      <button data-act="mute"><svg viewBox="0 0 24 24"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="m23 9-6 6M17 9l6 6"/></svg></button>
+    </div>
+    <div class="rk"><div><button data-atv="166" data-rep>+</button><div class="cap">pr</div><button data-atv="167" data-rep>−</button></div></div>
+  </div>
+  <div class="tp-col">
+    <div><button data-atv="183" style="background:#c62828;width:100%"></button><span>PIP</span></div>
+    <div><button data-atv="184" style="background:#2e7d32;width:100%"></button><span>kanallar</span></div>
+    <div><button data-atv="185" style="background:#f9a825;width:100%"></button><span>dil</span></div>
+    <div><button data-atv="186" style="background:#1565c0;width:100%"></button><span>altyazı</span></div>
+  </div>
+  <div class="tp-num">
+    <button data-atv="8">1</button><button data-atv="9">2<small>abc</small></button><button data-atv="10">3<small>def</small></button>
+    <button data-atv="11">4<small>ghi</small></button><button data-atv="12">5<small>jkl</small></button><button data-atv="13">6<small>mno</small></button>
+    <button data-atv="14">7<small>pqrs</small></button><button data-atv="15">8<small>tuv</small></button><button data-atv="16">9<small>wxyz</small></button>
+    <button data-atv="26" style="font-size:12px">kutu ⏻</button><button data-atv="7">0</button><button id="atvConnBtn" style="font-size:12px">bağlan</button>
+  </div>
+</section>
 </main>
 
 <nav class="tabs">
@@ -206,6 +281,27 @@ h3{font-size:13px;color:var(--mut);font-weight:600;margin:18px 0 4px;text-transf
   <button class="btn" data-close="ovSet" style="background:transparent;color:var(--mut)">Kapat</button>
 </div></div>
 
+<!-- TV+ BAĞLANTI -->
+<div class="ov hidden" id="ovAtv"><div class="sheet">
+  <h2>TV+ kutusuna bağlan</h2>
+  <p>Telefon ve TV+ kutusu aynı Wi‑Fi'da olmalı. Kutu ağda “Connect TV” adıyla görünür.</p>
+  <button class="btn pri" id="atvScan">Ağda kutuyu bul</button>
+  <p id="atvScanTxt" class="hidden" style="margin:8px 0 0"></p>
+  <div class="list" id="atvList"></div>
+  <h3>Elle gir</h3>
+  <input id="atvIp" placeholder="örn. 192.168.1.40" inputmode="decimal">
+  <button class="btn" id="atvIpGo">Bağlan</button>
+  <button class="btn" data-close="ovAtv" style="background:transparent;color:var(--mut)">Kapat</button>
+</div></div>
+<div class="ov hidden" id="ovAtvCode"><div class="sheet" style="text-align:center">
+  <div style="font-size:42px">🔑</div>
+  <h2>TV'deki kodu yaz</h2>
+  <p>TV ekranında 6 karakterli bir kod çıktı (rakamlar ve A–F harfleri). Aynen buraya yaz.</p>
+  <input id="atvCode" maxlength="6" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
+  <button class="btn pri" id="atvCodeGo">Eşleştir</button>
+  <button class="btn" id="atvCodeCancel" style="background:transparent;color:var(--mut)">Vazgeç</button>
+</div></div>
+
 <div id="toast"></div>
 
 <script>
@@ -227,7 +323,7 @@ function show(id){$(id).classList.remove("hidden")}
 function hide(id){$(id).classList.add("hidden")}
 
 function setState(s,sub){
-  state=s; var d=$("dot"); d.className="dot"+(s==="on"?" on":s==="wait"?" wait":"");
+  state=s; if(typeof dev!=="undefined" && dev==="tvp"){ return; } var d=$("dot"); d.className="dot"+(s==="on"?" on":s==="wait"?" wait":"");
   var name = tv&&tv.name ? tv.name : (tv?"LG TV":"TV bağlı değil");
   $("tvName").firstChild.nodeValue = name;
   var irTxt = hasIr() && (ctlMode==="ir" || (ctlMode==="auto" && s!=="on"));
@@ -496,7 +592,7 @@ $("scanBtn").onclick=scan;
 $("ipGo").onclick=function(){ var ip=$("ipIn").value.trim(); if(!/^\d{1,3}(\.\d{1,3}){3}$/.test(ip)){ toast("Geçerli bir IP yaz (örn. 192.168.1.35)"); return; } connect(ip,true); };
 $("connClose").onclick=function(){ hide("ovConn"); };
 $("pairCancel").onclick=function(){ hide("ovPair"); wantConn=false; if(ws) ws.close(); };
-$("tvName").onclick=function(){ if(state!=="on") { if(tv&&tv.ip&&state==="off") connect(tv.ip,true); else openConn(); } };
+$("tvName").onclick=function(){ if(dev==="tvp"){ if(atvState!=="on"){ if(atvHost&&atvState==="off") atvConnect(atvHost); else openAtv(); } return; } if(state!=="on") { if(tv&&tv.ip&&state==="off") connect(tv.ip,true); else openConn(); } };
 $("setBtn").onclick=function(){
   $("setInfo").textContent = tv ? ((tv.name||"LG TV")+" · "+tv.ip+(tv.mac?" · "+tv.mac:"")) : "Henüz bir TV'ye bağlanılmadı.";
   $("vibOn").checked=vib; paintMode();
@@ -510,6 +606,77 @@ $("setConn").onclick=function(){ hide("ovSet"); openConn(); };
 $("setWake").onclick=function(){ hide("ovSet"); wake(); };
 $("setForget").onclick=function(){ hide("ovSet"); wantConn=false; if(ws) ws.close(); tv=null; store.set("tv",null); store.set("ips",[]); setState("off"); $("appGrid").innerHTML=""; openConn(); };
 
+/* ---------- Cihaz seçimi: LG TV / TV+ kutusu ---------- */
+var dev = store.get("dev","lg"), atvHost = store.get("atv",null), atvState="off", atvRetry=null, atvWant=false;
+var hasAtv = !!window.TvAtv;
+function setDev(d){
+  dev=d; store.set("dev",d); document.body.classList.toggle("tvp",d==="tvp");
+  [].forEach.call(document.querySelectorAll("[data-dev]"),function(b){ b.classList.toggle("act",b.getAttribute("data-dev")===d); });
+  if(d==="tvp"){
+    [].forEach.call(document.querySelectorAll(".view"),function(v){ v.classList.toggle("act",v.id==="v-tvp"); });
+    paintAtv();
+    if(atvState==="off"){ if(atvHost) atvConnect(atvHost); else if(hasAtv) openAtv(); }
+  } else {
+    var t=document.querySelector("[data-tab].act"); if(t) t.click(); else document.querySelector("[data-tab=remote]").click();
+    setState(state);
+  }
+}
+function paintAtv(){
+  if(dev!=="tvp") return;
+  var d=$("dot"); d.className="dot"+(atvState==="on"?" on":atvState==="wait"?" wait":"");
+  $("tvName").firstChild.nodeValue="TV+ kutusu";
+  $("tvSub").textContent = !hasAtv ? "Sadece Android uygulamasında çalışır" : atvState==="on" ? "Bağlı · "+atvHost : atvState==="wait" ? "Bağlanıyor…" : atvState==="pair" ? "Eşleştirme bekleniyor" : "Bağlanmak için dokun";
+  $("volBadge").textContent="";
+}
+function atvConnect(h){ if(!hasAtv) return; clearTimeout(atvRetry); atvWant=true; atvHost=h; atvState="wait"; paintAtv(); window.TvAtv.connect(h); }
+function atvKey(code){
+  if(!hasAtv){ toast("TV+ kumandası sadece Android uygulamasında çalışır"); return; }
+  if(atvState!=="on"){ if(atvHost){ toast("Kutuya bağlanılıyor…"); if(atvState==="off") atvConnect(atvHost); } else openAtv(); return; }
+  window.TvAtv.key(code,3);
+}
+function openAtv(){ if(atvHost) $("atvIp").value=atvHost; show("ovAtv"); }
+window.atvEvent=function(type,data){
+  if(type==="found"){
+    var o; try{o=JSON.parse(data)}catch(e){return}
+    if(document.querySelector('#atvList [data-h="'+o.host+'"]')) return;
+    var b=document.createElement("button"); b.setAttribute("data-h",o.host);
+    b.innerHTML="<span></span><span style='color:var(--acc)'>Bağlan ›</span>"; b.firstChild.textContent="📦 "+o.name+" · "+o.host;
+    b.onclick=function(){ hide("ovAtv"); atvConnect(o.host); }; $("atvList").appendChild(b);
+    $("atvScanTxt").textContent="Bulunan cihazlar:";
+  } else if(type==="scanDone"){
+    $("atvScan").disabled=false; if(!$("atvList").children.length) $("atvScanTxt").textContent="Kutu bulunamadı. Açık mı? IP'yi elle girmeyi dene.";
+  } else if(type==="needPair"){
+    atvState="pair"; paintAtv(); toast("İlk bağlantı: TV'de eşleştirme kodu çıkacak"); window.TvAtv.pair(data);
+  } else if(type==="pairCode"){
+    hide("ovAtv"); $("atvCode").value=""; show("ovAtvCode"); setTimeout(function(){ try{$("atvCode").focus()}catch(e){} },300);
+  } else if(type==="pairError"){
+    toast(data); if(/başlatılamadı|başarısız/.test(data)){ hide("ovAtvCode"); atvState="off"; paintAtv(); }
+  } else if(type==="paired"){
+    hide("ovAtvCode"); toast("Eşleştirildi ✓"); atvHost=data; store.set("atv",data);
+  } else if(type==="connected"){
+    atvState="on"; atvHost=data; store.set("atv",data); hide("ovAtv"); paintAtv();
+  } else if(type==="unreachable"){
+    atvState="off"; paintAtv(); if(dev==="tvp") toast("Kutuya ulaşılamadı. Açık ve aynı Wi‑Fi'da mı?");
+    if(atvWant && dev==="tvp" && document.visibilityState==="visible") atvRetry=setTimeout(function(){ if(atvState==="off") atvConnect(atvHost); },5000);
+  } else if(type==="disconnected"){
+    atvState="off"; paintAtv();
+    if(atvWant && document.visibilityState==="visible") atvRetry=setTimeout(function(){ if(atvState==="off"&&atvHost) atvConnect(atvHost); },2000);
+  } else if(type==="notConnected"){
+    atvState="off"; paintAtv(); if(atvHost) atvConnect(atvHost);
+  }
+};
+[].forEach.call(document.querySelectorAll("[data-atv]"),function(el){ var c=+el.getAttribute("data-atv"); bindPress(el,function(){ atvKey(c); }); });
+[].forEach.call(document.querySelectorAll("[data-dev]"),function(b){ b.onclick=function(){ buzz(); setDev(b.getAttribute("data-dev")); }; });
+$("atvConnBtn").onclick=function(){ buzz(); openAtv(); };
+$("atvScan").onclick=function(){
+  if(!hasAtv){ toast("Sadece Android uygulamasında çalışır"); return; }
+  $("atvList").innerHTML=""; $("atvScan").disabled=true; $("atvScanTxt").classList.remove("hidden"); $("atvScanTxt").textContent="Aranıyor… (10 sn kadar)"; window.TvAtv.discover();
+};
+$("atvIpGo").onclick=function(){ var ip=$("atvIp").value.trim(); if(!/^\d{1,3}(\.\d{1,3}){3}$/.test(ip)){ toast("Geçerli bir IP yaz"); return; } hide("ovAtv"); atvConnect(ip); };
+$("atvCode").addEventListener("input",function(){ this.value=this.value.toUpperCase().replace(/[^0-9A-F]/g,"").slice(0,6); if(this.value.length===6) $("atvCodeGo").click(); });
+$("atvCodeGo").onclick=function(){ var c=$("atvCode").value; if(c.length!==6){ toast("Kod 6 karakter olmalı"); return; } toast("Eşleştiriliyor…"); window.TvAtv.code(atvHost,c); };
+$("atvCodeCancel").onclick=function(){ hide("ovAtvCode"); atvState="off"; atvWant=false; paintAtv(); };
+
 /* Android geri tuşu: açık pencereyi kapat, yoksa çık */
 window.tvkBack=function(){
   var o=[].slice.call(document.querySelectorAll(".ov:not(.hidden)"));
@@ -520,10 +687,11 @@ window.tvkBack=function(){
 /* Capacitor (Android) geri tuşu */
 (function(){ var C=window.Capacitor; if(C&&C.Plugins&&C.Plugins.App){ C.Plugins.App.addListener("backButton",function(){ if(!window.tvkBack()) C.Plugins.App.exitApp(); }); } })();
 document.addEventListener("visibilitychange",function(){
+  if(document.visibilityState==="visible" && hasAtv && atvHost && atvWant && atvState==="off") atvConnect(atvHost);
   if(document.visibilityState==="visible" && tv && tv.ip && (!ws || ws.readyState>1)) connect(tv.ip,false);
 });
 
-if(tv&&tv.ip) connect(tv.ip,false); else { setState("off"); if(!hasIr()) openConn(); else toast("Kızılötesi hazır · Wi‑Fi için ⚙ › Başka TV’ye bağlan"); }
+if(dev==="tvp"){ setDev("tvp"); if(tv&&tv.ip) connect(tv.ip,false); } else if(tv&&tv.ip) connect(tv.ip,false); else { setState("off"); if(!hasIr()) openConn(); else toast("Kızılötesi hazır · Wi‑Fi için ⚙ › Başka TV’ye bağlan"); }
 })();
 </script>
 </body>

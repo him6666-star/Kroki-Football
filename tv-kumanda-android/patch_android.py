@@ -25,6 +25,18 @@ act = '''package com.tvkumanda.lg;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.net.nsd.NsdManager;
+import android.net.nsd.NsdServiceInfo;
+import android.net.wifi.WifiManager;
+import org.json.JSONObject;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 import android.hardware.ConsumerIrManager;
 import android.os.Bundle;
 import android.webkit.JavascriptInterface;
@@ -32,7 +44,6 @@ import android.webkit.WebView;
 import com.getcapacitor.BridgeActivity;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.InetAddress;
 
 public class MainActivity extends BridgeActivity {
     @Override
@@ -44,7 +55,103 @@ public class MainActivity extends BridgeActivity {
             wv.setBackgroundColor(Color.parseColor("%s"));
             wv.addJavascriptInterface(new Wol(), "TvWol");
             wv.addJavascriptInterface(new Ir(), "TvIr");
+            wv.addJavascriptInterface(new Atv(), "TvAtv");
         } catch (Exception e) { }
+    }
+
+    /** TV+ (Android TV) kumandası: JS köprüsü */
+    private AtvCore atv;
+    private void jsEvent(final String type, final String data) {
+        runOnUiThread(new Runnable() { public void run() {
+            try {
+                getBridge().getWebView().evaluateJavascript(
+                    "window.atvEvent&&window.atvEvent(" + JSONObject.quote(type) + "," + JSONObject.quote(data) + ")", null);
+            } catch (Exception e) { }
+        }});
+    }
+    private synchronized AtvCore core() {
+        if (atv == null) atv = new AtvCore(getFilesDir(), new AtvCore.Listener() {
+            public void onEvent(String t, String d) { jsEvent(t, d); }
+        });
+        return atv;
+    }
+    public class Atv {
+        @JavascriptInterface public void pair(String host) { core().startPairing(host); }
+        @JavascriptInterface public void code(String host, String code) { core().finishPairing(host, code); }
+        @JavascriptInterface public void connect(String host) { core().connect(host); }
+        @JavascriptInterface public void disconnect() { core().disconnect(); }
+        @JavascriptInterface public boolean connected() { return core().isConnected(); }
+        @JavascriptInterface public void key(int code, int dir) { core().key(code, dir); }
+        @JavascriptInterface public void link(String url) { core().appLink(url); }
+        @JavascriptInterface public void discover() {
+            final Set<String> seen = Collections.synchronizedSet(new HashSet<String>());
+            // 1) mDNS: _androidtvremote2._tcp
+            try {
+                final WifiManager wm = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+                final WifiManager.MulticastLock lock = wm.createMulticastLock("tvk");
+                lock.acquire();
+                final NsdManager nsd = (NsdManager) getSystemService(Context.NSD_SERVICE);
+                final LinkedList<NsdServiceInfo> queue = new LinkedList<NsdServiceInfo>();
+                final boolean[] resolving = {false};
+                final Runnable[] next = new Runnable[1];
+                next[0] = new Runnable() { public void run() {
+                    NsdServiceInfo si;
+                    synchronized (queue) { if (resolving[0] || queue.isEmpty()) return; si = queue.removeFirst(); resolving[0] = true; }
+                    try {
+                        nsd.resolveService(si, new NsdManager.ResolveListener() {
+                            public void onResolveFailed(NsdServiceInfo i, int e) { synchronized (queue) { resolving[0] = false; } next[0].run(); }
+                            public void onServiceResolved(NsdServiceInfo i) {
+                                try {
+                                    String host = i.getHost().getHostAddress();
+                                    if (host != null && seen.add(host)) {
+                                        JSONObject o = new JSONObject(); o.put("name", i.getServiceName()); o.put("host", host);
+                                        jsEvent("found", o.toString());
+                                    }
+                                } catch (Exception e) { }
+                                synchronized (queue) { resolving[0] = false; }
+                                next[0].run();
+                            }
+                        });
+                    } catch (Exception e) { synchronized (queue) { resolving[0] = false; } }
+                }};
+                final NsdManager.DiscoveryListener dl = new NsdManager.DiscoveryListener() {
+                    public void onStartDiscoveryFailed(String t, int e) { }
+                    public void onStopDiscoveryFailed(String t, int e) { }
+                    public void onDiscoveryStarted(String t) { }
+                    public void onDiscoveryStopped(String t) { }
+                    public void onServiceFound(NsdServiceInfo i) { synchronized (queue) { queue.add(i); } next[0].run(); }
+                    public void onServiceLost(NsdServiceInfo i) { }
+                };
+                nsd.discoverServices("_androidtvremote2._tcp", NsdManager.PROTOCOL_DNS_SD, dl);
+                new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(new Runnable() { public void run() {
+                    try { nsd.stopServiceDiscovery(dl); } catch (Exception e) { }
+                    try { lock.release(); } catch (Exception e) { }
+                }}, 9000);
+            } catch (Exception e) { }
+            // 2) yedek: yerel ağda 6466 portu açık cihazları tara
+            new Thread(new Runnable() { public void run() {
+                try {
+                    String prefix = null;
+                    for (NetworkInterface ni : Collections.list(NetworkInterface.getNetworkInterfaces())) {
+                        if (!ni.isUp() || ni.isLoopback()) continue;
+                        for (InetAddress a : Collections.list(ni.getInetAddresses())) {
+                            if (a instanceof Inet4Address && a.isSiteLocalAddress()) {
+                                String ip = a.getHostAddress();
+                                if (prefix == null || ni.getName().startsWith("wlan")) prefix = ip.substring(0, ip.lastIndexOf('.'));
+                            }
+                        }
+                    }
+                    if (prefix != null) {
+                        List<String> l = AtvCore.scanSubnet(prefix, 3000);
+                        for (String h : l) if (seen.add(h)) {
+                            JSONObject o = new JSONObject(); o.put("name", "Android TV"); o.put("host", h);
+                            jsEvent("found", o.toString());
+                        }
+                    }
+                } catch (Exception e) { }
+                jsEvent("scanDone", "");
+            }}).start();
+        }
     }
 
     /** Kızılötesi verici (telefonda varsa) */
@@ -102,6 +209,7 @@ public class MainActivity extends BridgeActivity {
 }
 ''' % (BG, BG)
 open(glob.glob(base + '/java/com/tvkumanda/lg/MainActivity.java')[0], 'w', encoding='utf-8').write(act)
+shutil.copy('java/AtvCore.java', base + '/java/com/tvkumanda/lg/AtvCore.java')
 
 for d in glob.glob('icons/mipmap-*'):
     dst = base + '/res/' + os.path.basename(d)
