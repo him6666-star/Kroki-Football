@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0d1117">
+<title>TV Kumanda</title>
+<style>
+:root{--bg:#0d1117;--card:#161b22;--key:#21262d;--key2:#2d333b;--line:#30363d;--txt:#e6edf3;--mut:#8b949e;--acc:#e5004f;--ok:#2ea043;--warn:#d29922}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body{display:flex;flex-direction:column;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+button{font:inherit;color:inherit;border:0;background:var(--key);border-radius:14px;cursor:pointer;touch-action:manipulation}
+button:active{transform:scale(.94);background:var(--key2)}
+input{font:inherit;color:var(--txt);background:var(--key);border:1px solid var(--line);border-radius:12px;padding:12px 14px;width:100%;user-select:text;-webkit-user-select:text}
+svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+.hidden{display:none!important}
+header{display:flex;align-items:center;gap:10px;padding:12px 16px 6px}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--mut);flex:none}
+.dot.on{background:var(--ok);box-shadow:0 0 8px var(--ok)}.dot.wait{background:var(--warn)}
+#tvName{flex:1;font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#tvName small{display:block;font-weight:400;color:var(--mut);font-size:12px}
+.icon{width:42px;height:42px;display:grid;place-items:center;border-radius:12px;background:transparent}
+main{flex:1;overflow-y:auto;padding:4px 16px 12px}
+.row{display:flex;gap:10px;margin:10px 0}
+.row>button{flex:1;height:52px;display:grid;place-items:center;font-size:13px}
+.row>button.lbl{display:flex;flex-direction:column;gap:2px;height:58px}
+.row>button.lbl span{font-size:11px;color:var(--mut)}
+#pwr{color:#fff;background:var(--acc)}
+#pwr:active{background:#b8003f}
+/* D-pad */
+.pad{position:relative;width:min(78vw,300px);aspect-ratio:1;margin:14px auto 6px;border-radius:50%;background:var(--card);border:1px solid var(--line)}
+.pad button{position:absolute;background:transparent;border-radius:50%;display:grid;place-items:center}
+.pad .u{left:33%;top:2%;width:34%;height:30%}.pad .d{left:33%;bottom:2%;width:34%;height:30%}
+.pad .l{left:2%;top:33%;width:30%;height:34%}.pad .r{right:2%;top:33%;width:30%;height:34%}
+.pad .u:active,.pad .d:active,.pad .l:active,.pad .r:active{background:#ffffff10}
+.pad .ok{left:32%;top:32%;width:36%;height:36%;background:var(--key2);font-weight:700;font-size:17px;border:1px solid var(--line)}
+.rock{display:flex;gap:14px;margin:12px 0}
+.rock>div{flex:1;display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden}
+.rock button{height:52px;border-radius:0;background:transparent;display:grid;place-items:center;font-size:22px}
+.rock button:active{background:#ffffff10;transform:none}
+.rock .cap{text-align:center;font-size:12px;color:var(--mut);padding:2px 0}
+.tabs{display:flex;gap:6px;padding:8px 12px calc(8px + env(safe-area-inset-bottom));border-top:1px solid var(--line);background:var(--card)}
+.tabs button{flex:1;background:transparent;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;font-size:11px;color:var(--mut)}
+.tabs button.act{color:var(--txt)}.tabs button.act svg{color:var(--acc)}
+.view{display:none}.view.act{display:block}
+/* Touchpad */
+#tp{height:58vh;border-radius:20px;background:var(--card);border:1px solid var(--line);display:grid;place-items:center;color:var(--mut);font-size:13px;text-align:center;touch-action:none;margin-top:10px;position:relative}
+#tpScroll{position:absolute;right:0;top:0;bottom:0;width:48px;border-left:1px dashed var(--line);display:grid;place-items:center;font-size:18px}
+/* Apps */
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
+.grid button{height:96px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:6px;font-size:12px;overflow:hidden}
+.grid img{width:46px;height:46px;object-fit:contain;border-radius:10px}
+.grid span{display:block;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.num{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
+.num button{height:56px;font-size:22px}
+.colors{display:flex;gap:10px;margin-top:12px}.colors button{flex:1;height:36px}
+h3{font-size:13px;color:var(--mut);font-weight:600;margin:18px 0 4px;text-transform:uppercase;letter-spacing:.06em}
+/* Overlays */
+.ov{position:fixed;inset:0;background:#000a;display:flex;align-items:flex-end;z-index:9}
+.sheet{width:100%;max-height:88vh;overflow:auto;background:var(--card);border-radius:22px 22px 0 0;padding:20px 18px calc(22px + env(safe-area-inset-bottom));border-top:1px solid var(--line)}
+.sheet h2{margin:0 0 6px;font-size:19px}.sheet p{color:var(--mut);font-size:14px;line-height:1.45;margin:6px 0 12px}
+.btn{width:100%;height:50px;margin-top:10px;font-weight:600}.btn.pri{background:var(--acc);color:#fff}
+.list button{width:100%;text-align:left;padding:14px;margin-top:8px;display:flex;justify-content:space-between}
+.prog{height:4px;background:var(--key);border-radius:4px;overflow:hidden;margin:8px 0}.prog i{display:block;height:100%;width:0;background:var(--acc);transition:width .2s}
+#toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#000d;padding:10px 16px;border-radius:12px;font-size:14px;z-index:20;opacity:0;transition:opacity .25s;pointer-events:none;max-width:86vw;text-align:center}
+#toast.show{opacity:1}
+#volBadge{font-size:12px;color:var(--mut)}
+</style>
+</head>
+<body>
+<header>
+  <span class="dot" id="dot"></span>
+  <div id="tvName">TV bağlı değil<small id="tvSub">Bağlanmak için dokun</small></div>
+  <span id="volBadge"></span>
+  <button class="icon" id="setBtn" aria-label="Ayarlar"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+</header>
+
+<main>
+<!-- KUMANDA -->
+<section class="view act" id="v-remote">
+  <div class="row">
+    <button id="pwr" class="lbl" data-act="power"><svg viewBox="0 0 24 24"><path d="M12 2v10"/><path d="M18.4 6.6a9 9 0 1 1-12.8 0"/></svg><span style="color:#fff">Güç</span></button>
+    <button class="lbl" data-act="inputs"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg><span>Kaynak</span></button>
+    <button class="lbl" data-act="mute"><svg viewBox="0 0 24 24"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="m23 9-6 6M17 9l6 6"/></svg><span>Sessiz</span></button>
+    <button class="lbl" data-btn="MENU"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg><span>Ayarlar</span></button>
+  </div>
+
+  <div class="pad">
+    <button class="u" data-btn="UP" data-rep><svg viewBox="0 0 24 24"><path d="m6 15 6-6 6 6"/></svg></button>
+    <button class="l" data-btn="LEFT" data-rep><svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></button>
+    <button class="ok" data-btn="ENTER">OK</button>
+    <button class="r" data-btn="RIGHT" data-rep><svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></button>
+    <button class="d" data-btn="DOWN" data-rep><svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button>
+  </div>
+
+  <div class="row">
+    <button class="lbl" data-btn="BACK"><svg viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg><span>Geri</span></button>
+    <button class="lbl" data-btn="HOME"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span>Ana ekran</span></button>
+    <button class="lbl" data-btn="EXIT"><svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg><span>Çıkış</span></button>
+    <button class="lbl" data-btn="INFO"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h0"/></svg><span>Bilgi</span></button>
+  </div>
+
+  <div class="rock">
+    <div><button data-act="volUp" data-rep>+</button><div class="cap">SES</div><button data-act="volDown" data-rep>−</button></div>
+    <div><button data-act="chUp" data-rep>⌃</button><div class="cap">KANAL</div><button data-act="chDown" data-rep>⌄</button></div>
+  </div>
+
+  <div class="row">
+    <button data-media="rewind"><svg viewBox="0 0 24 24"><path d="m11 19-9-7 9-7zM22 19l-9-7 9-7z"/></svg></button>
+    <button data-media="play"><svg viewBox="0 0 24 24"><path d="m6 4 14 8-14 8z"/></svg></button>
+    <button data-media="pause"><svg viewBox="0 0 24 24"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg></button>
+    <button data-media="stop"><svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="1"/></svg></button>
+    <button data-media="fastForward"><svg viewBox="0 0 24 24"><path d="m13 19 9-7-9-7zM2 19l9-7-9-7z"/></svg></button>
+  </div>
+</section>
+
+<!-- TOUCHPAD -->
+<section class="view" id="v-touch">
+  <div id="tp">Parmağını kaydır: imleç hareket eder<br>Dokun: tıkla<br><br>Sağ şerit: kaydırma
+    <div id="tpScroll">↕</div>
+  </div>
+  <div class="row">
+    <button class="lbl" data-btn="BACK"><svg viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg><span>Geri</span></button>
+    <button class="lbl" data-btn="HOME"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span>Ana ekran</span></button>
+    <button class="lbl" data-act="volDown" data-rep><svg viewBox="0 0 24 24"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M16 12h5"/></svg><span>Ses −</span></button>
+    <button class="lbl" data-act="volUp" data-rep><svg viewBox="0 0 24 24"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M16 12h5M18.5 9.5v5"/></svg><span>Ses +</span></button>
+  </div>
+</section>
+
+<!-- UYGULAMALAR -->
+<section class="view" id="v-apps">
+  <div class="grid" id="appGrid"></div>
+  <p id="appNote" style="color:var(--mut);font-size:13px;text-align:center">TV'ye bağlanınca uygulamalar burada listelenir.</p>
+</section>
+
+<!-- KLAVYE + RAKAMLAR -->
+<section class="view" id="v-keys">
+  <h3>Klavye</h3>
+  <p style="color:var(--mut);font-size:13px;margin:4px 0 8px">TV'de bir arama kutusu açıkken yaz; yazdıkların anında TV'ye gider.</p>
+  <input id="kb" placeholder="Yaz… (YouTube araması vb.)" autocomplete="off" autocorrect="off" spellcheck="false">
+  <div class="row">
+    <button id="kbDel">⌫ Sil</button><button id="kbClear">Temizle</button><button id="kbEnter" style="background:var(--acc);color:#fff">Ara / Enter</button>
+  </div>
+  <h3>Rakamlar</h3>
+  <div class="num">
+    <button data-btn="1">1</button><button data-btn="2">2</button><button data-btn="3">3</button>
+    <button data-btn="4">4</button><button data-btn="5">5</button><button data-btn="6">6</button>
+    <button data-btn="7">7</button><button data-btn="8">8</button><button data-btn="9">9</button>
+    <button data-btn="DASH">-</button><button data-btn="0">0</button><button data-btn="ENTER">OK</button>
+  </div>
+  <div class="colors">
+    <button data-btn="RED" style="background:#c62828"></button><button data-btn="GREEN" style="background:#2e7d32"></button>
+    <button data-btn="YELLOW" style="background:#f9a825"></button><button data-btn="BLUE" style="background:#1565c0"></button>
+  </div>
+</section>
+</main>
+
+<nav class="tabs">
+  <button class="act" data-tab="remote"><svg viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="3"/><circle cx="12" cy="8" r="2"/><path d="M10 14h0M14 14h0M10 17h0M14 17h0"/></svg>Kumanda</button>
+  <button data-tab="touch"><svg viewBox="0 0 24 24"><path d="M9 11V5a2 2 0 0 1 4 0v6"/><path d="M13 10a2 2 0 0 1 4 0v2a2 2 0 0 1 4 0v3a7 7 0 0 1-7 7h-1a7 7 0 0 1-6-3.5L4 14a2 2 0 0 1 3.4-2L9 14"/></svg>Fare</button>
+  <button data-tab="apps"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Uygulamalar</button>
+  <button data-tab="keys"><svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h0M10 10h0M14 10h0M18 10h0M7 14h10"/></svg>Klavye</button>
+</nav>
+
+<!-- BAĞLANTI PENCERESİ -->
+<div class="ov hidden" id="ovConn"><div class="sheet">
+  <h2>TV'ye bağlan</h2>
+  <p>Telefon ile TV aynı Wi‑Fi ağında olmalı. TV'nin IP adresini <b>Ayarlar › Ağ › Ağ Bağlantısı</b> (veya Wi‑Fi Bağlantısı › Gelişmiş) ekranında görebilirsin.</p>
+  <button class="btn pri" id="scanBtn">Ağda TV'yi otomatik bul</button>
+  <div id="scanBox" class="hidden"><div class="prog"><i id="scanBar"></i></div><p id="scanTxt" style="margin:4px 0"></p></div>
+  <div class="list" id="scanList"></div>
+  <h3>Elle gir</h3>
+  <input id="ipIn" placeholder="örn. 192.168.1.35" inputmode="decimal">
+  <button class="btn" id="ipGo">Bağlan</button>
+  <div id="savedBox" class="hidden"><h3>Kayıtlı TV</h3><div class="list" id="savedList"></div></div>
+  <button class="btn" id="connClose" style="background:transparent;color:var(--mut)">Kapat</button>
+</div></div>
+
+<!-- EŞLEŞTİRME -->
+<div class="ov hidden" id="ovPair"><div class="sheet" style="text-align:center">
+  <div style="font-size:46px">📺</div>
+  <h2>TV'de onay ver</h2>
+  <p>TV ekranında “Bu cihazın bağlanmasına izin verilsin mi?” sorusu çıktı. TV'nin kendi kumandasıyla <b>Evet / Kabul</b>'e bas. Bu sadece ilk seferde gerekir.</p>
+  <button class="btn" id="pairCancel">Vazgeç</button>
+</div></div>
+
+<!-- KAYNAK SEÇ -->
+<div class="ov hidden" id="ovInputs"><div class="sheet">
+  <h2>Kaynak seç</h2><div class="list" id="inputList"></div>
+  <button class="btn" data-close="ovInputs">Kapat</button>
+</div></div>
+
+<!-- AYARLAR -->
+<div class="ov hidden" id="ovSet"><div class="sheet">
+  <h2>Ayarlar</h2>
+  <p id="setInfo"></p>
+  <button class="btn" id="setConn">Başka TV'ye / IP'ye bağlan</button>
+  <button class="btn" id="setWake">TV'yi aç (Wi‑Fi ile uyandır)</button>
+  <p style="font-size:12px">TV'yi telefondan açabilmek için TV'de <b>Ayarlar › Genel › Mobil TV Açık</b> (bazı modellerde “LG Connect Apps” / “Wi‑Fi ile TV'yi aç”) açık olmalı. 2015 modellerinde bu her zaman çalışmayabilir; kapatma her zaman çalışır.</p>
+  <h3>Kontrol yöntemi</h3>
+  <div class="row" id="modeRow"><button data-mode="auto">Otomatik</button><button data-mode="wifi">Wi‑Fi</button><button data-mode="ir">Kızılötesi</button></div>
+  <p id="irInfo" style="font-size:12px"></p>
+  <label style="display:flex;align-items:center;gap:10px;margin:12px 0;font-size:14px"><input type="checkbox" id="vibOn" style="width:auto"> Tuşlarda titreşim</label>
+  <button class="btn" id="setForget" style="color:#ff6b6b">Bu TV'yi unut</button>
+  <button class="btn" data-close="ovSet" style="background:transparent;color:var(--mut)">Kapat</button>
+</div></div>
+
+<div id="toast"></div>
+
+<script>
+(function(){
+"use strict";
+var PAIRING = {"forcePairing":false,"pairingType":"PROMPT","manifest":{"manifestVersion":1,"appVersion":"1.1","signed":{"created":"20140509","appId":"com.lge.test","vendorId":"com.lge","localizedAppNames":{"":"LG Remote App","ko-KR":"리모컨 앱","zxx-XX":"ЛГ Rэмotэ AПП"},"localizedVendorNames":{"":"LG Electronics"},"permissions":["TEST_SECURE","CONTROL_INPUT_TEXT","CONTROL_MOUSE_AND_KEYBOARD","READ_INSTALLED_APPS","READ_LGE_SDX","READ_NOTIFICATIONS","SEARCH","WRITE_SETTINGS","WRITE_NOTIFICATION_ALERT","CONTROL_POWER","READ_CURRENT_CHANNEL","READ_RUNNING_APPS","READ_UPDATE_INFO","UPDATE_FROM_REMOTE_APP","READ_LGE_TV_INPUT_EVENTS","READ_TV_CURRENT_TIME"],"serial":"2f930e2d2cfe083771f68e4fe7bb07"},"permissions":["LAUNCH","LAUNCH_WEBAPP","APP_TO_APP","CLOSE","TEST_OPEN","TEST_PROTECTED","CONTROL_AUDIO","CONTROL_DISPLAY","CONTROL_INPUT_JOYSTICK","CONTROL_INPUT_MEDIA_RECORDING","CONTROL_INPUT_MEDIA_PLAYBACK","CONTROL_INPUT_TV","CONTROL_POWER","READ_APP_STATUS","READ_CURRENT_CHANNEL","READ_INPUT_DEVICE_LIST","READ_NETWORK_STATE","READ_RUNNING_APPS","READ_TV_CHANNEL_LIST","WRITE_NOTIFICATION_TOAST","READ_POWER_STATE","READ_COUNTRY_INFO","READ_SETTINGS","CONTROL_TV_SCREEN","CONTROL_TV_STANBY","CONTROL_FAVORITE_GROUP","CONTROL_USER_INFO","CHECK_BLUETOOTH_DEVICE","CONTROL_BLUETOOTH","CONTROL_TIMER_INFO","STB_INTERNAL_CONNECTION","CONTROL_RECORDING","READ_RECORDING_STATE","WRITE_RECORDING_LIST","READ_RECORDING_LIST","READ_RECORDING_SCHEDULE","WRITE_RECORDING_SCHEDULE","READ_STORAGE_DEVICE_LIST","READ_TV_PROGRAM_INFO","CONTROL_BOX_CHANNEL","READ_TV_ACR_AUTH_TOKEN","READ_TV_CONTENT_STATE","READ_TV_CURRENT_TIME","ADD_LAUNCHER_CHANNEL","SET_CHANNEL_SKIP","RELEASE_CHANNEL_SKIP","CONTROL_CHANNEL_BLOCK","DELETE_SELECT_CHANNEL","CONTROL_CHANNEL_GROUP","SCAN_TV_CHANNELS","CONTROL_TV_POWER","CONTROL_WOL"],"signatures":[{"signatureVersion":1,"signature":"eyJhbGdvcml0aG0iOiJSU0EtU0hBMjU2Iiwia2V5SWQiOiJ0ZXN0LXNpZ25pbmctY2VydCIsInNpZ25hdHVyZVZlcnNpb24iOjF9.hrVRgjCwXVvE2OOSpDZ58hR+59aFNwYDyjQgKk3auukd7pcegmE2CzPCa0bJ0ZsRAcKkCTJrWo5iDzNhMBWRyaMOv5zWSrthlf7G128qvIlpMT0YNY+n/FaOHE73uLrS/g7swl3/qH/BGFG2Hu4RlL48eb3lLKqTt2xKHdCs6Cd4RMfJPYnzgvI4BNrFUKsjkcu+WD4OO2A27Pq1n50cMchmcaXadJhGrOqH5YmHdOCj5NSHzJYrsW0HPlpuAx/ECMeIZYDh6RMqaFM2DXzdKX9NmmyqzJ3o/0lkk/N97gfVRLW5hA29yeAwaCViZNCP8iC9aO0q9fQojoa7NQnAtw=="}]}};
+var $ = function(id){return document.getElementById(id)};
+var store = {
+  get:function(k,d){try{var v=localStorage.getItem("tvk_"+k);return v==null?d:JSON.parse(v)}catch(e){return d}},
+  set:function(k,v){try{localStorage.setItem("tvk_"+k,JSON.stringify(v))}catch(e){}}
+};
+var tv = store.get("tv", null); // {ip, key, name, mac}
+var ws=null, pws=null, reqId=0, cbs={}, state="off", retryT=null, wantConn=false;
+var vib = store.get("vib", true);
+
+function toast(t){var e=$("toast");e.textContent=t;e.classList.add("show");clearTimeout(e._t);e._t=setTimeout(function(){e.classList.remove("show")},2200)}
+function buzz(){if(vib&&navigator.vibrate)try{navigator.vibrate(12)}catch(e){}}
+function show(id){$(id).classList.remove("hidden")}
+function hide(id){$(id).classList.add("hidden")}
+
+function setState(s,sub){
+  state=s; var d=$("dot"); d.className="dot"+(s==="on"?" on":s==="wait"?" wait":"");
+  var name = tv&&tv.name ? tv.name : (tv?"LG TV":"TV bağlı değil");
+  $("tvName").firstChild.nodeValue = name;
+  var irTxt = hasIr() && (ctlMode==="ir" || (ctlMode==="auto" && s!=="on"));
+  $("tvSub").textContent = (irTxt ? "Kızılötesi ile kontrol · " : "") + (sub || (s==="on"?"Bağlı · "+tv.ip : s==="wait"?"Bağlanıyor…":"Bağlanmak için dokun"));
+  if(irTxt && !tv) $("tvName").firstChild.nodeValue="LG TV (kızılötesi)";
+  if(s!=="on") $("volBadge").textContent="";
+}
+
+/* ---------- SSAP bağlantısı ---------- */
+function connect(ip, interactive){
+  clearTimeout(retryT); wantConn=true;
+  if(ws){try{ws.onclose=null;ws.close()}catch(e){}} closePointer();
+  if(!tv||tv.ip!==ip) tv={ip:ip,key:(tv&&tv.ip===ip)?tv.key:null,name:null};
+  setState("wait");
+  var sock;
+  try{ sock = new WebSocket("ws://"+ip+":3000"); }catch(e){ setState("off","Bağlanamadı"); return; }
+  ws=sock;
+  var opened=false, to=setTimeout(function(){ if(!opened){ try{sock.close()}catch(e){} } },5000);
+  sock.onopen=function(){
+    opened=true; clearTimeout(to);
+    var p = JSON.parse(JSON.stringify(PAIRING));
+    if(tv.key) p["client-key"]=tv.key;
+    sock.send(JSON.stringify({type:"register",id:"reg0",payload:p}));
+  };
+  sock.onmessage=function(ev){
+    var m; try{m=JSON.parse(ev.data)}catch(e){return}
+    if(m.id==="reg0"){
+      if(m.type==="response" && m.payload && m.payload.pairingType==="PROMPT"){ if(interactive||!tv.key) show("ovPair"); setState("wait","TV'de onay bekleniyor"); return; }
+      if(m.type==="registered"){
+        hide("ovPair"); hide("ovConn");
+        tv.key = m.payload["client-key"]; store.set("tv",tv); rememberIp(ip);
+        setState("on"); onReady(); return;
+      }
+      if(m.type==="error"){ hide("ovPair"); setState("off","Eşleştirme reddedildi"); toast("TV bağlantıyı reddetti. Tekrar dene."); tv.key=null; store.set("tv",tv); return; }
+    }
+    var cb=cbs[m.id]; if(cb){ if(!cb.sub) delete cbs[m.id]; cb.fn(m.type==="error"?null:(m.payload||{}), m); }
+  };
+  sock.onerror=function(){};
+  sock.onclose=function(){
+    clearTimeout(to); if(ws!==sock) return;
+    ws=null; closePointer(); hide("ovPair");
+    var was=state; setState("off", opened?"Bağlantı koptu":"TV bulunamadı ("+ip+")");
+    if(!opened && interactive) toast("TV'ye ulaşılamadı. TV açık ve aynı Wi‑Fi'da mı?");
+    if(wantConn && document.visibilityState==="visible") retryT=setTimeout(function(){ if(tv) connect(tv.ip,false) }, was==="on"?1500:4000);
+  };
+}
+function req(uri, payload, fn, sub){
+  if(!ws||ws.readyState!==1||state!=="on"){ needConn(); return false; }
+  var id=(sub?"sub":"r")+(++reqId);
+  if(fn) cbs[id]={fn:fn,sub:!!sub};
+  ws.send(JSON.stringify({type:sub?"subscribe":"request",id:id,uri:uri,payload:payload||{}}));
+  return true;
+}
+function needConn(){
+  if(useIr()) return;
+  if(state==="wait"){ toast("Bağlanıyor…"); return; }
+  if(tv&&tv.ip){ toast("Yeniden bağlanılıyor…"); connect(tv.ip,true); } else openConn();
+}
+
+function onReady(){
+  openPointer();
+  req("ssap://system/getSystemInfo",{},function(p){ if(p&&p.modelName){ tv.name="LG "+p.modelName; store.set("tv",tv); setState("on"); } });
+  req("ssap://com.webos.service.connectionmanager/getinfo",{},function(p){
+    if(!p) return; var mac=(p.wiredInfo&&p.wiredInfo.macAddress)||(p.wifiInfo&&p.wifiInfo.macAddress);
+    var w=p.wifiInfo&&p.wifiInfo.state==="connected"&&p.wifiInfo.macAddress; if(w) mac=w;
+    if(mac){ tv.mac=mac; store.set("tv",tv); }
+  });
+  req("ssap://audio/getVolume",{},function(p){
+    if(!p) return; var v=p.volume!=null?p.volume:(p.volumeStatus&&p.volumeStatus.volume);
+    var mu=p.muted!=null?p.muted:(p.volumeStatus&&p.volumeStatus.muteStatus);
+    if(v!=null) $("volBadge").textContent = mu ? "🔇 "+v : "🔊 "+v;
+  }, true);
+  loadApps();
+}
+
+/* ---------- İşaretçi soketi (yön tuşları, OK, fare) ---------- */
+var pQueue=[];
+function openPointer(){
+  req("ssap://com.webos.service.networkinput/getPointerInputSocket",{},function(p){
+    if(!p||!p.socketPath) return;
+    try{ pws=new WebSocket(p.socketPath); }catch(e){ return; }
+    pws.onopen=function(){ while(pQueue.length) pws.send(pQueue.shift()); };
+    pws.onclose=function(){ pws=null; };
+  });
+}
+function closePointer(){ if(pws){ try{pws.onclose=null;pws.close()}catch(e){} } pws=null; pQueue=[]; }
+function psend(s){
+  if(state!=="on"){ if(hasIr()) irOnly(); else needConn(); return; }
+  if(pws&&pws.readyState===1) pws.send(s);
+  else { pQueue.push(s); if(!pws) openPointer(); }
+}
+/* ---------- Kızılötesi (IR) — LG NEC kodları ---------- */
+var IR={POWER:0x20DF10EF,VOLUMEUP:0x20DF40BF,VOLUMEDOWN:0x20DFC03F,CHANNELUP:0x20DF00FF,CHANNELDOWN:0x20DF807F,MUTE:0x20DF906F,
+ UP:0x20DF02FD,DOWN:0x20DF827D,LEFT:0x20DFE01F,RIGHT:0x20DF609F,ENTER:0x20DF22DD,BACK:0x20DF14EB,HOME:0x20DF3EC1,EXIT:0x20DFDA25,
+ MENU:0x20DFC23D,INPUT:0x20DFD02F,INFO:0x20DF55AA,RED:0x20DF4EB1,GREEN:0x20DF8E71,YELLOW:0x20DFC639,BLUE:0x20DF8679,
+ PLAY:0x20DF0DF2,PAUSE:0x20DF5DA2,STOP:0x20DF8D72,REWIND:0x20DFF10E,FASTFORWARD:0x20DF718E,
+ "1":0x20DF8877,"2":0x20DF48B7,"3":0x20DFC837,"4":0x20DF28D7,"5":0x20DFA857,"6":0x20DF6897,"7":0x20DFE817,"8":0x20DF18E7,"9":0x20DF9867,"0":0x20DF08F7};
+var ctlMode = store.get("mode","auto"); // auto | wifi | ir
+function hasIr(){ try{ return !!(window.TvIr && window.TvIr.hasIr()); }catch(e){ return false; } }
+function useIr(){ if(!hasIr()) return false; if(ctlMode==="ir") return true; if(ctlMode==="wifi") return false; return state!=="on"; }
+function necPattern(code){
+  var p=[9000,4500];
+  for(var i=31;i>=0;i--){ p.push(560); p.push(((code>>>i)&1)?1690:560); }
+  p.push(560); return p.join(",");
+}
+function ir(name){
+  var c=IR[name]; if(c==null){ toast("Bu tuş kızılötesi ile gönderilemiyor"); return; }
+  try{ window.TvIr.transmit(38000, necPattern(c)); }catch(e){ toast("Kızılötesi gönderilemedi"); }
+}
+function irOnly(){ toast(hasIr()?"Bu özellik sadece Wi‑Fi bağlantısıyla çalışır":"Bu özellik için TV'ye Wi‑Fi ile bağlan"); }
+function button(name){ if(useIr()) ir(name); else psend("type:button\nname:"+name+"\n\n"); }
+
+/* ---------- Komutlar ---------- */
+var acts={
+  power:function(){ if(useIr()){ ir("POWER"); return; } if(state==="on"){ req("ssap://system/turnOff"); toast("TV kapatılıyor"); } else wake(); },
+  mute:function(){ if(useIr()) return ir("MUTE"); req("ssap://audio/getVolume",{},function(p){ var m=p&&(p.muted!=null?p.muted:(p.volumeStatus&&p.volumeStatus.muteStatus)); req("ssap://audio/setMute",{mute:!m}); }); },
+  volUp:function(){ if(useIr()) return ir("VOLUMEUP"); req("ssap://audio/volumeUp"); },
+  volDown:function(){ if(useIr()) return ir("VOLUMEDOWN"); req("ssap://audio/volumeDown"); },
+  chUp:function(){ if(useIr()) return ir("CHANNELUP"); req("ssap://tv/channelUp"); },
+  chDown:function(){ if(useIr()) return ir("CHANNELDOWN"); req("ssap://tv/channelDown"); },
+  inputs:function(){
+    if(useIr()) return ir("INPUT");
+    req("ssap://tv/getExternalInputList",{},function(p){
+      var l=$("inputList"); l.innerHTML="";
+      var tvb=document.createElement("button"); tvb.innerHTML="<span>📺 TV (Anten / Uydu)</span>";
+      tvb.onclick=function(){ req("ssap://system.launcher/launch",{id:"com.webos.app.livetv"}); hide("ovInputs"); }; l.appendChild(tvb);
+      ((p&&p.devices)||[]).forEach(function(d){
+        var b=document.createElement("button"); b.innerHTML="<span></span><span style='color:var(--mut)'>"+(d.connected?"bağlı":"")+"</span>";
+        b.firstChild.textContent=d.label||d.id;
+        b.onclick=function(){ req("ssap://tv/switchInput",{inputId:d.id}); hide("ovInputs"); };
+        l.appendChild(b);
+      });
+      show("ovInputs");
+    });
+  }
+};
+function wake(){
+  if(!tv||!tv.mac){ toast("TV kapalıyken açmak için önce bir kez TV açıkken bağlan."); return; }
+  if(window.TvWol&&window.TvWol.wake){ window.TvWol.wake(tv.mac, tv.ip); toast("Açma sinyali gönderildi…"); setTimeout(function(){ connect(tv.ip,false) },6000); }
+  else toast("TV'yi açma sadece Android uygulamasında çalışır.");
+}
+
+/* ---------- Tuş bağlama (basılı tutunca tekrar) ---------- */
+function bindPress(el, fire){
+  var rep=el.hasAttribute("data-rep"), t1=null, t2=null;
+  function stop(){ clearTimeout(t1); clearInterval(t2); t1=t2=null; }
+  el.addEventListener("pointerdown",function(e){
+    e.preventDefault(); buzz(); fire();
+    if(rep){ t1=setTimeout(function(){ t2=setInterval(fire,140); },450); }
+  });
+  ["pointerup","pointerleave","pointercancel"].forEach(function(ev){ el.addEventListener(ev,stop); });
+  el.addEventListener("contextmenu",function(e){e.preventDefault()});
+}
+[].forEach.call(document.querySelectorAll("[data-btn]"),function(el){ bindPress(el,function(){ button(el.getAttribute("data-btn")); }); });
+[].forEach.call(document.querySelectorAll("[data-act]"),function(el){ var a=el.getAttribute("data-act"); bindPress(el,function(){ acts[a](); }); });
+[].forEach.call(document.querySelectorAll("[data-media]"),function(el){ var a=el.getAttribute("data-media"); bindPress(el,function(){ if(useIr()) ir(a.toUpperCase()); else req("ssap://media.controls/"+a); }); });
+[].forEach.call(document.querySelectorAll("[data-close]"),function(el){ el.onclick=function(){ hide(el.getAttribute("data-close")); }; });
+
+/* ---------- Sekmeler ---------- */
+[].forEach.call(document.querySelectorAll("[data-tab]"),function(b){
+  b.onclick=function(){
+    [].forEach.call(document.querySelectorAll("[data-tab]"),function(x){x.classList.toggle("act",x===b)});
+    [].forEach.call(document.querySelectorAll(".view"),function(v){v.classList.toggle("act",v.id==="v-"+b.getAttribute("data-tab"))});
+    if(b.getAttribute("data-tab")==="apps" && !$("appGrid").children.length) loadApps();
+  };
+});
+
+/* ---------- Fare (touchpad) ---------- */
+(function(){
+  var tp=$("tp"), sc=$("tpScroll"), last=null, moved=0, start=0, mode=null, acc=0;
+  tp.addEventListener("pointerdown",function(e){
+    tp.setPointerCapture(e.pointerId); last={x:e.clientX,y:e.clientY}; moved=0; start=Date.now(); acc=0;
+    mode = (e.target===sc)?"scroll":"move";
+  });
+  tp.addEventListener("pointermove",function(e){
+    if(!last) return; var dx=e.clientX-last.x, dy=e.clientY-last.y; last={x:e.clientX,y:e.clientY};
+    moved+=Math.abs(dx)+Math.abs(dy);
+    if(mode==="scroll"){ acc+=dy; if(Math.abs(acc)>12){ psend("type:scroll\ndx:0\ndy:"+Math.round(-acc/4)+"\n\n"); acc=0; } }
+    else { var k=1.8; psend("type:move\ndx:"+Math.round(dx*k)+"\ndy:"+Math.round(dy*k)+"\ndown:0\n\n"); }
+  });
+  tp.addEventListener("pointerup",function(){
+    if(last && mode==="move" && moved<10 && Date.now()-start<350){ buzz(); psend("type:click\n\n"); }
+    last=null;
+  });
+  tp.addEventListener("pointercancel",function(){ last=null; });
+})();
+
+/* ---------- Uygulamalar ---------- */
+var QUICK=[{id:"youtube.leanback.v4",title:"YouTube"},{id:"netflix",title:"Netflix"},{id:"com.webos.app.livetv",title:"Canlı TV"}];
+function loadApps(){
+  if(state!=="on") return;
+  req("ssap://com.webos.applicationManager/listLaunchPoints",{},function(p){
+    var g=$("appGrid"); g.innerHTML="";
+    var list=(p&&p.launchPoints)||QUICK;
+    list.forEach(function(a){
+      var b=document.createElement("button");
+      if(a.icon||a.largeIcon){ var im=new Image(); im.src=a.icon||a.largeIcon; im.alt=""; im.onerror=function(){im.remove()}; b.appendChild(im); }
+      var s=document.createElement("span"); s.textContent=a.title||a.id; b.appendChild(s);
+      b.onclick=function(){ buzz(); if(state!=="on") return irOnly(); req("ssap://system.launcher/launch",{id:a.id}); toast((a.title||a.id)+" açılıyor"); };
+      g.appendChild(b);
+    });
+    $("appNote").classList.toggle("hidden", list.length>0);
+  });
+}
+
+/* ---------- Klavye ---------- */
+(function(){
+  var kb=$("kb"), prev="";
+  kb.addEventListener("input",function(){
+    var v=kb.value;
+    if(v.indexOf(prev)===0){ var add=v.slice(prev.length); if(add) req("ssap://com.webos.service.ime/insertText",{text:add,replace:0}); }
+    else if(prev.indexOf(v)===0){ req("ssap://com.webos.service.ime/deleteCharacters",{count:prev.length-v.length}); }
+    else { req("ssap://com.webos.service.ime/deleteCharacters",{count:prev.length}); if(v) req("ssap://com.webos.service.ime/insertText",{text:v,replace:0}); }
+    prev=v;
+  });
+  $("kbDel").onclick=function(){ buzz(); req("ssap://com.webos.service.ime/deleteCharacters",{count:1}); kb.value=kb.value.slice(0,-1); prev=kb.value; };
+  $("kbClear").onclick=function(){ buzz(); if(prev.length) req("ssap://com.webos.service.ime/deleteCharacters",{count:prev.length}); kb.value=""; prev=""; };
+  $("kbEnter").onclick=function(){ buzz(); req("ssap://com.webos.service.ime/sendEnterKey"); kb.value=""; prev=""; };
+})();
+
+/* ---------- Bağlantı penceresi + ağ taraması ---------- */
+function rememberIp(ip){ var l=store.get("ips",[]); l=[ip].concat(l.filter(function(x){return x!==ip})).slice(0,5); store.set("ips",l); }
+function openConn(){
+  var l=store.get("ips",[]), box=$("savedList"); box.innerHTML="";
+  l.forEach(function(ip){ var b=document.createElement("button"); b.innerHTML="<span></span><span style='color:var(--mut)'>bağlan ›</span>"; b.firstChild.textContent=ip; b.onclick=function(){ connect(ip,true); }; box.appendChild(b); });
+  $("savedBox").classList.toggle("hidden",!l.length);
+  if(tv&&tv.ip) $("ipIn").value=tv.ip;
+  show("ovConn");
+}
+function probe(ip,ms){
+  return new Promise(function(res){
+    var done=false, s;
+    function fin(ok){ if(done) return; done=true; try{s.close()}catch(e){} res(ok); }
+    try{ s=new WebSocket("ws://"+ip+":3000"); }catch(e){ return res(false); }
+    s.onopen=function(){ fin(true) }; s.onerror=function(){ fin(false) }; setTimeout(function(){ fin(false) },ms);
+  });
+}
+var scanning=false;
+function scan(){
+  if(scanning) return; scanning=true;
+  var nets=[], seen={}; store.get("ips",[]).concat(tv&&tv.ip?[tv.ip]:[]).forEach(function(ip){ var n=ip.split(".").slice(0,3).join("."); if(!seen[n]){seen[n]=1;nets.push(n)} });
+  ["192.168.1","192.168.0","192.168.2","192.168.3","10.0.0","192.168.10","192.168.100"].forEach(function(n){ if(!seen[n]){seen[n]=1;nets.push(n)} });
+  var targets=[]; nets.forEach(function(n){ for(var i=1;i<255;i++) targets.push(n+"."+i); });
+  var found=[], idx=0, doneN=0, list=$("scanList"); list.innerHTML="";
+  show("scanBox"); $("scanBtn").disabled=true; $("scanTxt").textContent="Aranıyor… ("+nets[0]+".x)";
+  var CONC=48;
+  function next(){
+    if(idx>=targets.length || (found.length && idx%254===0)) return;
+    var ip=targets[idx++];
+    probe(ip,1500).then(function(ok){
+      doneN++; $("scanBar").style.width=Math.round(100*doneN/targets.length)+"%";
+      if(ok){ found.push(ip); var b=document.createElement("button"); b.innerHTML="<span>📺 LG TV · </span><span style='color:var(--acc)'>Bağlan ›</span>"; b.firstChild.textContent+=ip; b.onclick=function(){ connect(ip,true); }; list.appendChild(b); }
+      $("scanTxt").textContent = found.length ? found.length+" TV bulundu" : "Aranıyor… ("+ip.split(".").slice(0,3).join(".")+".x)";
+      if(idx<targets.length && !(found.length && idx%254===0)) next();
+      else if(--running===0) end();
+    });
+  }
+  var running=0; for(var c=0;c<CONC;c++){ running++; next(); }
+  function end(){
+    scanning=false; $("scanBtn").disabled=false; $("scanBar").style.width="100%";
+    if(!found.length) $("scanTxt").textContent="TV bulunamadı. TV açık mı? IP'yi elle girmeyi dene.";
+    else if(found.length===1) connect(found[0],true);
+  }
+}
+$("scanBtn").onclick=scan;
+$("ipGo").onclick=function(){ var ip=$("ipIn").value.trim(); if(!/^\d{1,3}(\.\d{1,3}){3}$/.test(ip)){ toast("Geçerli bir IP yaz (örn. 192.168.1.35)"); return; } connect(ip,true); };
+$("connClose").onclick=function(){ hide("ovConn"); };
+$("pairCancel").onclick=function(){ hide("ovPair"); wantConn=false; if(ws) ws.close(); };
+$("tvName").onclick=function(){ if(state!=="on") { if(tv&&tv.ip&&state==="off") connect(tv.ip,true); else openConn(); } };
+$("setBtn").onclick=function(){
+  $("setInfo").textContent = tv ? ((tv.name||"LG TV")+" · "+tv.ip+(tv.mac?" · "+tv.mac:"")) : "Henüz bir TV'ye bağlanılmadı.";
+  $("vibOn").checked=vib; paintMode();
+  $("irInfo").textContent = hasIr() ? "Telefonunda kızılötesi verici var. Otomatik: Wi‑Fi bağlıyken Wi‑Fi, değilse kızılötesi kullanılır (telefonu TV'ye doğrult). TV kapalıyken Güç tuşu kızılötesiyle TV'yi açar." : "Bu telefonda kızılötesi verici yok; sadece Wi‑Fi kullanılabilir. (Xiaomi/Redmi/POCO ve bazı Huawei/Honor telefonlarda bulunur.)";
+  show("ovSet");
+};
+function paintMode(){ [].forEach.call(document.querySelectorAll("[data-mode]"),function(b){ var on=b.getAttribute("data-mode")===ctlMode; b.style.background=on?"var(--acc)":""; b.style.color=on?"#fff":""; b.disabled=(b.getAttribute("data-mode")==="ir"&&!hasIr()); b.style.opacity=b.disabled?.4:1; }); }
+[].forEach.call(document.querySelectorAll("[data-mode]"),function(b){ b.onclick=function(){ ctlMode=b.getAttribute("data-mode"); store.set("mode",ctlMode); paintMode(); setState(state); }; });
+$("vibOn").onchange=function(){ vib=this.checked; store.set("vib",vib); };
+$("setConn").onclick=function(){ hide("ovSet"); openConn(); };
+$("setWake").onclick=function(){ hide("ovSet"); wake(); };
+$("setForget").onclick=function(){ hide("ovSet"); wantConn=false; if(ws) ws.close(); tv=null; store.set("tv",null); store.set("ips",[]); setState("off"); $("appGrid").innerHTML=""; openConn(); };
+
+/* Android geri tuşu: açık pencereyi kapat, yoksa çık */
+window.tvkBack=function(){
+  var o=[].slice.call(document.querySelectorAll(".ov:not(.hidden)"));
+  if(o.length){ o[o.length-1].classList.add("hidden"); return true; }
+  var t=document.querySelector("[data-tab].act"); if(t&&t.getAttribute("data-tab")!=="remote"){ document.querySelector("[data-tab=remote]").click(); return true; }
+  return false;
+};
+/* Capacitor (Android) geri tuşu */
+(function(){ var C=window.Capacitor; if(C&&C.Plugins&&C.Plugins.App){ C.Plugins.App.addListener("backButton",function(){ if(!window.tvkBack()) C.Plugins.App.exitApp(); }); } })();
+document.addEventListener("visibilitychange",function(){
+  if(document.visibilityState==="visible" && tv && tv.ip && (!ws || ws.readyState>1)) connect(tv.ip,false);
+});
+
+if(tv&&tv.ip) connect(tv.ip,false); else { setState("off"); if(!hasIr()) openConn(); else toast("Kızılötesi hazır · Wi‑Fi için ⚙ › Başka TV’ye bağlan"); }
+})();
+</script>
+</body>
+</html>
